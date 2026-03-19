@@ -1,12 +1,12 @@
 # CausalSynth: A Browser-Based Engine for Causal Evidence Triangulation Across Study Designs
 
-**Authors:** [AUTHOR_NAME_PLACEHOLDER]^1
+**Authors:** Mahmood Ahmad^1
 
-^1 [AFFILIATION_PLACEHOLDER]
+^1 Royal Free London NHS Foundation Trust, London, UK; Tahir Heart Institute, Rabwah, Pakistan
 
-**Corresponding author:** [CORRESPONDING_EMAIL_PLACEHOLDER]
+**Corresponding author:** mahmood726@gmail.com
 
-**ORCID:** [ORCID_PLACEHOLDER]
+**ORCID:** YOUR-ORCID-HERE
 
 **Keywords:** evidence triangulation, causal inference, meta-analysis, study design, convergence metrics, browser-based tool
 
@@ -22,7 +22,7 @@
 
 **Conclusions:** CausalSynth is the first interactive tool to quantify evidence triangulation across study designs. It is freely available, requires no installation or server, and produces reproducible, exportable outputs suitable for systematic review workflows.
 
-**Software availability:** Source code at [REPOSITORY_URL_PLACEHOLDER]. Archived at [ZENODO_DOI_PLACEHOLDER].
+**Software availability:** Source code at https://github.com/mahmood726-cyber/CausalSynth. Archived at ZENODO_DOI_PENDING.
 
 ---
 
@@ -427,9 +427,9 @@ This allows any researcher with R and metafor installed to independently verify 
 
 ## Data and Software Availability
 
-**Source code:** Available at [REPOSITORY_URL_PLACEHOLDER] under [LICENSE_PLACEHOLDER].
+**Source code:** Available at https://github.com/mahmood726-cyber/CausalSynth under MIT License.
 
-**Archived version:** [ZENODO_DOI_PLACEHOLDER].
+**Archived version:** ZENODO_DOI_PENDING.
 
 **System requirements:** Any modern web browser (Chrome, Firefox, Edge, Safari). No installation, server, or internet connection required after downloading the HTML file.
 
@@ -441,7 +441,7 @@ This allows any researcher with R and metafor installed to independently verify 
 
 ## Acknowledgments
 
-[ACKNOWLEDGMENTS_PLACEHOLDER]
+The author thanks the open-source community and the developers of the statistical methods implemented in this tool.
 
 ---
 
@@ -453,7 +453,7 @@ No competing interests were disclosed.
 
 ## Grant Information
 
-[GRANT_INFORMATION_PLACEHOLDER]
+No specific grant funding was received for this work.
 
 ---
 
