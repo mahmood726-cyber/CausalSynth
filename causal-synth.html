@@ -201,6 +201,135 @@ table.causal-sens-table td { background: var(--bg-input); color: var(--text); }
 .fade-in { animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
+/* Skip to content link (accessibility) */
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 999;
+  background: var(--accent); color: #fff; padding: 8px 16px;
+  font-size: 0.85rem; text-decoration: none; border-radius: 0 0 var(--radius) var(--radius);
+}
+.skip-link:focus { left: 50%; transform: translateX(-50%); }
+
+/* Concordance Matrix */
+.concordance-matrix { overflow-x: auto; }
+table.conc-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 12px; }
+table.conc-table th, table.conc-table td {
+  padding: 8px 12px; border: 1px solid var(--border); text-align: center;
+}
+table.conc-table th {
+  background: var(--accent-light); font-weight: 600; color: var(--text-heading);
+}
+.conc-agree { background: #d1fae5; color: #065f46; font-weight: 700; }
+.conc-partial { background: #fef3c7; color: #92400e; font-weight: 600; }
+.conc-disagree { background: #fee2e2; color: #991b1b; font-weight: 700; }
+.conc-na { background: var(--bg-input); color: var(--text-muted); font-style: italic; }
+body.dark .conc-agree { background: #064e3b; color: #6ee7b7; }
+body.dark .conc-partial { background: #451a03; color: #fcd34d; }
+body.dark .conc-disagree { background: #450a0a; color: #fca5a5; }
+
+/* Bias Architecture Heatmap (enhanced) */
+.bias-heatmap-container { overflow-x: auto; margin-top: 12px; }
+.bias-heatmap-svg { display: block; }
+.bias-detail-panel {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px; margin-top: 12px;
+  font-size: 0.84rem; line-height: 1.6; display: none;
+}
+.bias-detail-panel.visible { display: block; }
+.bias-detail-panel h4 { margin-bottom: 6px; color: var(--text-heading); font-size: 0.9rem; }
+.bias-detail-panel .bias-detail-item {
+  display: flex; align-items: center; gap: 8px; padding: 3px 0;
+}
+.bias-detail-panel .bias-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* Multi-design side-by-side comparison */
+.design-compare-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px; margin-top: 12px;
+}
+.design-compare-card {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; text-align: center;
+}
+.design-compare-card .dc-header {
+  font-weight: 700; font-size: 0.9rem; margin-bottom: 8px;
+  padding-bottom: 6px; border-bottom: 2px solid;
+}
+.design-compare-card .dc-stat {
+  display: flex; justify-content: space-between; padding: 3px 0;
+  font-size: 0.82rem;
+}
+.design-compare-card .dc-stat .dc-label { color: var(--text-muted); }
+.design-compare-card .dc-stat .dc-value { font-weight: 600; font-family: var(--mono); }
+
+/* Pairwise forest comparison */
+.pairwise-forest { margin-top: 16px; }
+
+/* Strength indicator bars */
+.strength-bar-container {
+  display: flex; align-items: center; gap: 8px; margin-top: 4px;
+}
+.strength-bar {
+  height: 8px; border-radius: 4px; transition: width 0.3s ease;
+}
+.strength-bar-bg {
+  width: 100%; height: 8px; background: var(--border); border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Tabs for sections */
+.tab-bar {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--border);
+  margin-bottom: 14px; overflow-x: auto;
+}
+.tab-bar button {
+  padding: 8px 16px; border: none; border-bottom: 2px solid transparent;
+  background: transparent; font-weight: 600; font-size: 0.82rem;
+  color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  margin-bottom: -2px; border-radius: var(--radius) var(--radius) 0 0;
+}
+.tab-bar button:hover { color: var(--accent); background: var(--accent-light); }
+.tab-bar button.active {
+  color: var(--accent); border-bottom-color: var(--accent);
+  background: var(--accent-light);
+}
+.tab-bar button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Evidence weight visualization */
+.evidence-weight-bar {
+  display: flex; height: 24px; border-radius: var(--radius); overflow: hidden;
+  border: 1px solid var(--border); margin-top: 8px;
+}
+.evidence-weight-segment {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 600; color: #fff; white-space: nowrap;
+  overflow: hidden; padding: 0 4px; min-width: 0;
+}
+
+/* Funnel plot */
+.funnel-container {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-top: 12px;
+}
+
+/* Toast notification */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
+  background: var(--accent); color: #fff; border-radius: var(--radius);
+  font-size: 0.85rem; z-index: 1000; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.toast.show { opacity: 1; }
+
+/* Screen reader only */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
 /* Phase 3: DAG Editor */
 .dag-canvas {
   background: var(--bg-input); border: 1px solid var(--border);
@@ -290,45 +419,49 @@ body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
 </style>
 </head>
 <body>
-<header>
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<header role="banner">
   <h1><span class="brand">CausalSynth</span><span class="sub">Causal Evidence Triangulation Engine</span></h1>
   <div class="hdr-btns">
     <div class="example-dropdown">
-      <button onclick="toggleExampleDropdown(event)">Load Example &#9662;</button>
-      <div class="example-dropdown-content" id="exampleDropdown">
-        <button onclick="loadExample('statins')">Statins &amp; CVD (RCT + Cohort + MR)</button>
-        <button onclick="loadExample('meddiet')">Mediterranean Diet &amp; CVD (3 designs)</button>
-        <button onclick="loadExample('smoking')">Smoking &amp; Lung Cancer (4 designs)</button>
+      <button onclick="toggleExampleDropdown(event)" aria-haspopup="true" aria-expanded="false" id="exampleBtn">Load Example &#9662;</button>
+      <div class="example-dropdown-content" id="exampleDropdown" role="menu" aria-labelledby="exampleBtn">
+        <button role="menuitem" onclick="loadExample('statins')">Statins &amp; CVD (RCT + Cohort + MR)</button>
+        <button role="menuitem" onclick="loadExample('meddiet')">Mediterranean Diet &amp; CVD (3 designs)</button>
+        <button role="menuitem" onclick="loadExample('smoking')">Smoking &amp; Lung Cancer (4 designs)</button>
+        <button role="menuitem" onclick="loadExample('alcohol')">Alcohol &amp; Liver Disease (5 designs)</button>
+        <button role="menuitem" onclick="loadExample('exercise')">Exercise &amp; Depression (4 designs)</button>
       </div>
     </div>
     <div class="import-area">
-      <button>Import CSV</button>
-      <input type="file" accept=".csv,.tsv,.txt" onchange="importCSV(event)">
+      <button aria-label="Import CSV file">Import CSV</button>
+      <input type="file" accept=".csv,.tsv,.txt" onchange="importCSV(event)" aria-label="Choose CSV file to import">
     </div>
-    <button onclick="exportResults()">Export CSV</button>
-    <button onclick="exportRCode()">Export R Code</button>
-    <button id="themeBtn" onclick="toggleTheme()">Dark Mode</button>
+    <button onclick="exportResults()" aria-label="Export results as CSV">Export CSV</button>
+    <button onclick="exportRCode()" aria-label="Export reproducible R code">Export R Code</button>
+    <button id="themeBtn" onclick="toggleTheme()" aria-label="Toggle dark mode">Dark Mode</button>
   </div>
 </header>
 
-<div class="container">
+<div class="container" id="mainContent" role="main">
   <!-- Design Legend -->
-  <div class="design-legend" id="designLegend"></div>
+  <div class="design-legend" id="designLegend" role="img" aria-label="Study design color legend"></div>
 
   <!-- Data Input -->
   <div class="card fade-in" id="dataCard">
     <h2>Evidence Streams <span class="badge badge-rct" id="studyBadge">0 studies</span></h2>
     <div style="overflow-x:auto">
-      <table class="data-table" id="dataTable">
+      <table class="data-table" id="dataTable" aria-label="Evidence stream data entry">
         <thead><tr>
-          <th style="width:28px">#</th>
-          <th style="width:170px">Study</th>
-          <th style="width:120px">Design</th>
-          <th style="width:100px">Effect (yi)</th>
-          <th style="width:100px">SE</th>
-          <th style="width:80px">N</th>
-          <th style="width:80px">p0</th>
-          <th style="width:36px"></th>
+          <th style="width:28px" scope="col">#</th>
+          <th style="width:170px" scope="col">Study</th>
+          <th style="width:120px" scope="col">Design</th>
+          <th style="width:100px" scope="col">Effect (yi)</th>
+          <th style="width:100px" scope="col">SE</th>
+          <th style="width:80px" scope="col">N</th>
+          <th style="width:80px" scope="col">p0</th>
+          <th style="width:36px" scope="col"><span class="sr-only">Actions</span></th>
         </tr></thead>
         <tbody id="dataBody"></tbody>
       </table>
@@ -380,6 +513,20 @@ body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
     <div class="section-title" style="margin-top:22px">Evidence Stream Forest Plot</div>
     <div class="forest-container" id="forestContainer"></div>
 
+    <!-- Design Comparison Cards -->
+    <div class="section-title" style="margin-top:22px">Design-Level Comparison</div>
+    <div class="card fade-in" id="designCompareCard">
+      <h2>Side-by-Side Design Summary</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Each card shows the pooled estimate, precision, and contribution from one study design.
+      </p>
+      <div class="design-compare-grid" id="designCompareGrid"></div>
+      <div style="margin-top:14px">
+        <h3 style="font-size:0.88rem;color:var(--text-heading);margin-bottom:8px">Evidence Weight Distribution</h3>
+        <div class="evidence-weight-bar" id="evidenceWeightBar" role="img" aria-label="Relative evidence weight by design"></div>
+      </div>
+    </div>
+
     <!-- Triangulation Visualization -->
     <div class="section-title" style="margin-top:22px">Triangulation Map</div>
     <div class="tri-radar-wrap">
@@ -391,6 +538,62 @@ body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
         <h2>Bias Architecture</h2>
         <div id="biasContainer"></div>
       </div>
+    </div>
+
+    <!-- Enhanced Bias Architecture Heatmap -->
+    <div class="section-title" style="margin-top:22px">Bias Architecture Heatmap</div>
+    <div class="card fade-in" id="biasHeatmapCard">
+      <h2>Study-Level Bias Profiling</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Visual heatmap showing which biases affect each study design. Click any cell for details.
+        Green = low risk (design addresses this bias), Yellow = moderate, Red = high risk.
+      </p>
+      <div class="bias-heatmap-container" id="biasHeatmapContainer"></div>
+      <div class="bias-detail-panel" id="biasDetailPanel" role="region" aria-label="Bias detail information">
+        <h4 id="biasDetailTitle">Select a cell for details</h4>
+        <div id="biasDetailContent"></div>
+      </div>
+    </div>
+
+    <!-- Evidence Concordance Matrix -->
+    <div class="section-title" style="margin-top:22px">Evidence Concordance Matrix</div>
+    <div class="card fade-in" id="concordanceCard">
+      <h2>Pairwise Design Agreement</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Compares every pair of study designs on direction agreement, magnitude overlap (CI overlap),
+        and statistical significance concordance. Strong agreement across designs with different
+        bias profiles is the hallmark of robust causal evidence.
+      </p>
+      <div class="tab-bar" id="concordanceTabs" role="tablist" aria-label="Concordance matrix views">
+        <button role="tab" aria-selected="true" aria-controls="concDirectionPanel" id="concDirectionTab" class="active" onclick="switchConcordanceTab('direction')">Direction</button>
+        <button role="tab" aria-selected="false" aria-controls="concOverlapPanel" id="concOverlapTab" onclick="switchConcordanceTab('overlap')">CI Overlap</button>
+        <button role="tab" aria-selected="false" aria-controls="concSignifPanel" id="concSignifTab" onclick="switchConcordanceTab('signif')">Significance</button>
+        <button role="tab" aria-selected="false" aria-controls="concCompositePanel" id="concCompositeTab" onclick="switchConcordanceTab('composite')">Composite</button>
+      </div>
+      <div class="tab-panel active" id="concDirectionPanel" role="tabpanel" aria-labelledby="concDirectionTab">
+        <div class="concordance-matrix" id="concDirectionMatrix"></div>
+      </div>
+      <div class="tab-panel" id="concOverlapPanel" role="tabpanel" aria-labelledby="concOverlapTab">
+        <div class="concordance-matrix" id="concOverlapMatrix"></div>
+      </div>
+      <div class="tab-panel" id="concSignifPanel" role="tabpanel" aria-labelledby="concSignifTab">
+        <div class="concordance-matrix" id="concSignifMatrix"></div>
+      </div>
+      <div class="tab-panel" id="concCompositePanel" role="tabpanel" aria-labelledby="concCompositeTab">
+        <div class="concordance-matrix" id="concCompositeMatrix"></div>
+      </div>
+      <div id="concordanceSummary" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Funnel Plot -->
+    <div class="section-title" style="margin-top:22px">Funnel Plot (Design-Colored)</div>
+    <div class="card fade-in" id="funnelCard">
+      <h2>Publication Bias Assessment</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Studies are colored by design type. Asymmetry may indicate publication bias,
+        but between-design heterogeneity can also cause apparent asymmetry.
+      </p>
+      <div class="funnel-container" id="funnelContainer"></div>
     </div>
 
     <!-- Causal Correction (CaMeA) -->
@@ -645,16 +848,31 @@ function loadExample(key) {
 function toggleExampleDropdown(event) {
   event.stopPropagation();
   const dd = document.getElementById('exampleDropdown');
+  const btn = document.getElementById('exampleBtn');
   dd.classList.toggle('show');
+  var isOpen = dd.classList.contains('show');
+  if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   // Close on outside click
   const closer = function(e) {
     if (!dd.contains(e.target)) {
       dd.classList.remove('show');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
       document.removeEventListener('click', closer);
     }
   };
-  if (dd.classList.contains('show')) {
-    setTimeout(function() { document.addEventListener('click', closer); }, 0);
+  // Close on Escape key
+  const escCloser = function(e) {
+    if (e.key === 'Escape') {
+      dd.classList.remove('show');
+      if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
+      document.removeEventListener('keydown', escCloser);
+    }
+  };
+  if (isOpen) {
+    setTimeout(function() {
+      document.addEventListener('click', closer);
+      document.addEventListener('keydown', escCloser);
+    }, 0);
   }
 }
 
@@ -760,15 +978,20 @@ function runTriangulation() {
 function renderResults() {
   document.getElementById('results').style.display = 'block';
   renderConvergenceMetrics();
+  renderDesignCompareCards();
   renderForestPlot();
   renderRadar();
   renderBiasTable();
+  renderBiasHeatmap();
+  renderConcordanceMatrix();
+  renderFunnelPlot();
   renderCausalCorrection();
   renderSensitivity();
   renderInterpretation();
   renderReport();
   renderRCode();
   renderDAGOverlays();
+  showToast('Analysis complete: ' + triResults.nStudies + ' studies, ' + triResults.nDesigns + ' designs');
   document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
@@ -1677,6 +1900,20 @@ function generateReport() {
     results += '(k=' + dr.k + ', I\u00B2=' + dr.I2.toFixed(1) + '%)\n';
   }
 
+  // Concordance summary
+  var pairCount = 0, pairAgree = 0;
+  for (var ci = 0; ci < designKeys.length; ci++) {
+    for (var cj = ci + 1; cj < designKeys.length; cj++) {
+      pairCount++;
+      var drA = r.designResults[designKeys[ci]];
+      var drB = r.designResults[designKeys[cj]];
+      if (Math.sign(drA.theta) === Math.sign(drB.theta) || drA.theta === 0 || drB.theta === 0) pairAgree++;
+    }
+  }
+  if (pairCount > 0) {
+    results += '\nPairwise concordance: ' + pairAgree + '/' + pairCount + ' design pairs agree on direction (' + (pairAgree/pairCount*100).toFixed(0) + '%).';
+  }
+
   // Causal correction results if applicable
   if (hasP0) {
     results += '\nCausal correction (CaMeA-style): study-level log-OR estimates were converted to risk differences (RD) using reported baseline risks, then pooled on the RD scale.';
@@ -1938,9 +2175,567 @@ renderResults = function() {
   document.getElementById('webrCard').style.display = '';
 };
 
+// ============================================================
+// Phase 2: Design-Level Comparison Cards + Evidence Weight Bar
+// ============================================================
+function renderDesignCompareCards() {
+  const grid = document.getElementById('designCompareGrid');
+  const weightBar = document.getElementById('evidenceWeightBar');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  if (designKeys.length < 1) { grid.innerHTML = ''; weightBar.innerHTML = ''; return; }
+
+  // Compute total inverse-variance weight per design
+  const designWeights = {};
+  let totalWeight = 0;
+  for (const dKey of designKeys) {
+    const dr = r.designResults[dKey];
+    const w = 1 / (dr.se * dr.se);
+    designWeights[dKey] = w;
+    totalWeight += w;
+  }
+
+  // Cards
+  let html = '';
+  for (const dKey of designKeys) {
+    const dr = r.designResults[dKey];
+    const dInfo = DESIGNS[dKey] || { label: dKey, color: 'var(--text)', short: dKey };
+    const pctWeight = (designWeights[dKey] / totalWeight * 100).toFixed(1);
+    const sig = dr.pval < 0.05;
+    const expEffect = Math.exp(dr.theta);
+
+    html += '<div class="design-compare-card" tabindex="0" role="group" aria-label="' + escapeHtml(dInfo.label) + ' summary">';
+    html += '<div class="dc-header" style="border-color:' + dInfo.color + ';color:' + dInfo.color + '">' + escapeHtml(dInfo.label) + '</div>';
+    html += '<div class="dc-stat"><span class="dc-label">Studies (k)</span><span class="dc-value">' + dr.k + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">Pooled Effect</span><span class="dc-value">' + dr.theta.toFixed(4) + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">95% CI</span><span class="dc-value">[' + dr.lower.toFixed(3) + ', ' + dr.upper.toFixed(3) + ']</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">OR (exp)</span><span class="dc-value">' + expEffect.toFixed(3) + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">I\u00B2</span><span class="dc-value">' + dr.I2.toFixed(1) + '%</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">p-value</span><span class="dc-value" style="color:' + (sig ? 'var(--success)' : 'var(--text-muted)') + '">' + (dr.pval < 0.001 ? '<0.001' : dr.pval.toFixed(4)) + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">Evidence Weight</span><span class="dc-value">' + pctWeight + '%</span></div>';
+    // Strength bar
+    html += '<div class="strength-bar-container">';
+    html += '<div class="strength-bar-bg"><div class="strength-bar" style="width:' + pctWeight + '%;background:' + dInfo.color + '"></div></div>';
+    html += '</div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+
+  // Evidence weight stacked bar
+  let barHtml = '';
+  for (const dKey of designKeys) {
+    const dInfo = DESIGNS[dKey] || { short: dKey, color: 'var(--text)' };
+    const pct = (designWeights[dKey] / totalWeight * 100);
+    if (pct < 2) {
+      barHtml += '<div class="evidence-weight-segment" style="width:' + pct.toFixed(1) + '%;background:' + dInfo.color + '" title="' + escapeHtml(dInfo.short) + ': ' + pct.toFixed(1) + '%"></div>';
+    } else {
+      barHtml += '<div class="evidence-weight-segment" style="width:' + pct.toFixed(1) + '%;background:' + dInfo.color + '" title="' + escapeHtml(dInfo.short) + ': ' + pct.toFixed(1) + '%">' + escapeHtml(dInfo.short) + ' ' + pct.toFixed(0) + '%</div>';
+    }
+  }
+  weightBar.innerHTML = barHtml;
+}
+
+// ============================================================
+// Phase 2: Enhanced Bias Architecture Heatmap (SVG)
+// ============================================================
+const BIAS_DETAILS = {
+  Confounding: {
+    RCT: { level: 'low', text: 'Randomization eliminates confounding by design. Imbalance possible in small trials, but expectation is zero bias.' },
+    cohort: { level: 'moderate', text: 'Measured confounders can be adjusted for, but unmeasured confounders remain a concern (e.g., healthy user bias).' },
+    cc: { level: 'moderate', text: 'Case-control studies can adjust for measured confounders, but residual confounding is common.' },
+    MR: { level: 'low', text: 'Mendelian randomization uses genetic instruments that are randomly allocated at conception, mimicking randomization.' },
+    ecological: { level: 'high', text: 'Ecological fallacy: population-level associations may not reflect individual-level confounding structures.' },
+    cross: { level: 'moderate', text: 'Cross-sectional designs can adjust for measured confounders but temporal precedence is unclear.' }
+  },
+  Selection: {
+    RCT: { level: 'moderate', text: 'Selection into trials is non-random (eligibility criteria, consent). Results may not generalize to target population.' },
+    cohort: { level: 'moderate', text: 'Selection into cohorts depends on recruitment; loss to follow-up introduces further selection.' },
+    cc: { level: 'high', text: 'Control selection is critical and often problematic. Hospital-based controls can introduce Berkson bias.' },
+    MR: { level: 'low', text: 'MR studies typically use population-based biobanks with minimal selection bias in genotype-outcome analyses.' },
+    ecological: { level: 'moderate', text: 'Populations included may be non-representative; data availability drives selection.' },
+    cross: { level: 'moderate', text: 'Response rates and sampling frame affect representativeness.' }
+  },
+  Measurement: {
+    RCT: { level: 'low', text: 'Blinding and standardized outcome assessment reduce measurement error. Double-blind RCTs have minimal information bias.' },
+    cohort: { level: 'moderate', text: 'Prospective measurement reduces recall bias, but exposure/outcome ascertainment may still vary.' },
+    cc: { level: 'high', text: 'Recall bias: cases may report exposure history differently than controls. Differential misclassification likely.' },
+    MR: { level: 'low', text: 'Genetic variants are measured with high precision (genotyping arrays, imputation). Minimal measurement error.' },
+    ecological: { level: 'moderate', text: 'Population-level measures may be crude aggregations with measurement error.' },
+    cross: { level: 'moderate', text: 'Self-reported measures susceptible to social desirability and recall bias.' }
+  },
+  'Reverse Causation': {
+    RCT: { level: 'low', text: 'Temporal ordering is enforced: treatment precedes outcome by design.' },
+    cohort: { level: 'moderate', text: 'Prospective design helps, but prevalent exposure at baseline could reflect reverse causation (prevalent user bias).' },
+    cc: { level: 'moderate', text: 'Temporal sequence unclear for exposures measured after disease onset. Protopathic bias possible.' },
+    MR: { level: 'low', text: 'Genetic variants are fixed at conception, preceding all phenotypic outcomes. Reverse causation virtually eliminated.' },
+    ecological: { level: 'high', text: 'Cross-sectional ecological data cannot establish temporal ordering.' },
+    cross: { level: 'high', text: 'No temporal ordering possible in cross-sectional data. Cause and effect indistinguishable.' }
+  },
+  Generalizability: {
+    RCT: { level: 'moderate', text: 'Strict eligibility criteria and volunteer bias limit external validity. Efficacy != effectiveness.' },
+    cohort: { level: 'high', text: 'Large population-based cohorts often have good external validity if representative of target population.' },
+    cc: { level: 'moderate', text: 'Generalizability depends on case/control sources. Population-based case-control better than hospital-based.' },
+    MR: { level: 'moderate', text: 'Genetic effects may differ across ancestries. Most MR studies are in European-ancestry populations.' },
+    ecological: { level: 'high', text: 'Population-level data can be broadly generalizable if populations are representative.' },
+    cross: { level: 'moderate', text: 'Depends on sampling frame. National surveys have good generalizability.' }
+  }
+};
+
+function renderBiasHeatmap() {
+  const container = document.getElementById('biasHeatmapContainer');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  if (designKeys.length < 1) { container.innerHTML = ''; return; }
+
+  const cellW = 120, cellH = 40;
+  const headerH = 70, labelW = 160;
+  const W = labelW + designKeys.length * cellW + 20;
+  const H = headerH + BIAS_NAMES.length * cellH + 20;
+
+  const biasColors = { low: '#059669', moderate: '#d97706', high: '#dc2626' };
+  const biasColorsBg = { low: '#d1fae5', moderate: '#fef3c7', high: '#fee2e2' };
+
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg" class="bias-heatmap-svg" width="' + W + '" height="' + H + '" style="font-family:var(--font)" role="img" aria-label="Bias architecture heatmap">';
+
+  // Column headers (designs)
+  for (let ci = 0; ci < designKeys.length; ci++) {
+    const dKey = designKeys[ci];
+    const dInfo = DESIGNS[dKey] || { short: dKey, color: 'var(--text)' };
+    const x = labelW + ci * cellW + cellW / 2;
+    svg += '<text x="' + x + '" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="' + dInfo.color + '">' + escapeHtml(dInfo.short) + '</text>';
+    svg += '<text x="' + x + '" y="40" text-anchor="middle" font-size="9" fill="var(--text-muted)">k=' + r.designResults[dKey].k + '</text>';
+  }
+
+  // Rows (bias types)
+  for (let ri = 0; ri < BIAS_NAMES.length; ri++) {
+    const biasName = BIAS_NAMES[ri];
+    const y = headerH + ri * cellH;
+    // Row label
+    svg += '<text x="' + (labelW - 8) + '" y="' + (y + cellH / 2 + 4) + '" text-anchor="end" font-size="11" font-weight="600" fill="var(--text-heading)">' + escapeHtml(biasName) + '</text>';
+
+    for (let ci = 0; ci < designKeys.length; ci++) {
+      const dKey = designKeys[ci];
+      const profile = BIAS_PROFILE[dKey] || ['moderate','moderate','moderate','moderate','moderate'];
+      const level = profile[ri];
+      const x = labelW + ci * cellW;
+      const fillBg = biasColorsBg[level] || biasColorsBg.moderate;
+      const fillText = biasColors[level] || biasColors.moderate;
+
+      svg += '<rect x="' + x + '" y="' + y + '" width="' + cellW + '" height="' + cellH + '" fill="' + fillBg + '" stroke="var(--border)" stroke-width="1" ';
+      svg += 'style="cursor:pointer" data-bias="' + escapeHtml(biasName) + '" data-design="' + escapeHtml(dKey) + '" ';
+      svg += 'onclick="showBiasDetail(\'' + escapeHtml(biasName) + '\',\'' + escapeHtml(dKey) + '\')" ';
+      svg += 'tabindex="0" role="button" aria-label="' + escapeHtml(biasName) + ' for ' + escapeHtml(DESIGNS[dKey]?.short || dKey) + ': ' + level + ' risk"';
+      svg += '/>';
+
+      // Level text
+      const levelLabel = level.charAt(0).toUpperCase() + level.slice(1);
+      svg += '<text x="' + (x + cellW / 2) + '" y="' + (y + cellH / 2 + 4) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + fillText + '" style="pointer-events:none">' + levelLabel + '</text>';
+    }
+  }
+
+  // Bottom summary row: overall bias concern per design
+  const summaryY = headerH + BIAS_NAMES.length * cellH + 5;
+  svg += '<text x="' + (labelW - 8) + '" y="' + (summaryY + 10) + '" text-anchor="end" font-size="10" font-weight="600" fill="var(--text-muted)">High-risk count</text>';
+  for (let ci = 0; ci < designKeys.length; ci++) {
+    const dKey = designKeys[ci];
+    const profile = BIAS_PROFILE[dKey] || ['moderate','moderate','moderate','moderate','moderate'];
+    const highCount = profile.filter(function(l) { return l === 'high'; }).length;
+    const x = labelW + ci * cellW + cellW / 2;
+    const col = highCount >= 3 ? biasColors.high : highCount >= 1 ? biasColors.moderate : biasColors.low;
+    svg += '<text x="' + x + '" y="' + (summaryY + 10) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + col + '">' + highCount + '/5</text>';
+  }
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+
+  // Add keyboard event to SVG rects for accessibility
+  container.querySelectorAll('rect[data-bias]').forEach(function(rect) {
+    rect.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        showBiasDetail(rect.getAttribute('data-bias'), rect.getAttribute('data-design'));
+      }
+    });
+  });
+}
+
+function showBiasDetail(biasName, designKey) {
+  const panel = document.getElementById('biasDetailPanel');
+  const title = document.getElementById('biasDetailTitle');
+  const content = document.getElementById('biasDetailContent');
+  const dInfo = DESIGNS[designKey] || { label: designKey, color: 'var(--text)' };
+
+  const detail = (BIAS_DETAILS[biasName] && BIAS_DETAILS[biasName][designKey])
+    ? BIAS_DETAILS[biasName][designKey]
+    : { level: 'moderate', text: 'No detailed information available for this combination.' };
+
+  const dotColors = { low: '#059669', moderate: '#d97706', high: '#dc2626' };
+  title.textContent = biasName + ' in ' + dInfo.label;
+  content.innerHTML = '<div class="bias-detail-item">' +
+    '<span class="bias-dot" style="background:' + (dotColors[detail.level] || dotColors.moderate) + '"></span>' +
+    '<strong>' + detail.level.charAt(0).toUpperCase() + detail.level.slice(1) + ' Risk</strong>' +
+    '</div>' +
+    '<p style="margin-top:6px">' + escapeHtml(detail.text) + '</p>';
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ============================================================
+// Phase 2: Evidence Concordance Matrix
+// ============================================================
+function renderConcordanceMatrix() {
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  if (designKeys.length < 2) {
+    document.getElementById('concDirectionMatrix').innerHTML = '<p style="color:var(--text-muted)">Need 2+ designs for concordance matrix.</p>';
+    document.getElementById('concOverlapMatrix').innerHTML = '';
+    document.getElementById('concSignifMatrix').innerHTML = '';
+    document.getElementById('concCompositeMatrix').innerHTML = '';
+    document.getElementById('concordanceSummary').innerHTML = '';
+    return;
+  }
+
+  const dLabels = designKeys.map(function(k) { return DESIGNS[k] ? DESIGNS[k].short : k; });
+
+  // Compute pairwise concordance metrics
+  const pairMetrics = [];
+  for (let i = 0; i < designKeys.length; i++) {
+    pairMetrics[i] = [];
+    for (let j = 0; j < designKeys.length; j++) {
+      if (i === j) { pairMetrics[i][j] = { direction: 'self', overlap: 'self', signif: 'self', composite: 'self' }; continue; }
+      const drA = r.designResults[designKeys[i]];
+      const drB = r.designResults[designKeys[j]];
+
+      // Direction: same sign?
+      const dirA = Math.sign(drA.theta);
+      const dirB = Math.sign(drB.theta);
+      const dirAgree = dirA === dirB || dirA === 0 || dirB === 0;
+
+      // CI Overlap: do 95% CIs overlap?
+      const overlapLo = Math.max(drA.lower, drB.lower);
+      const overlapHi = Math.min(drA.upper, drB.upper);
+      const ciOverlap = overlapHi >= overlapLo;
+      // Compute overlap fraction (of the smaller CI)
+      const ciWidthA = drA.upper - drA.lower;
+      const ciWidthB = drB.upper - drB.lower;
+      const minWidth = Math.min(ciWidthA, ciWidthB);
+      const overlapWidth = ciOverlap ? (overlapHi - overlapLo) : 0;
+      const overlapFrac = minWidth > 0 ? Math.min(1, overlapWidth / minWidth) : 0;
+
+      // Significance concordance: both sig, both non-sig, or discordant
+      const sigA = drA.pval < 0.05;
+      const sigB = drB.pval < 0.05;
+      const sigConcord = sigA === sigB ? (sigA ? 'both-sig' : 'both-nonsig') : 'discordant';
+
+      // Composite: direction + CI overlap + significance
+      let compositeScore = 0;
+      if (dirAgree) compositeScore += 0.4;
+      compositeScore += 0.4 * overlapFrac;
+      if (sigConcord === 'both-sig') compositeScore += 0.2;
+      else if (sigConcord === 'both-nonsig') compositeScore += 0.1;
+
+      pairMetrics[i][j] = {
+        direction: dirAgree ? 'agree' : 'disagree',
+        overlap: overlapFrac,
+        ciOverlap: ciOverlap,
+        signif: sigConcord,
+        composite: compositeScore
+      };
+    }
+  }
+
+  // Direction matrix
+  renderConcordanceTable('concDirectionMatrix', designKeys, dLabels, pairMetrics, 'direction');
+  // CI Overlap matrix
+  renderConcordanceTable('concOverlapMatrix', designKeys, dLabels, pairMetrics, 'overlap');
+  // Significance matrix
+  renderConcordanceTable('concSignifMatrix', designKeys, dLabels, pairMetrics, 'signif');
+  // Composite matrix
+  renderConcordanceTable('concCompositeMatrix', designKeys, dLabels, pairMetrics, 'composite');
+
+  // Summary
+  let agreeCount = 0, totalPairs = 0;
+  let totalComposite = 0;
+  for (let i = 0; i < designKeys.length; i++) {
+    for (let j = i + 1; j < designKeys.length; j++) {
+      totalPairs++;
+      if (pairMetrics[i][j].direction === 'agree') agreeCount++;
+      totalComposite += pairMetrics[i][j].composite;
+    }
+  }
+  const avgComposite = totalPairs > 0 ? (totalComposite / totalPairs) : 0;
+  const concordancePct = totalPairs > 0 ? (agreeCount / totalPairs * 100).toFixed(0) : '0';
+
+  let summaryClass = avgComposite >= 0.7 ? 'strong' : avgComposite >= 0.4 ? 'moderate' : 'weak';
+  let summaryHtml = '<div class="interp-panel" style="margin-top:0;padding:12px 16px">';
+  summaryHtml += '<strong>Pairwise Concordance Summary:</strong> ';
+  summaryHtml += concordancePct + '% of design pairs agree on direction (' + agreeCount + '/' + totalPairs + '). ';
+  summaryHtml += 'Average composite concordance: <strong class="verdict ' + summaryClass + '">' + avgComposite.toFixed(3) + '</strong> ';
+  summaryHtml += '(1.0 = perfect agreement, 0.0 = complete disagreement).';
+  summaryHtml += '</div>';
+  document.getElementById('concordanceSummary').innerHTML = summaryHtml;
+}
+
+function renderConcordanceTable(containerId, designKeys, dLabels, pairMetrics, metricType) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  let html = '<table class="conc-table" aria-label="Concordance matrix - ' + metricType + '">';
+  html += '<thead><tr><th scope="col"></th>';
+  for (let j = 0; j < dLabels.length; j++) {
+    const color = DESIGNS[designKeys[j]] ? DESIGNS[designKeys[j]].color : 'var(--text)';
+    html += '<th scope="col" style="color:' + color + '">' + escapeHtml(dLabels[j]) + '</th>';
+  }
+  html += '</tr></thead><tbody>';
+
+  for (let i = 0; i < designKeys.length; i++) {
+    const color = DESIGNS[designKeys[i]] ? DESIGNS[designKeys[i]].color : 'var(--text)';
+    html += '<tr><th scope="row" style="text-align:left;color:' + color + '">' + escapeHtml(dLabels[i]) + '</th>';
+    for (let j = 0; j < designKeys.length; j++) {
+      const pm = pairMetrics[i][j];
+      if (i === j) {
+        html += '<td class="conc-na">--</td>';
+        continue;
+      }
+
+      if (metricType === 'direction') {
+        const cls = pm.direction === 'agree' ? 'conc-agree' : 'conc-disagree';
+        const lbl = pm.direction === 'agree' ? 'Agree' : 'Disagree';
+        html += '<td class="' + cls + '">' + lbl + '</td>';
+      } else if (metricType === 'overlap') {
+        const pct = (pm.overlap * 100).toFixed(0);
+        const cls = pm.overlap >= 0.5 ? 'conc-agree' : pm.overlap > 0 ? 'conc-partial' : 'conc-disagree';
+        html += '<td class="' + cls + '">' + pct + '%</td>';
+      } else if (metricType === 'signif') {
+        if (pm.signif === 'both-sig') {
+          html += '<td class="conc-agree">Both sig.</td>';
+        } else if (pm.signif === 'both-nonsig') {
+          html += '<td class="conc-partial">Both n.s.</td>';
+        } else {
+          html += '<td class="conc-disagree">Discordant</td>';
+        }
+      } else if (metricType === 'composite') {
+        const score = pm.composite.toFixed(2);
+        const cls = pm.composite >= 0.7 ? 'conc-agree' : pm.composite >= 0.4 ? 'conc-partial' : 'conc-disagree';
+        html += '<td class="' + cls + '">' + score + '</td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function switchConcordanceTab(tabName) {
+  var tabs = ['direction', 'overlap', 'signif', 'composite'];
+  for (var i = 0; i < tabs.length; i++) {
+    var t = tabs[i];
+    var tabBtn = document.getElementById('conc' + t.charAt(0).toUpperCase() + t.slice(1) + 'Tab');
+    var panel = document.getElementById('conc' + t.charAt(0).toUpperCase() + t.slice(1) + 'Panel');
+    if (t === tabName) {
+      if (tabBtn) { tabBtn.classList.add('active'); tabBtn.setAttribute('aria-selected', 'true'); }
+      if (panel) panel.classList.add('active');
+    } else {
+      if (tabBtn) { tabBtn.classList.remove('active'); tabBtn.setAttribute('aria-selected', 'false'); }
+      if (panel) panel.classList.remove('active');
+    }
+  }
+}
+
+// ============================================================
+// Phase 2: Funnel Plot (Design-Colored)
+// ============================================================
+function renderFunnelPlot() {
+  var container = document.getElementById('funnelContainer');
+  var r = triResults;
+  if (!r || studies.length < 3) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">Need 3+ studies for funnel plot.</p>';
+    return;
+  }
+
+  var W = Math.max(container.clientWidth - 32, 500);
+  var H = 350;
+  var margin = { top: 20, right: 40, bottom: 40, left: 60 };
+  var plotW = W - margin.left - margin.right;
+  var plotH = H - margin.top - margin.bottom;
+
+  // X-axis: effect size (yi), Y-axis: standard error (inverted, small SE at top)
+  var allYi = studies.map(function(s) { return s.yi; });
+  var allSe = studies.map(function(s) { return s.se; });
+  var yiMin = Math.min.apply(null, allYi);
+  var yiMax = Math.max.apply(null, allYi);
+  var seMax = Math.max.apply(null, allSe);
+  var yiPad = (yiMax - yiMin) * 0.2 || 0.5;
+
+  var xMin = yiMin - yiPad;
+  var xMax = yiMax + yiPad;
+  var yMin = 0;
+  var yMax = seMax * 1.15;
+
+  function xScale(v) { return margin.left + ((v - xMin) / (xMax - xMin)) * plotW; }
+  function yScale(v) { return margin.top + (v / yMax) * plotH; } // SE increases downward
+
+  var pooled = r.overallResult.theta;
+
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" style="font-family:var(--font)" role="img" aria-label="Funnel plot showing study precision vs effect size, colored by design">';
+
+  // Pseudo-95% CI funnel region
+  var funnelSEs = [];
+  for (var si = 0; si <= 20; si++) funnelSEs.push(yMax * si / 20);
+  var z95 = normalQuantile(0.975);
+
+  // Left edge of funnel
+  var leftPoints = '';
+  for (var fsi = 0; fsi < funnelSEs.length; fsi++) {
+    var fse = funnelSEs[fsi];
+    var fx = xScale(pooled - z95 * fse);
+    var fy = yScale(fse);
+    leftPoints += fx + ',' + fy + ' ';
+  }
+  // Right edge of funnel (reversed)
+  var rightPoints = '';
+  for (var fsi2 = funnelSEs.length - 1; fsi2 >= 0; fsi2--) {
+    var fse2 = funnelSEs[fsi2];
+    var fx2 = xScale(pooled + z95 * fse2);
+    var fy2 = yScale(fse2);
+    rightPoints += fx2 + ',' + fy2 + ' ';
+  }
+  svg += '<polygon points="' + leftPoints + rightPoints + '" fill="var(--accent-light)" opacity="0.4"/>';
+
+  // Vertical line at pooled estimate
+  svg += '<line x1="' + xScale(pooled) + '" y1="' + margin.top + '" x2="' + xScale(pooled) + '" y2="' + (H - margin.bottom) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,3"/>';
+
+  // Null line at 0
+  if (xMin < 0 && xMax > 0) {
+    svg += '<line x1="' + xScale(0) + '" y1="' + margin.top + '" x2="' + xScale(0) + '" y2="' + (H - margin.bottom) + '" stroke="var(--border)" stroke-width="1"/>';
+  }
+
+  // Plot points
+  for (var pi = 0; pi < studies.length; pi++) {
+    var s = studies[pi];
+    var px = xScale(s.yi);
+    var py = yScale(s.se);
+    var dColor = DESIGNS[s.design] ? DESIGNS[s.design].color : 'var(--text)';
+    svg += '<circle cx="' + px + '" cy="' + py + '" r="5" fill="' + dColor + '" opacity="0.85" stroke="var(--bg-card)" stroke-width="1.5">';
+    svg += '<title>' + escapeHtml(s.study) + ' (' + (DESIGNS[s.design] ? DESIGNS[s.design].short : s.design) + '): yi=' + s.yi.toFixed(3) + ', SE=' + s.se.toFixed(3) + '</title>';
+    svg += '</circle>';
+  }
+
+  // Axes
+  // X-axis
+  svg += '<line x1="' + margin.left + '" y1="' + (H - margin.bottom) + '" x2="' + (W - margin.right) + '" y2="' + (H - margin.bottom) + '" stroke="var(--text-muted)" stroke-width="1"/>';
+  // Y-axis
+  svg += '<line x1="' + margin.left + '" y1="' + margin.top + '" x2="' + margin.left + '" y2="' + (H - margin.bottom) + '" stroke="var(--text-muted)" stroke-width="1"/>';
+
+  // X-axis ticks
+  var nXTicks = 7;
+  for (var xi = 0; xi <= nXTicks; xi++) {
+    var xv = xMin + (xMax - xMin) * xi / nXTicks;
+    var xx = xScale(xv);
+    svg += '<text x="' + xx + '" y="' + (H - margin.bottom + 16) + '" text-anchor="middle" font-size="9" fill="var(--text-muted)">' + xv.toFixed(2) + '</text>';
+  }
+  svg += '<text x="' + (margin.left + plotW / 2) + '" y="' + (H - 5) + '" text-anchor="middle" font-size="10" fill="var(--text-muted)">Effect Size (log-OR)</text>';
+
+  // Y-axis ticks
+  var nYTicks = 5;
+  for (var yi2 = 0; yi2 <= nYTicks; yi2++) {
+    var yv = yMax * yi2 / nYTicks;
+    var yy = yScale(yv);
+    svg += '<text x="' + (margin.left - 8) + '" y="' + (yy + 3) + '" text-anchor="end" font-size="9" fill="var(--text-muted)">' + yv.toFixed(2) + '</text>';
+  }
+  svg += '<text x="15" y="' + (margin.top + plotH / 2) + '" text-anchor="middle" font-size="10" fill="var(--text-muted)" transform="rotate(-90,15,' + (margin.top + plotH / 2) + ')">Standard Error</text>';
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+// ============================================================
+// Toast Notification
+// ============================================================
+function showToast(message) {
+  var toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 3000);
+}
+
+// ============================================================
+// Additional Example Datasets (Phase 2)
+// ============================================================
+EXAMPLE_DATASETS.alcohol = {
+  label: 'Alcohol & Liver Disease',
+  data: [
+    { study: 'Bellentani 1997 (RCT analog)', design: 'RCT', yi: 0.45, se: 0.18, n: 6534, p0: 0.03 },
+    { study: 'Becker 1996', design: 'RCT', yi: 0.51, se: 0.22, n: 1200, p0: 0.04 },
+    { study: 'Whitfield 2001 Cohort', design: 'cohort', yi: 0.62, se: 0.08, n: 45000, p0: 0.05 },
+    { study: 'EPIC-Norfolk 2010', design: 'cohort', yi: 0.55, se: 0.06, n: 78000, p0: 0.04 },
+    { study: 'UK Biobank Cohort 2018', design: 'cohort', yi: 0.49, se: 0.04, n: 340000, p0: 0.03 },
+    { study: 'Askgaard 2015 CC', design: 'cc', yi: 0.70, se: 0.15, n: 2400, p0: 0.05 },
+    { study: 'Tian 2020 MR', design: 'MR', yi: 0.38, se: 0.12, n: 280000, p0: 0.04 },
+    { study: 'Millwood 2019 MR (China)', design: 'MR', yi: 0.42, se: 0.10, n: 160000, p0: 0.06 },
+    { study: 'Rehm 2010 Ecological', design: 'ecological', yi: 0.58, se: 0.20, n: 50, p0: 0.04 }
+  ]
+};
+
+EXAMPLE_DATASETS.exercise = {
+  label: 'Exercise & Depression',
+  data: [
+    { study: 'Blumenthal 2007 (RCT)', design: 'RCT', yi: -0.50, se: 0.14, n: 202, p0: 0.15 },
+    { study: 'Schuch 2016 (RCT pool)', design: 'RCT', yi: -0.56, se: 0.08, n: 2500, p0: 0.12 },
+    { study: 'Rethorst 2009 (RCT)', design: 'RCT', yi: -0.42, se: 0.12, n: 126, p0: 0.18 },
+    { study: 'Harvey 2018 Cohort', design: 'cohort', yi: -0.29, se: 0.05, n: 33908, p0: 0.10 },
+    { study: 'Choi 2019 Cohort', design: 'cohort', yi: -0.35, se: 0.06, n: 611583, p0: 0.08 },
+    { study: 'Choi 2019 MR', design: 'MR', yi: -0.26, se: 0.11, n: 611583, p0: 0.09 },
+    { study: 'Stubbs 2017 MR', design: 'MR', yi: -0.20, se: 0.13, n: 300000, p0: 0.10 },
+    { study: 'Mammen 2013 Cross-Sec', design: 'cross', yi: -0.38, se: 0.07, n: 90000, p0: 0.11 }
+  ]
+};
+
+// ============================================================
+// Keyboard navigation for data table
+// ============================================================
+function setupTableKeyboardNav() {
+  document.getElementById('dataTable').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') return; // let normal tab work
+    var td = e.target.closest('td');
+    if (!td) return;
+    var tr = td.closest('tr');
+    if (!tr) return;
+    var cells = Array.from(tr.querySelectorAll('input, select'));
+    var idx = cells.indexOf(e.target);
+    if (idx < 0) return;
+
+    if (e.key === 'ArrowRight' && idx < cells.length - 1) {
+      e.preventDefault();
+      cells[idx + 1].focus();
+    } else if (e.key === 'ArrowLeft' && idx > 0) {
+      e.preventDefault();
+      cells[idx - 1].focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      var nextRow = tr.nextElementSibling;
+      if (nextRow) {
+        var nextCells = Array.from(nextRow.querySelectorAll('input, select'));
+        if (nextCells[idx]) nextCells[idx].focus();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      var prevRow = tr.previousElementSibling;
+      if (prevRow) {
+        var prevCells = Array.from(prevRow.querySelectorAll('input, select'));
+        if (prevCells[idx]) prevCells[idx].focus();
+      }
+    }
+  });
+}
+
 // ---- Init ----
 renderLegend();
-addRows(5);
+setupTableKeyboardNav();
+
+// Load default example dataset on startup so the tool is immediately usable
+loadExample('statins');
 </script>
 </body>
 </html>

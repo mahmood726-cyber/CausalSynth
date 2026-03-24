@@ -161,16 +161,16 @@ def test_08_load_smoking_8_studies(driver):
     assert len(rows) == 8, f"Expected 8 studies, got {len(rows)}"
 
 
-def test_09_dataset_dropdown_3_options(driver):
-    """Dataset dropdown has 3 example options."""
+def test_09_dataset_dropdown_5_options(driver):
+    """Dataset dropdown has 5 example options."""
     driver.get(URL)
     time.sleep(0.5)
     # Open the dropdown
     toggle = driver.find_element(By.CSS_SELECTOR, ".example-dropdown > button")
     toggle.click()
     time.sleep(0.3)
-    buttons = driver.find_elements(By.CSS_SELECTOR, "#exampleDropdown button")
-    assert len(buttons) == 3, f"Expected 3 example options, got {len(buttons)}"
+    buttons = driver.find_elements(By.CSS_SELECTOR, "#exampleDropdown button[role='menuitem']")
+    assert len(buttons) == 5, f"Expected 5 example options, got {len(buttons)}"
 
 
 def test_10_clear_all(driver):
@@ -613,7 +613,7 @@ ALL_TESTS = [
     test_06_load_statins_12_studies,
     test_07_load_meddiet_7_studies,
     test_08_load_smoking_8_studies,
-    test_09_dataset_dropdown_3_options,
+    test_09_dataset_dropdown_5_options,
     test_10_clear_all,
     # Category 3: Core Triangulation Engine
     test_11_statins_3_designs,
