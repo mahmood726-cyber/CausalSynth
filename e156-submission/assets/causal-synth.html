@@ -1,0 +1,2741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CausalSynth — Causal Evidence Triangulation Engine</title>
+<style>
+:root {
+  --bg: #f5f6f8; --bg-card: #ffffff; --bg-input: #f8f9fb;
+  --text: #1a1a2e; --text-muted: #6b7280; --text-heading: #0f172a;
+  --border: #e2e5ea; --border-focus: #6366f1;
+  --accent: #6366f1; --accent-hover: #4f46e5; --accent-light: #eef2ff;
+  --success: #059669; --danger: #dc2626; --warning: #d97706;
+  --rct-color: #2563eb; --cohort-color: #7c3aed; --cc-color: #c026d3;
+  --mr-color: #059669; --eco-color: #d97706; --cross-color: #64748b;
+  --overall-color: #0f172a;
+  --shadow: 0 1px 6px rgba(0,0,0,0.07);
+  --radius: 8px; --font: 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Cascadia Code', 'Consolas', monospace;
+}
+body.dark {
+  --bg: #0b0f19; --bg-card: #131825; --bg-input: #1a2033;
+  --text: #cbd5e1; --text-muted: #64748b; --text-heading: #e2e8f0;
+  --border: #1e293b; --border-focus: #818cf8;
+  --accent: #818cf8; --accent-hover: #a5b4fc; --accent-light: #1e1b4b;
+  --rct-color: #60a5fa; --cohort-color: #a78bfa; --cc-color: #e879f9;
+  --mr-color: #34d399; --eco-color: #fbbf24; --cross-color: #94a3b8;
+  --overall-color: #e2e8f0;
+  --shadow: 0 1px 6px rgba(0,0,0,0.3);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+.container { max-width: 1300px; margin: 0 auto; padding: 20px; }
+header {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+  box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;
+}
+header h1 { font-size: 1.3rem; color: var(--text-heading); }
+header h1 .brand { color: var(--accent); font-weight: 800; }
+header h1 .sub { font-weight: 400; font-size: 0.85rem; color: var(--text-muted); margin-left: 8px; }
+.hdr-btns { display: flex; gap: 10px; }
+button {
+  font-family: var(--font); font-size: 0.82rem; padding: 7px 14px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-card); color: var(--text); cursor: pointer;
+  transition: all 0.15s;
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+button.primary:hover { background: var(--accent-hover); }
+button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+select {
+  font-family: var(--font); font-size: 0.82rem; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-input); color: var(--text);
+}
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
+  box-shadow: var(--shadow);
+}
+.card h2 {
+  font-size: 1.05rem; color: var(--text-heading); margin-bottom: 14px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--accent-light);
+  display: flex; align-items: center; gap: 8px;
+}
+.card h2 .badge {
+  font-size: 0.68rem; padding: 2px 8px; border-radius: 12px; font-weight: 600;
+}
+.badge-rct { background: #dbeafe; color: var(--rct-color); }
+.badge-cohort { background: #ede9fe; color: var(--cohort-color); }
+.badge-mr { background: #d1fae5; color: var(--mr-color); }
+body.dark .badge-rct { background: #1e3a5f; }
+body.dark .badge-cohort { background: #2e1a47; }
+body.dark .badge-mr { background: #064e3b; }
+
+/* Design colors legend */
+.design-legend {
+  display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; font-size: 0.82rem;
+}
+.design-legend .leg-item {
+  display: flex; align-items: center; gap: 6px;
+}
+.leg-dot {
+  width: 12px; height: 12px; border-radius: 50%; display: inline-block;
+}
+
+/* Data Table */
+table.data-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+table.data-table th, table.data-table td {
+  padding: 7px 10px; border: 1px solid var(--border); text-align: left;
+}
+table.data-table th {
+  background: var(--accent-light); color: var(--text-heading); font-weight: 600;
+}
+table.data-table td { background: var(--bg-input); }
+table.data-table input, table.data-table select {
+  width: 100%; border: none; background: transparent; color: var(--text);
+  font-family: var(--mono); font-size: 0.82rem; padding: 2px;
+}
+table.data-table input:focus, table.data-table select:focus { outline: none; background: var(--accent-light); }
+.table-controls { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+/* Forest Plot */
+.forest-container {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; overflow-x: auto;
+}
+.forest-container svg { display: block; }
+
+/* Triangulation Radar */
+.tri-radar-wrap {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+@media (max-width: 900px) { .tri-radar-wrap { grid-template-columns: 1fr; } }
+
+/* Convergence Metrics */
+.conv-metrics {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;
+}
+.conv-metric {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; text-align: center;
+}
+.conv-metric .val { font-size: 1.4rem; font-weight: 700; font-family: var(--mono); }
+.conv-metric .lbl { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.conv-metric.strong .val { color: var(--success); }
+.conv-metric.moderate .val { color: var(--warning); }
+.conv-metric.weak .val { color: var(--danger); }
+
+/* Bias Table */
+table.bias-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 12px; }
+table.bias-table th, table.bias-table td {
+  padding: 6px 10px; border: 1px solid var(--border); text-align: center;
+}
+table.bias-table th { background: var(--accent-light); font-weight: 600; }
+.bias-low { background: #d1fae5; color: #065f46; }
+.bias-mod { background: #fef3c7; color: #92400e; }
+.bias-high { background: #fee2e2; color: #991b1b; }
+body.dark .bias-low { background: #064e3b; color: #6ee7b7; }
+body.dark .bias-mod { background: #451a03; color: #fcd34d; }
+body.dark .bias-high { background: #450a0a; color: #fca5a5; }
+
+/* Section */
+.section-title {
+  font-size: 1rem; font-weight: 700; color: var(--text-heading);
+  margin: 22px 0 12px; padding-left: 12px; border-left: 3px solid var(--accent);
+}
+
+/* Interpretation panel */
+.interp-panel {
+  background: var(--accent-light); border: 1px solid var(--accent);
+  border-radius: var(--radius); padding: 16px 20px; margin-top: 16px;
+  font-size: 0.88rem; line-height: 1.7;
+}
+.interp-panel h3 { font-size: 0.95rem; margin-bottom: 6px; color: var(--text-heading); }
+.interp-panel .verdict {
+  font-size: 1.1rem; font-weight: 700; margin: 8px 0;
+}
+.interp-panel .verdict.strong { color: var(--success); }
+.interp-panel .verdict.moderate { color: var(--warning); }
+.interp-panel .verdict.weak { color: var(--danger); }
+
+/* Sensitivity Table */
+table.sens-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 12px; }
+table.sens-table th, table.sens-table td {
+  padding: 7px 10px; border: 1px solid var(--border); text-align: center;
+}
+table.sens-table th { background: var(--accent-light); font-weight: 600; color: var(--text-heading); }
+table.sens-table td { background: var(--bg-input); color: var(--text); }
+
+/* Causal Correction */
+.causal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+@media (max-width: 900px) { .causal-grid { grid-template-columns: 1fr; } }
+.causal-box {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; text-align: center;
+}
+.causal-box .cb-val { font-size: 1.3rem; font-weight: 700; font-family: var(--mono); }
+.causal-box .cb-lbl { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.causal-box.highlight { border-color: var(--accent); background: var(--accent-light); }
+table.causal-sens-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 12px; }
+table.causal-sens-table th, table.causal-sens-table td {
+  padding: 7px 10px; border: 1px solid var(--border); text-align: center;
+}
+table.causal-sens-table th { background: var(--accent-light); font-weight: 600; color: var(--text-heading); }
+table.causal-sens-table td { background: var(--bg-input); color: var(--text); }
+
+/* CSV Import */
+.import-area {
+  display: inline-block; position: relative;
+}
+.import-area input[type="file"] {
+  position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer;
+}
+
+@media print { header { position: static; } }
+.fade-in { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+/* Skip to content link (accessibility) */
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 999;
+  background: var(--accent); color: #fff; padding: 8px 16px;
+  font-size: 0.85rem; text-decoration: none; border-radius: 0 0 var(--radius) var(--radius);
+}
+.skip-link:focus { left: 50%; transform: translateX(-50%); }
+
+/* Concordance Matrix */
+.concordance-matrix { overflow-x: auto; }
+table.conc-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 12px; }
+table.conc-table th, table.conc-table td {
+  padding: 8px 12px; border: 1px solid var(--border); text-align: center;
+}
+table.conc-table th {
+  background: var(--accent-light); font-weight: 600; color: var(--text-heading);
+}
+.conc-agree { background: #d1fae5; color: #065f46; font-weight: 700; }
+.conc-partial { background: #fef3c7; color: #92400e; font-weight: 600; }
+.conc-disagree { background: #fee2e2; color: #991b1b; font-weight: 700; }
+.conc-na { background: var(--bg-input); color: var(--text-muted); font-style: italic; }
+body.dark .conc-agree { background: #064e3b; color: #6ee7b7; }
+body.dark .conc-partial { background: #451a03; color: #fcd34d; }
+body.dark .conc-disagree { background: #450a0a; color: #fca5a5; }
+
+/* Bias Architecture Heatmap (enhanced) */
+.bias-heatmap-container { overflow-x: auto; margin-top: 12px; }
+.bias-heatmap-svg { display: block; }
+.bias-detail-panel {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px; margin-top: 12px;
+  font-size: 0.84rem; line-height: 1.6; display: none;
+}
+.bias-detail-panel.visible { display: block; }
+.bias-detail-panel h4 { margin-bottom: 6px; color: var(--text-heading); font-size: 0.9rem; }
+.bias-detail-panel .bias-detail-item {
+  display: flex; align-items: center; gap: 8px; padding: 3px 0;
+}
+.bias-detail-panel .bias-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* Multi-design side-by-side comparison */
+.design-compare-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px; margin-top: 12px;
+}
+.design-compare-card {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; text-align: center;
+}
+.design-compare-card .dc-header {
+  font-weight: 700; font-size: 0.9rem; margin-bottom: 8px;
+  padding-bottom: 6px; border-bottom: 2px solid;
+}
+.design-compare-card .dc-stat {
+  display: flex; justify-content: space-between; padding: 3px 0;
+  font-size: 0.82rem;
+}
+.design-compare-card .dc-stat .dc-label { color: var(--text-muted); }
+.design-compare-card .dc-stat .dc-value { font-weight: 600; font-family: var(--mono); }
+
+/* Pairwise forest comparison */
+.pairwise-forest { margin-top: 16px; }
+
+/* Strength indicator bars */
+.strength-bar-container {
+  display: flex; align-items: center; gap: 8px; margin-top: 4px;
+}
+.strength-bar {
+  height: 8px; border-radius: 4px; transition: width 0.3s ease;
+}
+.strength-bar-bg {
+  width: 100%; height: 8px; background: var(--border); border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Tabs for sections */
+.tab-bar {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--border);
+  margin-bottom: 14px; overflow-x: auto;
+}
+.tab-bar button {
+  padding: 8px 16px; border: none; border-bottom: 2px solid transparent;
+  background: transparent; font-weight: 600; font-size: 0.82rem;
+  color: var(--text-muted); cursor: pointer; white-space: nowrap;
+  margin-bottom: -2px; border-radius: var(--radius) var(--radius) 0 0;
+}
+.tab-bar button:hover { color: var(--accent); background: var(--accent-light); }
+.tab-bar button.active {
+  color: var(--accent); border-bottom-color: var(--accent);
+  background: var(--accent-light);
+}
+.tab-bar button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Evidence weight visualization */
+.evidence-weight-bar {
+  display: flex; height: 24px; border-radius: var(--radius); overflow: hidden;
+  border: 1px solid var(--border); margin-top: 8px;
+}
+.evidence-weight-segment {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 600; color: #fff; white-space: nowrap;
+  overflow: hidden; padding: 0 4px; min-width: 0;
+}
+
+/* Funnel plot */
+.funnel-container {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; overflow-x: auto; margin-top: 12px;
+}
+
+/* Toast notification */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
+  background: var(--accent); color: #fff; border-radius: var(--radius);
+  font-size: 0.85rem; z-index: 1000; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.toast.show { opacity: 1; }
+
+/* Screen reader only */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* Phase 3: DAG Editor */
+.dag-canvas {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.dag-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.dag-controls label { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+.dag-overlay-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 0.78rem; }
+.dag-overlay-legend .dag-leg { display: flex; align-items: center; gap: 5px; }
+.dag-leg-swatch { width: 18px; height: 4px; border-radius: 2px; display: inline-block; }
+
+/* Phase 3: GRADE certainty badge */
+.grade-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 14px;
+  font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px;
+}
+.grade-high { background: #d1fae5; color: #065f46; }
+.grade-moderate { background: #fef3c7; color: #92400e; }
+.grade-low { background: #fee2e2; color: #991b1b; }
+.grade-very-low { background: #f1f5f9; color: #64748b; }
+body.dark .grade-high { background: #064e3b; color: #6ee7b7; }
+body.dark .grade-moderate { background: #451a03; color: #fcd34d; }
+body.dark .grade-low { background: #450a0a; color: #fca5a5; }
+body.dark .grade-very-low { background: #1e293b; color: #94a3b8; }
+
+/* Phase 3: Report card */
+.report-card {
+  position: relative;
+}
+.report-text {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; font-size: 0.84rem;
+  line-height: 1.7; white-space: pre-wrap; font-family: var(--font);
+  color: var(--text); max-height: 400px; overflow-y: auto;
+}
+.report-section-title {
+  font-weight: 700; font-size: 0.9rem; color: var(--text-heading);
+  margin: 12px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--border);
+}
+.copy-btn {
+  position: absolute; top: 52px; right: 28px; font-size: 0.78rem;
+  padding: 5px 12px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius); cursor: pointer;
+  z-index: 2;
+}
+.copy-btn:hover { background: var(--accent-hover); }
+.copy-btn.copied { background: var(--success); }
+
+/* Phase 3: R code block */
+.r-code-block {
+  background: #1e1e2e; color: #cdd6f4; border-radius: var(--radius);
+  padding: 16px; font-family: var(--mono); font-size: 0.78rem;
+  line-height: 1.5; overflow-x: auto; white-space: pre; max-height: 500px;
+  overflow-y: auto; border: 1px solid var(--border);
+}
+body.dark .r-code-block { background: #0b0f19; border-color: #1e293b; }
+
+/* Phase 3: Example dropdown */
+.example-dropdown { position: relative; display: inline-block; }
+.example-dropdown-content {
+  display: none; position: absolute; top: 100%; left: 0;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  z-index: 200; min-width: 260px; margin-top: 4px;
+}
+.example-dropdown-content.show { display: block; }
+.example-dropdown-content button {
+  display: block; width: 100%; text-align: left; padding: 8px 14px;
+  border: none; border-radius: 0; font-size: 0.82rem;
+  background: transparent; color: var(--text);
+}
+.example-dropdown-content button:hover {
+  background: var(--accent-light); color: var(--accent);
+}
+
+/* WebR Validation */
+.webr-table { width:100%; border-collapse:collapse; font-size:0.82rem; margin-top:12px; }
+.webr-table th, .webr-table td { padding:7px 10px; border:1px solid var(--border); text-align:center; }
+.webr-table th { background:var(--accent-light); font-weight:600; }
+.webr-match { color:var(--success); font-weight:700; }
+.webr-fail { color:var(--danger); font-weight:700; }
+.webr-summary { margin-top:14px; padding:12px 16px; border-radius:var(--radius); font-weight:600; font-size:0.92rem; }
+.webr-summary.pass { background:#d1fae5; color:#065f46; }
+.webr-summary.fail { background:#fee2e2; color:#991b1b; }
+body.dark .webr-summary.pass { background:#064e3b; color:#6ee7b7; }
+body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
+</style>
+</head>
+<body>
+<a href="#mainContent" class="skip-link">Skip to main content</a>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<header role="banner">
+  <h1><span class="brand">CausalSynth</span><span class="sub">Causal Evidence Triangulation Engine</span></h1>
+  <div class="hdr-btns">
+    <div class="example-dropdown">
+      <button onclick="toggleExampleDropdown(event)" aria-haspopup="true" aria-expanded="false" id="exampleBtn">Load Example &#9662;</button>
+      <div class="example-dropdown-content" id="exampleDropdown" role="menu" aria-labelledby="exampleBtn">
+        <button role="menuitem" onclick="loadExample('statins')">Statins &amp; CVD (RCT + Cohort + MR)</button>
+        <button role="menuitem" onclick="loadExample('meddiet')">Mediterranean Diet &amp; CVD (3 designs)</button>
+        <button role="menuitem" onclick="loadExample('smoking')">Smoking &amp; Lung Cancer (4 designs)</button>
+        <button role="menuitem" onclick="loadExample('alcohol')">Alcohol &amp; Liver Disease (5 designs)</button>
+        <button role="menuitem" onclick="loadExample('exercise')">Exercise &amp; Depression (4 designs)</button>
+      </div>
+    </div>
+    <div class="import-area">
+      <button aria-label="Import CSV file">Import CSV</button>
+      <input type="file" accept=".csv,.tsv,.txt" onchange="importCSV(event)" aria-label="Choose CSV file to import">
+    </div>
+    <button onclick="exportResults()" aria-label="Export results as CSV">Export CSV</button>
+    <button onclick="exportRCode()" aria-label="Export reproducible R code">Export R Code</button>
+    <button id="themeBtn" onclick="toggleTheme()" aria-label="Toggle dark mode">Dark Mode</button>
+  </div>
+</header>
+
+<div class="container" id="mainContent" role="main">
+  <!-- Design Legend -->
+  <div class="design-legend" id="designLegend" role="img" aria-label="Study design color legend"></div>
+
+  <!-- Data Input -->
+  <div class="card fade-in" id="dataCard">
+    <h2>Evidence Streams <span class="badge badge-rct" id="studyBadge">0 studies</span></h2>
+    <div style="overflow-x:auto">
+      <table class="data-table" id="dataTable" aria-label="Evidence stream data entry">
+        <thead><tr>
+          <th style="width:28px" scope="col">#</th>
+          <th style="width:170px" scope="col">Study</th>
+          <th style="width:120px" scope="col">Design</th>
+          <th style="width:100px" scope="col">Effect (yi)</th>
+          <th style="width:100px" scope="col">SE</th>
+          <th style="width:80px" scope="col">N</th>
+          <th style="width:80px" scope="col">p0</th>
+          <th style="width:36px" scope="col"><span class="sr-only">Actions</span></th>
+        </tr></thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+    <div class="table-controls">
+      <button onclick="addRow()">+ Add Study</button>
+      <button onclick="addRows(5)">+ Add 5</button>
+      <button onclick="clearAll()">Clear All</button>
+    </div>
+  </div>
+
+  <!-- Causal DAG Editor -->
+  <div class="card fade-in" id="dagCard">
+    <h2>Causal Assumptions (DAG)</h2>
+    <div class="dag-controls">
+      <label for="dagTemplate">Template:</label>
+      <select id="dagTemplate" onchange="loadDAGTemplate(this.value)">
+        <option value="">-- Select a DAG template --</option>
+        <option value="confounding">Simple Confounding</option>
+        <option value="mediation">Mediation</option>
+        <option value="iv">Instrumental Variable (MR)</option>
+        <option value="collider">Collider Bias</option>
+      </select>
+      <button onclick="clearDAG()">Clear DAG</button>
+    </div>
+    <div class="dag-canvas" id="dagCanvas">
+      <svg id="dagSvg" width="500" height="350" style="display:block;font-family:var(--font)">
+        <text x="250" y="180" text-anchor="middle" font-size="13" fill="var(--text-muted)">Select a template above to draw a causal DAG</text>
+      </svg>
+    </div>
+    <div class="dag-overlay-legend" id="dagOverlayLegend"></div>
+  </div>
+
+  <!-- Run -->
+  <div style="text-align:right;margin-bottom:18px">
+    <button class="primary" id="runBtn" onclick="runTriangulation()" disabled style="padding:10px 28px;font-size:0.95rem">
+      Run Triangulation Analysis
+    </button>
+  </div>
+
+  <!-- Results -->
+  <div id="results" style="display:none">
+
+    <!-- Convergence Metrics -->
+    <div class="section-title">Convergence Metrics</div>
+    <div class="conv-metrics" id="convMetrics"></div>
+
+    <!-- Design-Grouped Forest Plot -->
+    <div class="section-title" style="margin-top:22px">Evidence Stream Forest Plot</div>
+    <div class="forest-container" id="forestContainer"></div>
+
+    <!-- Design Comparison Cards -->
+    <div class="section-title" style="margin-top:22px">Design-Level Comparison</div>
+    <div class="card fade-in" id="designCompareCard">
+      <h2>Side-by-Side Design Summary</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Each card shows the pooled estimate, precision, and contribution from one study design.
+      </p>
+      <div class="design-compare-grid" id="designCompareGrid"></div>
+      <div style="margin-top:14px">
+        <h3 style="font-size:0.88rem;color:var(--text-heading);margin-bottom:8px">Evidence Weight Distribution</h3>
+        <div class="evidence-weight-bar" id="evidenceWeightBar" role="img" aria-label="Relative evidence weight by design"></div>
+      </div>
+    </div>
+
+    <!-- Triangulation Visualization -->
+    <div class="section-title" style="margin-top:22px">Triangulation Map</div>
+    <div class="tri-radar-wrap">
+      <div class="card" style="margin-bottom:0">
+        <h2>Evidence Radar</h2>
+        <div id="radarContainer"></div>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <h2>Bias Architecture</h2>
+        <div id="biasContainer"></div>
+      </div>
+    </div>
+
+    <!-- Enhanced Bias Architecture Heatmap -->
+    <div class="section-title" style="margin-top:22px">Bias Architecture Heatmap</div>
+    <div class="card fade-in" id="biasHeatmapCard">
+      <h2>Study-Level Bias Profiling</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Visual heatmap showing which biases affect each study design. Click any cell for details.
+        Green = low risk (design addresses this bias), Yellow = moderate, Red = high risk.
+      </p>
+      <div class="bias-heatmap-container" id="biasHeatmapContainer"></div>
+      <div class="bias-detail-panel" id="biasDetailPanel" role="region" aria-label="Bias detail information">
+        <h4 id="biasDetailTitle">Select a cell for details</h4>
+        <div id="biasDetailContent"></div>
+      </div>
+    </div>
+
+    <!-- Evidence Concordance Matrix -->
+    <div class="section-title" style="margin-top:22px">Evidence Concordance Matrix</div>
+    <div class="card fade-in" id="concordanceCard">
+      <h2>Pairwise Design Agreement</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Compares every pair of study designs on direction agreement, magnitude overlap (CI overlap),
+        and statistical significance concordance. Strong agreement across designs with different
+        bias profiles is the hallmark of robust causal evidence.
+      </p>
+      <div class="tab-bar" id="concordanceTabs" role="tablist" aria-label="Concordance matrix views">
+        <button role="tab" aria-selected="true" aria-controls="concDirectionPanel" id="concDirectionTab" class="active" onclick="switchConcordanceTab('direction')">Direction</button>
+        <button role="tab" aria-selected="false" aria-controls="concOverlapPanel" id="concOverlapTab" onclick="switchConcordanceTab('overlap')">CI Overlap</button>
+        <button role="tab" aria-selected="false" aria-controls="concSignifPanel" id="concSignifTab" onclick="switchConcordanceTab('signif')">Significance</button>
+        <button role="tab" aria-selected="false" aria-controls="concCompositePanel" id="concCompositeTab" onclick="switchConcordanceTab('composite')">Composite</button>
+      </div>
+      <div class="tab-panel active" id="concDirectionPanel" role="tabpanel" aria-labelledby="concDirectionTab">
+        <div class="concordance-matrix" id="concDirectionMatrix"></div>
+      </div>
+      <div class="tab-panel" id="concOverlapPanel" role="tabpanel" aria-labelledby="concOverlapTab">
+        <div class="concordance-matrix" id="concOverlapMatrix"></div>
+      </div>
+      <div class="tab-panel" id="concSignifPanel" role="tabpanel" aria-labelledby="concSignifTab">
+        <div class="concordance-matrix" id="concSignifMatrix"></div>
+      </div>
+      <div class="tab-panel" id="concCompositePanel" role="tabpanel" aria-labelledby="concCompositeTab">
+        <div class="concordance-matrix" id="concCompositeMatrix"></div>
+      </div>
+      <div id="concordanceSummary" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Funnel Plot -->
+    <div class="section-title" style="margin-top:22px">Funnel Plot (Design-Colored)</div>
+    <div class="card fade-in" id="funnelCard">
+      <h2>Publication Bias Assessment</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Studies are colored by design type. Asymmetry may indicate publication bias,
+        but between-design heterogeneity can also cause apparent asymmetry.
+      </p>
+      <div class="funnel-container" id="funnelContainer"></div>
+    </div>
+
+    <!-- Causal Correction (CaMeA) -->
+    <div class="section-title" style="margin-top:22px">Causal Correction (CaMeA-Style)</div>
+    <div class="card fade-in" id="causalCorrectionCard" style="display:none">
+      <h2>Traditional vs Causally-Corrected Pooled Effects</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        For nonlinear measures (OR, RR), pooling on the log-OR scale can be biased when baseline risks differ across studies.
+        The causal correction converts to the risk difference (RD) scale, pools linearly, then shows both.
+      </p>
+      <div class="causal-grid" id="causalGrid"></div>
+      <div id="causalSensContainer"></div>
+    </div>
+
+    <!-- Sensitivity to Design Removal -->
+    <div class="section-title" style="margin-top:22px">Sensitivity to Design Removal</div>
+    <div class="card fade-in" id="sensitivityCard">
+      <h2>Leave-One-Design-Out Analysis</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Tests whether the overall convergence depends critically on any single study design.
+      </p>
+      <div id="sensitivityContainer"></div>
+    </div>
+
+    <!-- Interpretation -->
+    <div class="interp-panel" id="interpPanel"></div>
+
+    <!-- Triangulation Report -->
+    <div class="section-title" style="margin-top:22px">Auto-Generated Triangulation Report</div>
+    <div class="card fade-in report-card" id="reportCard">
+      <h2>Methods &amp; Results Text</h2>
+      <button class="copy-btn" onclick="copyReport(this)">Copy to Clipboard</button>
+      <div class="report-text" id="reportText"></div>
+    </div>
+
+    <!-- R Code Export -->
+    <div class="section-title" style="margin-top:22px">R Code (metafor)</div>
+    <div class="card fade-in" id="rCodeCard">
+      <h2>Reproducible R Code <button onclick="copyRCode()" style="margin-left:12px;font-size:0.76rem;padding:3px 10px">Copy</button></h2>
+      <div class="r-code-block" id="rCodeBlock"></div>
+    </div>
+
+    <!-- WebR Cross-Validation -->
+    <div class="card fade-in" id="webrCard" style="display:none">
+      <h2>R Cross-Validation (WebR) <span class="badge" id="webrBadge">Ready</span></h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px">
+        Validate JavaScript DL meta-analysis against R metafor per-design and overall.
+      </p>
+      <button class="primary" id="webrRunBtn" onclick="runWebRValidation()">Validate with R</button>
+      <div id="webrResults"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+// CausalSynth — Causal Evidence Triangulation Engine
+// World's first browser-based causal evidence triangulation tool
+// ============================================================
+
+// ---- Design Type Definitions ----
+const DESIGNS = {
+  RCT:       { label: 'Randomized Controlled Trial', color: 'var(--rct-color)',    short: 'RCT' },
+  cohort:    { label: 'Cohort Study',                color: 'var(--cohort-color)',  short: 'Cohort' },
+  cc:        { label: 'Case-Control',                color: 'var(--cc-color)',      short: 'Case-Ctrl' },
+  MR:        { label: 'Mendelian Randomization',     color: 'var(--mr-color)',      short: 'MR' },
+  ecological:{ label: 'Ecological Study',            color: 'var(--eco-color)',     short: 'Ecological' },
+  cross:     { label: 'Cross-Sectional',             color: 'var(--cross-color)',   short: 'Cross-Sec' }
+};
+
+// Bias profiles: for each design, which biases are typically addressed (low) vs concerning (high)
+const BIAS_PROFILE = {
+  //              confounding  selection  measurement  reverse-caus  generalizability
+  RCT:        [   'low',       'moderate','low',       'low',        'moderate' ],
+  cohort:     [   'moderate',  'moderate','moderate',  'moderate',   'high'     ],
+  cc:         [   'moderate',  'high',    'high',      'moderate',   'moderate' ],
+  MR:         [   'low',       'low',     'low',       'low',        'moderate' ],
+  ecological: [   'high',      'moderate','moderate',  'high',       'high'     ],
+  cross:      [   'moderate',  'moderate','moderate',  'high',       'moderate' ]
+};
+const BIAS_NAMES = ['Confounding', 'Selection', 'Measurement', 'Reverse Causation', 'Generalizability'];
+
+// ---- State ----
+let studies = [];
+let triResults = null;
+
+// ---- Theme ----
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  document.getElementById('themeBtn').textContent =
+    document.body.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+}
+
+// ---- Stats ----
+function normalCDF(x) {
+  if (x === 0) return 0.5;
+  const s = x < 0 ? -1 : 1; x = Math.abs(x);
+  const t = 1 / (1 + 0.2316419 * x);
+  const d = 0.3989422804014327 * Math.exp(-0.5 * x * x);
+  const p = d * t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+  return s < 0 ? p : 1 - p;
+}
+function normalQuantile(p) {
+  if (p <= 0) return -Infinity; if (p >= 1) return Infinity; if (p === 0.5) return 0;
+  const a=[-3.969683028665376e1,2.209460984245205e2,-2.759285104469687e2,1.383577518672690e2,-3.066479806614716e1,2.506628277459239e0];
+  const b=[-5.447609879822406e1,1.615858368580409e2,-1.556989798598866e2,6.680131188771972e1,-1.328068155288572e1];
+  const c=[-7.784894002430293e-3,-3.223964580411365e-1,-2.400758277161838e0,-2.549732539343734e0,4.374664141464968e0,2.938163982698783e0];
+  const d=[7.784695709041462e-3,3.224671290700398e-1,2.445134137142996e0,3.754408661907416e0];
+  const pL=0.02425; let q,r;
+  if(p<pL){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  if(p<=1-pL){q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+  q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+}
+function pval(z) { return 2 * (1 - normalCDF(Math.abs(z))); }
+
+// DL random-effects meta-analysis
+function dlMeta(yi, sei) {
+  const k = yi.length;
+  if (k === 0) return null;
+  if (k === 1) {
+    const se = sei[0];
+    const z95 = normalQuantile(0.975);
+    return { theta: yi[0], se, lower: yi[0]-z95*se, upper: yi[0]+z95*se, pval: pval(yi[0]/se), tau2:0, I2:0, k:1 };
+  }
+  const vi = sei.map(s => s*s);
+  const wi = vi.map(v => 1/v);
+  const sumW = wi.reduce((a,b)=>a+b,0);
+  const theta_fe = wi.reduce((s,w,i)=>s+w*yi[i],0)/sumW;
+  const Q = wi.reduce((s,w,i)=>s+w*(yi[i]-theta_fe)**2,0);
+  const C = sumW - wi.reduce((s,w)=>s+w*w,0)/sumW;
+  const tau2 = Math.max(0, (Q-(k-1))/C);
+  const wi2 = vi.map(v=>1/(v+tau2));
+  const sumW2 = wi2.reduce((a,b)=>a+b,0);
+  const theta = wi2.reduce((s,w,i)=>s+w*yi[i],0)/sumW2;
+  const se = Math.sqrt(1/sumW2);
+  const z95 = normalQuantile(0.975);
+  const I2 = Q>(k-1) ? Math.max(0,(Q-(k-1))/Q*100) : 0;
+  return { theta, se, lower: theta-z95*se, upper: theta+z95*se, pval: pval(theta/se), tau2, I2, k, Q };
+}
+
+// ---- Data Input ----
+let rowNum = 0;
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function addRow(d) {
+  rowNum++;
+  const data = d || { study:'', design:'RCT', yi:'', se:'', n:'', p0:'' };
+  const tbody = document.getElementById('dataBody');
+  const tr = document.createElement('tr');
+  const designOpts = Object.entries(DESIGNS).map(([k,v]) =>
+    `<option value="${k}" ${k===data.design?'selected':''}>${v.short}</option>`
+  ).join('');
+  const p0Val = (data.p0 !== undefined && data.p0 !== '') ? data.p0 : '';
+  tr.innerHTML = `
+    <td style="text-align:center;color:var(--text-muted)">${rowNum}</td>
+    <td><input type="text" value="${escapeHtml(data.study)}" data-f="study" placeholder="Author Year"></td>
+    <td><select data-f="design">${designOpts}</select></td>
+    <td><input type="text" value="${data.yi}" data-f="yi" placeholder="log-OR"></td>
+    <td><input type="text" value="${data.se}" data-f="se" placeholder="SE"></td>
+    <td><input type="text" value="${data.n}" data-f="n" placeholder="N"></td>
+    <td><input type="text" value="${p0Val}" data-f="p0" placeholder="0.2"></td>
+    <td><button onclick="this.closest('tr').remove();sync()" style="padding:2px 7px;border:none;background:none;color:var(--danger);cursor:pointer;font-size:1.1rem">&times;</button></td>
+  `;
+  tr.querySelectorAll('input,select').forEach(el => el.addEventListener('input', sync));
+  tbody.appendChild(tr);
+  sync();
+}
+function addRows(n) { for(let i=0;i<n;i++) addRow(); }
+function clearAll() { document.getElementById('dataBody').innerHTML=''; rowNum=0; studies=[]; sync(); }
+function sync() {
+  studies = [];
+  document.getElementById('dataBody').querySelectorAll('tr').forEach(tr => {
+    const g = f => { const el = tr.querySelector(`[data-f="${f}"]`); return el ? (el.value||'').trim() : ''; };
+    const yi = parseFloat(g('yi'));
+    const se = parseFloat(g('se'));
+    const n = parseFloat(g('n'));
+    const p0raw = parseFloat(g('p0'));
+    if (isFinite(yi) && isFinite(se) && se > 0) {
+      studies.push({
+        study: g('study') || `Study ${studies.length+1}`,
+        design: g('design') || 'RCT',
+        yi, se, n: isFinite(n) ? n : null,
+        p0: (isFinite(p0raw) && p0raw > 0 && p0raw < 1) ? p0raw : null
+      });
+    }
+  });
+  document.getElementById('studyBadge').textContent = `${studies.length} studies`;
+  document.getElementById('runBtn').disabled = studies.length < 2;
+}
+
+// ---- Example Datasets ----
+const EXAMPLE_DATASETS = {
+  statins: {
+    label: 'Statins & CVD',
+    data: [
+      { study:'CTT 2010 (mega-RCT pool)', design:'RCT', yi:-0.36, se:0.03, n:170000, p0:0.08 },
+      { study:'JUPITER 2008', design:'RCT', yi:-0.42, se:0.10, n:17802, p0:0.04 },
+      { study:'HOPE-3 2016', design:'RCT', yi:-0.27, se:0.09, n:12705, p0:0.05 },
+      { study:'WOSCOPS 1995', design:'RCT', yi:-0.33, se:0.08, n:6595, p0:0.10 },
+      { study:'ASCOT-LLA 2003', design:'RCT', yi:-0.36, se:0.11, n:10305, p0:0.06 },
+      { study:'CPRD UK Cohort 2019', design:'cohort', yi:-0.31, se:0.05, n:200000, p0:0.07 },
+      { study:'Danish Registry 2020', design:'cohort', yi:-0.28, se:0.04, n:350000, p0:0.06 },
+      { study:'KPNC Cohort 2017', design:'cohort', yi:-0.34, se:0.06, n:150000, p0:0.08 },
+      { study:'Medicare Cohort 2018', design:'cohort', yi:-0.25, se:0.07, n:400000, p0:0.12 },
+      { study:'HMGCR variant MR 2016', design:'MR', yi:-0.40, se:0.08, n:100000, p0:0.08 },
+      { study:'Global Lipids MR 2018', design:'MR', yi:-0.35, se:0.06, n:300000, p0:0.07 },
+      { study:'UK Biobank MR 2020', design:'MR', yi:-0.29, se:0.07, n:500000, p0:0.06 }
+    ]
+  },
+  meddiet: {
+    label: 'Mediterranean Diet & CVD',
+    data: [
+      { study:'PREDIMED 2013', design:'RCT', yi:-0.30, se:0.11, n:7447, p0:0.05 },
+      { study:'Lyon Diet Heart 1999', design:'RCT', yi:-0.53, se:0.19, n:605, p0:0.08 },
+      { study:'EPIC-Greece 2003', design:'cohort', yi:-0.25, se:0.08, n:22043, p0:0.06 },
+      { study:'Nurses Health 2009', design:'cohort', yi:-0.19, se:0.06, n:74886, p0:0.05 },
+      { study:'SUN Cohort 2014', design:'cohort', yi:-0.22, se:0.09, n:19467, p0:0.04 },
+      { study:'UK Biobank MR 2021', design:'MR', yi:-0.18, se:0.12, n:450000, p0:0.06 },
+      { study:'MESA MR 2020', design:'MR', yi:-0.15, se:0.14, n:6814, p0:0.05 }
+    ]
+  },
+  smoking: {
+    label: 'Smoking & Lung Cancer',
+    data: [
+      { study:'Doll & Hill 1950', design:'cc', yi:1.39, se:0.12, n:1465, p0:0.01 },
+      { study:'Wynder & Graham 1950', design:'cc', yi:1.56, se:0.15, n:1275, p0:0.01 },
+      { study:'British Doctors 1964', design:'cohort', yi:1.61, se:0.08, n:34439, p0:0.01 },
+      { study:'ACS CPS-II 1988', design:'cohort', yi:1.44, se:0.05, n:1200000, p0:0.015 },
+      { study:'Nurses Health 2004', design:'cohort', yi:1.35, se:0.07, n:121700, p0:0.02 },
+      { study:'CHRNA5 MR 2014', design:'MR', yi:0.88, se:0.22, n:50000, p0:0.015 },
+      { study:'UK Biobank MR 2019', design:'MR', yi:0.95, se:0.18, n:337000, p0:0.012 },
+      { study:'WHO Ecological 1980', design:'ecological', yi:1.20, se:0.25, n:30, p0:0.01 }
+    ]
+  }
+};
+
+function loadExample(key) {
+  const dataset = EXAMPLE_DATASETS[key || 'statins'];
+  if (!dataset) return;
+  clearAll();
+  for (const d of dataset.data) addRow(d);
+  // Close dropdown
+  const dd = document.getElementById('exampleDropdown');
+  if (dd) dd.classList.remove('show');
+  // Update DAG overlays if a DAG is loaded
+  renderDAGOverlays();
+}
+
+function toggleExampleDropdown(event) {
+  event.stopPropagation();
+  const dd = document.getElementById('exampleDropdown');
+  const btn = document.getElementById('exampleBtn');
+  dd.classList.toggle('show');
+  var isOpen = dd.classList.contains('show');
+  if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  // Close on outside click
+  const closer = function(e) {
+    if (!dd.contains(e.target)) {
+      dd.classList.remove('show');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('click', closer);
+    }
+  };
+  // Close on Escape key
+  const escCloser = function(e) {
+    if (e.key === 'Escape') {
+      dd.classList.remove('show');
+      if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
+      document.removeEventListener('keydown', escCloser);
+    }
+  };
+  if (isOpen) {
+    setTimeout(function() {
+      document.addEventListener('click', closer);
+      document.addEventListener('keydown', escCloser);
+    }, 0);
+  }
+}
+
+// ---- Triangulation Engine ----
+function runTriangulation() {
+  if (studies.length < 2) return;
+
+  // Group by design
+  const groups = {};
+  for (const s of studies) {
+    if (!groups[s.design]) groups[s.design] = [];
+    groups[s.design].push(s);
+  }
+
+  // Run MA within each design group
+  const designResults = {};
+  for (const [design, studyList] of Object.entries(groups)) {
+    const yi = studyList.map(s => s.yi);
+    const sei = studyList.map(s => s.se);
+    const result = dlMeta(yi, sei);
+    if (result) {
+      designResults[design] = { ...result, studies: studyList, design };
+    }
+  }
+
+  // Run overall MA (all studies pooled, design-agnostic)
+  const allYi = studies.map(s => s.yi);
+  const allSei = studies.map(s => s.se);
+  const overallResult = dlMeta(allYi, allSei);
+
+  // Compute convergence metrics
+  const designKeys = Object.keys(designResults);
+  const designEstimates = designKeys.map(k => designResults[k].theta);
+
+  // 1. Direction Concordance Index (DCI)
+  // Zero estimates are counted with the majority direction (they do not indicate disagreement)
+  const posCount = designEstimates.filter(e => e > 0).length;
+  const negCount = designEstimates.filter(e => e < 0).length;
+  const zeroCount = designEstimates.filter(e => e === 0).length;
+  const majorityCount = Math.max(posCount, negCount) + zeroCount;
+  const DCI = designKeys.length > 0 ? Math.min(1, majorityCount / designKeys.length) : 0;
+
+  // 2. Magnitude Consistency Score (MCS) — coefficient of variation approach
+  // CV-based metric: penalizes relative spread of design-level estimates
+  let MCS;
+  if (designKeys.length > 1) {
+    // CV of design-level point estimates
+    const meanEffect = designEstimates.reduce((a,b) => a+b, 0) / designEstimates.length;
+    const cv = Math.abs(meanEffect) > 1e-10
+      ? Math.sqrt(designEstimates.reduce((s,e) => s + (e-meanEffect)**2, 0) / designEstimates.length) / Math.abs(meanEffect)
+      : 0;
+    // MCS = 1 / (1 + cv*5) — scales nicely: cv=0 -> 1, cv=0.2 -> 0.5, cv=1 -> 0.17
+    MCS = 1 / (1 + cv * 5);
+  } else {
+    MCS = 1; // single design: no between-design inconsistency measurable
+  }
+
+  // 3. Bias Diversity Score (BDS) — how different are the bias profiles?
+  let BDS = 0;
+  if (designKeys.length > 1) {
+    const biasNumeric = { low: 0, moderate: 1, high: 2 };
+    let totalDist = 0, pairs = 0;
+    for (let i = 0; i < designKeys.length; i++) {
+      for (let j = i + 1; j < designKeys.length; j++) {
+        const profA = BIAS_PROFILE[designKeys[i]] || [1,1,1,1,1];
+        const profB = BIAS_PROFILE[designKeys[j]] || [1,1,1,1,1];
+        let dist = 0;
+        for (let b = 0; b < profA.length; b++) {
+          dist += Math.abs((biasNumeric[profA[b]]??1) - (biasNumeric[profB[b]]??1));
+        }
+        totalDist += dist / (profA.length * 2); // normalize to 0-1
+        pairs++;
+      }
+    }
+    BDS = pairs > 0 ? totalDist / pairs : 0;
+  }
+
+  // 4. Causal Evidence Score (CES) — composite
+  // designBonus: more designs = stronger (2 designs = 0.7, 3+ = 1.0, 1 = 0.4)
+  const designBonus = designKeys.length >= 3 ? 1.0 : designKeys.length === 2 ? 0.7 : 0.4;
+  const CES = DCI * MCS * (0.5 + 0.5 * BDS) * designBonus;
+  // Normalize to 0-1 range with sensible scaling
+  const CES_norm = Math.min(1, Math.max(0, CES));
+
+  // Between-design meta-analysis (pool of design-level estimates)
+  let betweenDesignResult = null;
+  if (designKeys.length >= 2) {
+    const dYi = designKeys.map(k => designResults[k].theta);
+    const dSei = designKeys.map(k => designResults[k].se);
+    betweenDesignResult = dlMeta(dYi, dSei);
+  }
+
+  triResults = {
+    designResults, overallResult, betweenDesignResult, groups,
+    DCI, MCS, BDS, CES: CES_norm, designBonus,
+    nDesigns: designKeys.length, nStudies: studies.length
+  };
+
+  renderResults();
+}
+
+// ---- Rendering ----
+function renderResults() {
+  document.getElementById('results').style.display = 'block';
+  renderConvergenceMetrics();
+  renderDesignCompareCards();
+  renderForestPlot();
+  renderRadar();
+  renderBiasTable();
+  renderBiasHeatmap();
+  renderConcordanceMatrix();
+  renderFunnelPlot();
+  renderCausalCorrection();
+  renderSensitivity();
+  renderInterpretation();
+  renderReport();
+  renderRCode();
+  renderDAGOverlays();
+  showToast('Analysis complete: ' + triResults.nStudies + ' studies, ' + triResults.nDesigns + ' designs');
+  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function renderConvergenceMetrics() {
+  const r = triResults;
+  const strength = v => v >= 0.7 ? 'strong' : v >= 0.4 ? 'moderate' : 'weak';
+  const cesStrength = v => v >= 0.7 ? 'strong' : v >= 0.45 ? 'moderate' : 'weak';
+  const grade = getGRADECertainty(r.CES, r.DCI, r.BDS, r.designResults);
+  const metrics = [
+    { val: r.nDesigns, lbl: 'Study Designs', cls: r.nDesigns >= 3 ? 'strong' : r.nDesigns >= 2 ? 'moderate' : 'weak' },
+    { val: r.nStudies, lbl: 'Total Studies', cls: 'strong' },
+    { val: (r.DCI*100).toFixed(0)+'%', lbl: 'Direction Concordance', cls: strength(r.DCI) },
+    { val: r.MCS.toFixed(3), lbl: 'Magnitude Consistency', cls: strength(r.MCS) },
+    { val: r.BDS.toFixed(3), lbl: 'Bias Diversity', cls: strength(r.BDS) },
+    { val: r.CES.toFixed(3), lbl: 'Causal Evidence Score', cls: cesStrength(r.CES) },
+    { val: r.overallResult.theta.toFixed(4), lbl: 'Pooled Effect (overall)', cls: '' },
+    { val: `${r.overallResult.I2.toFixed(1)}%`, lbl: 'I\u00B2 (overall)', cls: '' }
+  ];
+  let html = metrics.map(m =>
+    `<div class="conv-metric ${m.cls}"><div class="val">${m.val}</div><div class="lbl">${m.lbl}</div></div>`
+  ).join('');
+  // GRADE-style certainty badge
+  html += `<div class="conv-metric"><div class="val"><span class="grade-badge ${grade.cls}">${grade.symbol} ${grade.level}</span></div><div class="lbl">GRADE-like Certainty</div></div>`;
+  document.getElementById('convMetrics').innerHTML = html;
+}
+
+function renderForestPlot() {
+  const container = document.getElementById('forestContainer');
+  const r = triResults;
+  const allStudies = [];
+  const designOrder = ['RCT','cohort','cc','MR','ecological','cross'];
+  const activeDesigns = designOrder.filter(d => r.designResults[d]);
+
+  // t-distribution quantile approximation (Abramowitz & Stegun)
+  function tQuantile(p, df) {
+    if (df >= 120) return normalQuantile(p);
+    // Use normal approx corrected for df
+    const z = normalQuantile(p);
+    const g1 = (z*z*z + z) / 4;
+    const g2 = (5*z*z*z*z*z + 16*z*z*z + 3*z) / 96;
+    return z + g1/df + g2/(df*df);
+  }
+
+  // Build row list: design headers + studies + design summaries (with PI) + between-design + overall
+  const rows = [];
+  for (const dKey of activeDesigns) {
+    const dr = r.designResults[dKey];
+    const dInfo = DESIGNS[dKey];
+    rows.push({ type:'header', label: dInfo.label, color: dInfo.color, k: dr.k });
+    for (const s of dr.studies) {
+      rows.push({ type:'study', label: s.study, yi: s.yi, se: s.se, color: dInfo.color, design: dKey });
+    }
+    // Prediction interval for design-level pooled estimate
+    let piLower = null, piUpper = null;
+    if (dr.k >= 3) {
+      const tval = tQuantile(0.975, dr.k - 2);
+      const piHW = tval * Math.sqrt(dr.se * dr.se + dr.tau2);
+      piLower = dr.theta - piHW;
+      piUpper = dr.theta + piHW;
+    }
+    rows.push({ type:'summary', label: `${dInfo.short} pooled`, yi: dr.theta, se: dr.se,
+                lower: dr.lower, upper: dr.upper, color: dInfo.color, design: dKey, bold: true,
+                piLower, piUpper });
+    rows.push({ type:'spacer' });
+  }
+  // Between-design pooled estimate
+  if (r.betweenDesignResult) {
+    rows.push({ type:'header', label:'Between-Design Pooled', color:'var(--accent)', k: activeDesigns.length });
+    rows.push({ type:'summary', label:'Design-level pooled', yi: r.betweenDesignResult.theta, se: r.betweenDesignResult.se,
+                lower: r.betweenDesignResult.lower, upper: r.betweenDesignResult.upper, color:'var(--accent)', bold:true });
+    rows.push({ type:'spacer' });
+  }
+  // Overall
+  rows.push({ type:'header', label:'Overall (all designs)', color:'var(--overall-color)', k: r.overallResult.k });
+  rows.push({ type:'summary', label:'Overall pooled', yi: r.overallResult.theta, se: r.overallResult.se,
+              lower: r.overallResult.lower, upper: r.overallResult.upper, color:'var(--overall-color)', bold:true });
+
+  // SVG dimensions
+  const rowH = 26;
+  const W = Math.max(container.clientWidth - 32, 700);
+  const H = rows.length * rowH + 40;
+  const labelW = 220;
+  const plotLeft = labelW + 20;
+  const plotRight = W - 120;
+  const plotW = plotRight - plotLeft;
+  const statsLeft = plotRight + 10;
+
+  // Scale: find range of all CIs (including prediction intervals)
+  const allLower = [], allUpper = [];
+  for (const row of rows) {
+    if (row.type === 'study') {
+      const z = normalQuantile(0.975);
+      allLower.push(row.yi - z * row.se);
+      allUpper.push(row.yi + z * row.se);
+    } else if (row.type === 'summary') {
+      allLower.push(row.lower);
+      allUpper.push(row.upper);
+      if (row.piLower != null) allLower.push(row.piLower);
+      if (row.piUpper != null) allUpper.push(row.piUpper);
+    }
+  }
+  const xMin = Math.min(...allLower) * 1.15;
+  const xMax = Math.max(...allUpper) * 1.15;
+  const xRange = xMax - xMin || 1;
+  const xScale = v => plotLeft + ((v - xMin) / xRange) * plotW;
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="font-family:var(--font)">`;
+
+  // Null line
+  const nullX = xScale(0);
+  svg += `<line x1="${nullX}" y1="20" x2="${nullX}" y2="${H-10}" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,3"/>`;
+
+  let y = 30;
+  for (const row of rows) {
+    if (row.type === 'spacer') { y += rowH * 0.5; continue; }
+    if (row.type === 'header') {
+      svg += `<text x="8" y="${y}" font-size="12" font-weight="700" fill="${row.color}">${escapeHtml(row.label)} (k=${row.k})</text>`;
+      y += rowH;
+      continue;
+    }
+
+    const isSum = row.type === 'summary';
+    const z95 = normalQuantile(0.975);
+    const lo = isSum ? row.lower : row.yi - z95 * row.se;
+    const hi = isSum ? row.upper : row.yi + z95 * row.se;
+    const x1 = xScale(Math.max(xMin, lo));
+    const x2 = xScale(Math.min(xMax, hi));
+    const xMid = xScale(row.yi);
+    const fsize = isSum ? 11 : 10.5;
+    const fw = isSum ? '700' : '400';
+
+    // Label
+    svg += `<text x="${labelW}" y="${y}" text-anchor="end" font-size="${fsize}" font-weight="${fw}" fill="var(--text)">${escapeHtml(row.label)}</text>`;
+
+    // Prediction interval (dashed, wider, drawn behind CI)
+    if (isSum && row.piLower != null && row.piUpper != null) {
+      const piX1 = xScale(Math.max(xMin, row.piLower));
+      const piX2 = xScale(Math.min(xMax, row.piUpper));
+      svg += `<line x1="${piX1}" y1="${y-3}" x2="${piX2}" y2="${y-3}" stroke="${row.color}" stroke-width="1" stroke-dasharray="4,2" opacity="0.55"/>`;
+      // PI whiskers
+      svg += `<line x1="${piX1}" y1="${y-7}" x2="${piX1}" y2="${y+1}" stroke="${row.color}" stroke-width="1" opacity="0.55"/>`;
+      svg += `<line x1="${piX2}" y1="${y-7}" x2="${piX2}" y2="${y+1}" stroke="${row.color}" stroke-width="1" opacity="0.55"/>`;
+    }
+
+    // CI line
+    svg += `<line x1="${x1}" y1="${y-3}" x2="${x2}" y2="${y-3}" stroke="${row.color}" stroke-width="${isSum?2.5:1.5}"/>`;
+
+    // Point estimate
+    if (isSum) {
+      // Diamond for summaries
+      const dw = 6;
+      svg += `<polygon points="${xMid},${y-3-dw} ${xMid+dw},${y-3} ${xMid},${y-3+dw} ${xMid-dw},${y-3}" fill="${row.color}"/>`;
+    } else {
+      // Circle for individual studies
+      const radius = row.se > 0 ? Math.max(3, Math.min(7, 1 / (row.se * 3))) : 4;
+      svg += `<circle cx="${xMid}" cy="${y-3}" r="${radius}" fill="${row.color}" opacity="0.85"/>`;
+    }
+
+    // Stats text
+    const pv = pval(row.yi / row.se);
+    svg += `<text x="${statsLeft}" y="${y}" font-size="9.5" font-family="var(--mono)" fill="var(--text-muted)">${row.yi.toFixed(3)} [${lo.toFixed(2)}, ${hi.toFixed(2)}]</text>`;
+
+    y += rowH;
+  }
+
+  // X-axis labels
+  const nTicks = 7;
+  for (let i = 0; i <= nTicks; i++) {
+    const v = xMin + (xRange * i / nTicks);
+    const x = xScale(v);
+    svg += `<text x="${x}" y="${H-2}" text-anchor="middle" font-size="9" fill="var(--text-muted)">${v.toFixed(2)}</text>`;
+  }
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+function renderRadar() {
+  const container = document.getElementById('radarContainer');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  if (designKeys.length < 2) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">Need 2+ designs for radar.</p>';
+    return;
+  }
+
+  const W = 340, H = 340;
+  const cx = W / 2, cy = H / 2;
+  const maxR = 130;
+
+  // Each spoke = one design; length proportional to absolute effect magnitude
+  const maxEffect = Math.max(...designKeys.map(k => Math.abs(r.designResults[k].theta)), 0.01);
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" style="font-family:var(--font)">`;
+
+  // Background circles
+  for (let ring = 0.25; ring <= 1; ring += 0.25) {
+    svg += `<circle cx="${cx}" cy="${cy}" r="${maxR*ring}" fill="none" stroke="var(--border)" stroke-width="0.5"/>`;
+  }
+
+  const n = designKeys.length;
+  const points = [];
+  for (let i = 0; i < n; i++) {
+    const angle = (2 * Math.PI * i / n) - Math.PI / 2;
+    const dKey = designKeys[i];
+    const dr = r.designResults[dKey];
+    const mag = Math.abs(dr.theta) / maxEffect;
+    const px = cx + Math.cos(angle) * maxR * mag;
+    const py = cy + Math.sin(angle) * maxR * mag;
+    points.push({ x: px, y: py });
+
+    // Spoke line
+    const spokeX = cx + Math.cos(angle) * maxR;
+    const spokeY = cy + Math.sin(angle) * maxR;
+    svg += `<line x1="${cx}" y1="${cy}" x2="${spokeX}" y2="${spokeY}" stroke="var(--border)" stroke-width="0.5"/>`;
+
+    // Label
+    const lx = cx + Math.cos(angle) * (maxR + 20);
+    const ly = cy + Math.sin(angle) * (maxR + 20);
+    const color = DESIGNS[dKey]?.color || 'var(--text)';
+    svg += `<text x="${lx}" y="${ly}" text-anchor="middle" font-size="10" font-weight="600" fill="${color}">${DESIGNS[dKey]?.short || dKey}</text>`;
+    svg += `<text x="${lx}" y="${ly+13}" text-anchor="middle" font-size="9" fill="var(--text-muted)">${dr.theta.toFixed(3)}</text>`;
+
+    // Point
+    svg += `<circle cx="${px}" cy="${py}" r="5" fill="${color}" stroke="var(--bg-card)" stroke-width="1.5"/>`;
+  }
+
+  // Polygon connecting points
+  if (points.length >= 3) {
+    const polyPoints = points.map(p => `${p.x},${p.y}`).join(' ');
+    svg += `<polygon points="${polyPoints}" fill="var(--accent)" fill-opacity="0.12" stroke="var(--accent)" stroke-width="1.5"/>`;
+  } else if (points.length === 2) {
+    svg += `<line x1="${points[0].x}" y1="${points[0].y}" x2="${points[1].x}" y2="${points[1].y}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  }
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+function renderBiasTable() {
+  const container = document.getElementById('biasContainer');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+
+  let html = '<table class="bias-table"><thead><tr><th>Design</th>';
+  for (const bn of BIAS_NAMES) html += `<th>${bn}</th>`;
+  html += '</tr></thead><tbody>';
+
+  for (const dKey of designKeys) {
+    const profile = BIAS_PROFILE[dKey] || ['moderate','moderate','moderate','moderate','moderate'];
+    const color = DESIGNS[dKey]?.color || 'var(--text)';
+    html += `<tr><td style="text-align:left;font-weight:600;color:${color}">${DESIGNS[dKey]?.short || dKey}</td>`;
+    for (const level of profile) {
+      const cls = level === 'low' ? 'bias-low' : level === 'high' ? 'bias-high' : 'bias-mod';
+      const icon = level === 'low' ? '+' : level === 'high' ? '-' : '~';
+      html += `<td class="${cls}">${level}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+
+  // Diversity explanation
+  html += `<p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px">
+    Bias Diversity Score: <strong>${r.BDS.toFixed(3)}</strong> &mdash;
+    ${r.BDS >= 0.5 ? 'High diversity: designs address different biases, strengthening triangulation.' :
+      r.BDS >= 0.3 ? 'Moderate diversity: some overlap in bias structures.' :
+      'Low diversity: designs share similar bias profiles, weakening triangulation.'}
+  </p>`;
+
+  container.innerHTML = html;
+}
+
+function renderInterpretation() {
+  const panel = document.getElementById('interpPanel');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  const designLabels = designKeys.map(k => DESIGNS[k]?.short || k);
+
+  // Determine direction
+  const direction = r.overallResult.theta < 0 ? 'protective/beneficial' : 'harmful/risk-increasing';
+  const sig = r.overallResult.pval < 0.05;
+
+  // CES interpretation (aligned with strength() thresholds)
+  let cesLevel, cesClass;
+  if (r.CES >= 0.45) { cesLevel = 'Strong'; cesClass = 'strong'; }
+  else if (r.CES >= 0.25) { cesLevel = 'Moderate'; cesClass = 'moderate'; }
+  else { cesLevel = 'Weak'; cesClass = 'weak'; }
+
+  // GRADE certainty
+  const grade = getGRADECertainty(r.CES, r.DCI, r.BDS, r.designResults);
+
+  // Build interpretation
+  let text = `<h3>Triangulation Interpretation</h3>`;
+  text += `<div class="verdict ${cesClass}">${cesLevel} Causal Evidence (CES = ${r.CES.toFixed(3)}) &mdash; <span class="grade-badge ${grade.cls}">${grade.symbol} ${grade.level}</span></div>`;
+
+  // GRADE upgrade/downgrade reasons
+  if (grade.reasons.length > 0) {
+    text += `<p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">`;
+    for (const reason of grade.reasons) {
+      text += reason + '. ';
+    }
+    text += '</p>';
+  }
+
+  text += `<p>Evidence from <strong>${r.nStudies} studies</strong> across <strong>${designKeys.length} study designs</strong> (${designLabels.join(', ')}) was synthesized.</p>`;
+
+  text += `<p>The overall pooled effect is <strong>${r.overallResult.theta.toFixed(4)}</strong> `;
+  text += `[95% CI: ${r.overallResult.lower.toFixed(3)}, ${r.overallResult.upper.toFixed(3)}], `;
+  text += `which is ${sig ? 'statistically significant' : 'not statistically significant'} `;
+  text += `and suggests a <strong>${direction}</strong> effect.</p>`;
+
+  // Direction concordance
+  if (r.DCI === 1) {
+    text += `<p><strong>All ${designKeys.length} designs agree on direction</strong> (DCI = 100%), suggesting the direction of effect is robust across different methodological approaches with different bias structures.</p>`;
+  } else {
+    const disagree = designKeys.filter(k => {
+      const majorDir = r.overallResult.theta < 0 ? -1 : 1;
+      const s = Math.sign(r.designResults[k].theta);
+      return s !== 0 && s !== majorDir; // zero estimates are not discordant
+    }).map(k => DESIGNS[k]?.short || k);
+    text += `<p>Direction concordance is ${(r.DCI*100).toFixed(0)}%. Designs showing discordant direction: <strong>${disagree.join(', ')}</strong>. This weakens the causal interpretation.</p>`;
+  }
+
+  // Bias diversity
+  if (r.BDS >= 0.5) {
+    text += `<p>The designs have <strong>high bias diversity</strong> (BDS = ${r.BDS.toFixed(3)}), meaning they are susceptible to different biases. Agreement across these designs strengthens causal inference because it is unlikely that the same bias drives results in all designs simultaneously.</p>`;
+  } else if (r.BDS >= 0.3) {
+    text += `<p>Bias diversity is moderate (BDS = ${r.BDS.toFixed(3)}). Some bias structures overlap across designs.</p>`;
+  } else {
+    text += `<p>Bias diversity is low (BDS = ${r.BDS.toFixed(3)}). The designs share similar bias vulnerabilities, meaning agreement could be driven by a common bias rather than a true causal effect.</p>`;
+  }
+
+  // Per-design summary
+  text += `<p><strong>Per-design estimates:</strong></p><ul>`;
+  for (const dKey of designKeys) {
+    const dr = r.designResults[dKey];
+    const dLabel = DESIGNS[dKey]?.label || dKey;
+    text += `<li>${dLabel}: ${dr.theta.toFixed(4)} [${dr.lower.toFixed(3)}, ${dr.upper.toFixed(3)}] (k=${dr.k}, I\u00B2=${dr.I2.toFixed(1)}%)</li>`;
+  }
+  text += '</ul>';
+
+  panel.innerHTML = text;
+}
+
+// ---- Causal Correction (CaMeA-style) ----
+function renderCausalCorrection() {
+  const card = document.getElementById('causalCorrectionCard');
+  const grid = document.getElementById('causalGrid');
+  const sensContainer = document.getElementById('causalSensContainer');
+  const r = triResults;
+
+  // Check if any study has a baseline risk set
+  const hasP0 = studies.some(s => s.p0 != null);
+  const defaultP0 = 0.2;
+
+  // For causal correction: convert log-OR -> RD for each study, then pool on RD scale
+  function computeCausalRD(p0Override) {
+    const rdYi = [];
+    const rdSei = [];
+    for (const s of studies) {
+      const p0 = p0Override ?? (s.p0 ?? defaultP0);
+      const OR = Math.exp(s.yi);
+      // RD = OR*p0 / (1 + (OR-1)*p0) - p0
+      const denom = 1 + (OR - 1) * p0;
+      if (denom <= 0) continue; // skip degenerate
+      const p1 = OR * p0 / denom;
+      const rd = p1 - p0;
+      // Delta-method SE: dRD/dlogOR = OR*p0*(1-p0) / (1+(OR-1)*p0)^2
+      const drdDlogOR = OR * p0 * (1 - p0) / (denom * denom);
+      const rdSe = Math.abs(drdDlogOR) * s.se;
+      if (rdSe > 0 && isFinite(rd) && isFinite(rdSe)) {
+        rdYi.push(rd);
+        rdSei.push(rdSe);
+      }
+    }
+    if (rdYi.length < 2) return null;
+    return dlMeta(rdYi, rdSei);
+  }
+
+  // Compute with study-level p0 (or default 0.2)
+  const causalResult = computeCausalRD(null);
+
+  if (!causalResult) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+
+  // Traditional pooled (log-OR)
+  const trad = r.overallResult;
+  const z = normalQuantile(0.975);
+  const tradOR = Math.exp(trad.theta);
+  const tradORlo = Math.exp(trad.lower);
+  const tradORhi = Math.exp(trad.upper);
+
+  // Discrepancy: is the causal RD consistent with what traditional OR implies at mean p0?
+  const meanP0 = studies.reduce((s, st) => s + (st.p0 ?? defaultP0), 0) / studies.length;
+  const impliedRDfromOR = tradOR * meanP0 / (1 + (tradOR - 1) * meanP0) - meanP0;
+
+  let html = '';
+  if (!hasP0) {
+    html += `<p style="font-size:0.82rem;color:var(--warning);margin-bottom:10px;padding:8px 12px;background:var(--bg-input);border:1px solid var(--warning);border-radius:var(--radius)"><strong>Note:</strong> No study-level baseline risk (p0) was provided. Using default p0 = ${defaultP0}. Enter study-specific baseline risks in the data table for more accurate causal correction.</p>`;
+  }
+  html += `<div class="causal-box"><div class="cb-val">${trad.theta.toFixed(4)}</div><div class="cb-lbl">Traditional Pooled log-OR [${trad.lower.toFixed(3)}, ${trad.upper.toFixed(3)}]</div></div>`;
+  html += `<div class="causal-box"><div class="cb-val">${tradOR.toFixed(3)}</div><div class="cb-lbl">Traditional OR [${tradORlo.toFixed(3)}, ${tradORhi.toFixed(3)}]</div></div>`;
+  html += `<div class="causal-box highlight"><div class="cb-val">${(causalResult.theta * 100).toFixed(2)}%</div><div class="cb-lbl">Causal Pooled RD [${(causalResult.lower*100).toFixed(2)}%, ${(causalResult.upper*100).toFixed(2)}%]</div></div>`;
+  html += `<div class="causal-box"><div class="cb-val">${(impliedRDfromOR * 100).toFixed(2)}%</div><div class="cb-lbl">OR-implied RD (at mean p0=${meanP0.toFixed(2)})</div></div>`;
+  grid.innerHTML = html;
+
+  // Sensitivity: show results for baseline risk = 0.1, 0.2, 0.3, 0.5
+  const sensP0s = [0.05, 0.1, 0.2, 0.3, 0.5];
+  let sensHtml = '<h3 style="font-size:0.9rem;margin-top:16px;color:var(--text-heading)">Sensitivity to Baseline Risk Assumption</h3>';
+  sensHtml += '<table class="causal-sens-table"><thead><tr><th>Baseline Risk (p0)</th><th>Causal RD (%)</th><th>95% CI</th><th>OR-implied RD (%)</th><th>Discrepancy</th></tr></thead><tbody>';
+  for (const p0 of sensP0s) {
+    const res = computeCausalRD(p0);
+    if (!res) continue;
+    const orImplied = tradOR * p0 / (1 + (tradOR - 1) * p0) - p0;
+    const disc = Math.abs(res.theta - orImplied);
+    sensHtml += `<tr><td>${p0.toFixed(2)}</td><td>${(res.theta*100).toFixed(2)}</td><td>[${(res.lower*100).toFixed(2)}, ${(res.upper*100).toFixed(2)}]</td><td>${(orImplied*100).toFixed(2)}</td><td>${(disc*100).toFixed(3)}pp</td></tr>`;
+  }
+  sensHtml += '</tbody></table>';
+  sensHtml += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">RD = risk difference; pp = percentage points. Small discrepancy means the OR scale and RD scale give consistent results.</p>';
+  sensContainer.innerHTML = sensHtml;
+}
+
+// ---- Sensitivity to Design Removal ----
+function renderSensitivity() {
+  const container = document.getElementById('sensitivityContainer');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+
+  if (designKeys.length < 2) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">Need 2+ designs for leave-one-design-out analysis.</p>';
+    return;
+  }
+
+  let html = '<table class="sens-table"><thead><tr><th>Design Removed</th><th>Pooled Without</th><th>95% CI</th><th>Change</th><th>Direction Same?</th><th>I\u00B2</th></tr></thead><tbody>';
+
+  const overallDir = Math.sign(r.overallResult.theta);
+
+  for (const removeKey of designKeys) {
+    // Pool all studies EXCEPT those from this design
+    const keptStudies = studies.filter(s => s.design !== removeKey);
+    if (keptStudies.length < 2) {
+      const label = DESIGNS[removeKey]?.short || removeKey;
+      html += `<tr><td style="text-align:left;font-weight:600">${escapeHtml(label)}</td><td colspan="5" style="color:var(--text-muted)">Insufficient studies remaining</td></tr>`;
+      continue;
+    }
+    const yi = keptStudies.map(s => s.yi);
+    const sei = keptStudies.map(s => s.se);
+    const res = dlMeta(yi, sei);
+    if (!res) continue;
+
+    const label = DESIGNS[removeKey]?.short || removeKey;
+    const change = res.theta - r.overallResult.theta;
+    const sameDir = Math.sign(res.theta) === overallDir;
+
+    html += `<tr>`;
+    html += `<td style="text-align:left;font-weight:600">${escapeHtml(label)}</td>`;
+    html += `<td>${res.theta.toFixed(4)}</td>`;
+    html += `<td>[${res.lower.toFixed(3)}, ${res.upper.toFixed(3)}]</td>`;
+    html += `<td>${change >= 0 ? '+' : ''}${change.toFixed(4)}</td>`;
+    html += `<td style="color:${sameDir ? 'var(--success)' : 'var(--danger)'};font-weight:600">${sameDir ? 'Yes' : 'No'}</td>`;
+    html += `<td>${res.I2.toFixed(1)}%</td>`;
+    html += `</tr>`;
+  }
+
+  html += '</tbody></table>';
+  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">If removing one design substantially changes the pooled estimate or reverses its direction, the triangulation depends critically on that design.</p>';
+  container.innerHTML = html;
+}
+
+// ---- CSV Import ----
+// Parse a CSV line respecting quoted fields (handles commas inside quotes)
+function parseCSVLine(line, delim) {
+  const result = [];
+  let i = 0, field = '', inQuotes = false;
+  while (i < line.length) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && i + 1 < line.length && line[i + 1] === '"') {
+        field += '"'; i += 2; // escaped quote
+      } else if (ch === '"') {
+        inQuotes = false; i++;
+      } else {
+        field += ch; i++;
+      }
+    } else {
+      if (ch === '"') { inQuotes = true; i++; }
+      else if (ch === delim) { result.push(field.trim()); field = ''; i++; }
+      else { field += ch; i++; }
+    }
+  }
+  result.push(field.trim());
+  return result;
+}
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0 && !l.trim().startsWith('#'));
+    if (lines.length < 2) return;
+
+    // Parse header — fuzzy matching
+    const delim = lines[0].includes('\t') ? '\t' : ',';
+    const rawHeaders = parseCSVLine(lines[0], delim).map(h => h.replace(/^["']|["']$/g, '').toLowerCase());
+
+    // Fuzzy header mapping
+    const headerMap = {};
+    const patterns = {
+      study: ['study', 'author', 'name', 'trial', 'label', 'id'],
+      design: ['design', 'type', 'method', 'study_design', 'study design'],
+      yi: ['yi', 'effect', 'estimate', 'log_or', 'logor', 'log-or', 'log_rr', 'logrr', 'theta', 'es', 'effect_size', 'lnor', 'lnrr', 'smd', 'md'],
+      se: ['se', 'sei', 'stderr', 'std_err', 'standard_error', 'se_effect', 'std.err'],
+      n: ['n', 'sample', 'samplesize', 'sample_size', 'total', 'nobs'],
+      p0: ['p0', 'baseline', 'baseline_risk', 'base_risk', 'control_risk', 'pcr', 'cer']
+    };
+    for (const [field, aliases] of Object.entries(patterns)) {
+      for (let i = 0; i < rawHeaders.length; i++) {
+        const h = rawHeaders[i].replace(/[_\-.\s]/g, '');
+        for (const alias of aliases) {
+          if (h === alias.replace(/[_\-.\s]/g, '')) {
+            headerMap[field] = i;
+            break;
+          }
+        }
+        if (headerMap[field] !== undefined) break;
+      }
+    }
+
+    // Must have at least yi and se
+    if (headerMap.yi === undefined || headerMap.se === undefined) {
+      alert('CSV must have at least "yi" (effect) and "se" columns. Headers found: ' + rawHeaders.join(', '));
+      return;
+    }
+
+    clearAll();
+    for (let i = 1; i < lines.length; i++) {
+      const vals = parseCSVLine(lines[i], delim).map(v => v.replace(/^["']|["']$/g, ''));
+      const getCol = f => headerMap[f] !== undefined ? vals[headerMap[f]] || '' : '';
+
+      // Map design strings to our keys
+      const rawDesign = getCol('design').toLowerCase();
+      let design = 'RCT';
+      if (/cohort/i.test(rawDesign)) design = 'cohort';
+      else if (/case.?control|cc/i.test(rawDesign)) design = 'cc';
+      else if (/mendelian|mr\b/i.test(rawDesign)) design = 'MR';
+      else if (/ecol/i.test(rawDesign)) design = 'ecological';
+      else if (/cross/i.test(rawDesign)) design = 'cross';
+      else if (/rct|random/i.test(rawDesign)) design = 'RCT';
+
+      const yi = getCol('yi');
+      const se = getCol('se');
+      if (yi === '' || se === '') continue;
+
+      addRow({
+        study: getCol('study') || `Imported ${i}`,
+        design,
+        yi, se,
+        n: getCol('n'),
+        p0: getCol('p0')
+      });
+    }
+  };
+  reader.readAsText(file);
+  // Reset the input so the same file can be re-imported
+  event.target.value = '';
+}
+
+// ---- Export ----
+function exportResults() {
+  if (!triResults) return;
+  const r = triResults;
+  let csv = 'study,design,yi,se,lower,upper,pval\n';
+  for (const s of studies) {
+    const z = normalQuantile(0.975);
+    csv += `"${s.study.replace(/"/g, '""')}",${s.design},${s.yi},${s.se},${(s.yi-z*s.se).toFixed(6)},${(s.yi+z*s.se).toFixed(6)},${pval(s.yi/s.se).toFixed(6)}\n`;
+  }
+  csv += '\n# Design-level pooled estimates\n';
+  csv += 'design,theta,se,lower,upper,pval,tau2,I2,k\n';
+  for (const [k,v] of Object.entries(r.designResults)) {
+    csv += `${k},${v.theta.toFixed(6)},${v.se.toFixed(6)},${v.lower.toFixed(6)},${v.upper.toFixed(6)},${v.pval.toFixed(6)},${v.tau2.toFixed(6)},${v.I2.toFixed(2)},${v.k}\n`;
+  }
+  csv += `\n# Convergence metrics\nDCI,${r.DCI.toFixed(4)}\nMCS,${r.MCS.toFixed(4)}\nBDS,${r.BDS.toFixed(4)}\nCES,${r.CES.toFixed(4)}\n`;
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'causal_triangulation_results.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ---- Design Legend ----
+function renderLegend() {
+  const el = document.getElementById('designLegend');
+  el.innerHTML = Object.entries(DESIGNS).map(([k,v]) =>
+    `<span class="leg-item"><span class="leg-dot" style="background:${v.color}"></span>${v.label}</span>`
+  ).join('');
+}
+
+// ============================================================
+// Phase 3: Causal DAG Editor
+// ============================================================
+const DAG_TEMPLATES = {
+  confounding: {
+    label: 'Simple Confounding',
+    nodes: [
+      { id: 'E', label: 'Exposure', x: 100, y: 250 },
+      { id: 'O', label: 'Outcome', x: 400, y: 250 },
+      { id: 'C', label: 'Confounder', x: 250, y: 80 }
+    ],
+    edges: [
+      { from: 'E', to: 'O', label: 'causal' },
+      { from: 'C', to: 'E', label: 'confounding' },
+      { from: 'C', to: 'O', label: 'confounding' }
+    ]
+  },
+  mediation: {
+    label: 'Mediation',
+    nodes: [
+      { id: 'E', label: 'Exposure', x: 80, y: 175 },
+      { id: 'M', label: 'Mediator', x: 250, y: 80 },
+      { id: 'O', label: 'Outcome', x: 420, y: 175 }
+    ],
+    edges: [
+      { from: 'E', to: 'M', label: 'indirect' },
+      { from: 'M', to: 'O', label: 'indirect' },
+      { from: 'E', to: 'O', label: 'direct' }
+    ]
+  },
+  iv: {
+    label: 'Instrumental Variable (MR)',
+    nodes: [
+      { id: 'I', label: 'Instrument\n(Genetic Variant)', x: 80, y: 175 },
+      { id: 'E', label: 'Exposure', x: 250, y: 175 },
+      { id: 'O', label: 'Outcome', x: 420, y: 175 },
+      { id: 'C', label: 'Confounder', x: 335, y: 60 }
+    ],
+    edges: [
+      { from: 'I', to: 'E', label: 'instrument' },
+      { from: 'E', to: 'O', label: 'causal' },
+      { from: 'C', to: 'E', label: 'confounding' },
+      { from: 'C', to: 'O', label: 'confounding' }
+    ]
+  },
+  collider: {
+    label: 'Collider Bias',
+    nodes: [
+      { id: 'E', label: 'Exposure', x: 100, y: 80 },
+      { id: 'O', label: 'Outcome', x: 400, y: 80 },
+      { id: 'S', label: 'Collider\n(Selection)', x: 250, y: 250 }
+    ],
+    edges: [
+      { from: 'E', to: 'S', label: 'collider' },
+      { from: 'O', to: 'S', label: 'collider' }
+    ]
+  }
+};
+
+// Which edges each design type addresses
+const DESIGN_DAG_OVERLAYS = {
+  RCT: {
+    color: 'var(--rct-color)',
+    label: 'RCT blocks confounding',
+    blocks: function(edge) { return edge.label === 'confounding' && edge.to !== 'O'; },
+    addresses: function(edge) { return edge.label === 'confounding'; }
+  },
+  MR: {
+    color: 'var(--mr-color)',
+    label: 'MR blocks confounding via instrument',
+    blocks: function(edge) { return edge.label === 'confounding'; },
+    addresses: function(edge) { return edge.label === 'instrument'; }
+  },
+  cohort: {
+    color: 'var(--cohort-color)',
+    label: 'Cohort cannot block confounding',
+    blocks: function() { return false; },
+    addresses: function(edge) { return edge.label === 'causal' || edge.label === 'direct'; }
+  },
+  cc: {
+    color: 'var(--cc-color)',
+    label: 'Case-control cannot block confounding',
+    blocks: function() { return false; },
+    addresses: function(edge) { return edge.label === 'causal' || edge.label === 'direct'; }
+  }
+};
+
+let currentDAG = null;
+
+function loadDAGTemplate(key) {
+  if (!key || !DAG_TEMPLATES[key]) {
+    clearDAG();
+    return;
+  }
+  currentDAG = JSON.parse(JSON.stringify(DAG_TEMPLATES[key]));
+  renderDAG();
+  renderDAGOverlays();
+}
+
+function clearDAG() {
+  currentDAG = null;
+  const svg = document.getElementById('dagSvg');
+  svg.innerHTML = '<text x="250" y="180" text-anchor="middle" font-size="13" fill="var(--text-muted)">Select a template above to draw a causal DAG</text>';
+  document.getElementById('dagOverlayLegend').innerHTML = '';
+  document.getElementById('dagTemplate').value = '';
+}
+
+function renderDAG() {
+  if (!currentDAG) return;
+  const svg = document.getElementById('dagSvg');
+  const W = 500, H = 350;
+  let s = '';
+
+  // Arrowhead marker
+  s += '<defs>';
+  s += '<marker id="dagArrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">';
+  s += '<polygon points="0 0, 10 3.5, 0 7" fill="var(--text-muted)"/>';
+  s += '</marker>';
+  s += '<marker id="dagArrowGreen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">';
+  s += '<polygon points="0 0, 10 3.5, 0 7" fill="var(--success)"/>';
+  s += '</marker>';
+  s += '<marker id="dagArrowRed" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">';
+  s += '<polygon points="0 0, 10 3.5, 0 7" fill="var(--danger)"/>';
+  s += '</marker>';
+  s += '</defs>';
+
+  // Draw edges
+  for (const edge of currentDAG.edges) {
+    const fromNode = currentDAG.nodes.find(n => n.id === edge.from);
+    const toNode = currentDAG.nodes.find(n => n.id === edge.to);
+    if (!fromNode || !toNode) continue;
+
+    const r = 28; // node radius
+    const dx = toNode.x - fromNode.x;
+    const dy = toNode.y - fromNode.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 1) continue;
+    const ux = dx / dist, uy = dy / dist;
+    const x1 = fromNode.x + ux * r;
+    const y1 = fromNode.y + uy * r;
+    const x2 = toNode.x - ux * (r + 10); // offset for arrowhead
+    const y2 = toNode.y - uy * (r + 10);
+
+    const edgeId = edge.from + '-' + edge.to;
+    s += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" ';
+    s += 'stroke="var(--text-muted)" stroke-width="2" marker-end="url(#dagArrow)" ';
+    s += 'data-edge="' + edgeId + '" data-edge-label="' + escapeHtml(edge.label) + '"/>';
+  }
+
+  // Draw nodes
+  for (const node of currentDAG.nodes) {
+    s += '<circle cx="' + node.x + '" cy="' + node.y + '" r="28" fill="var(--bg-card)" ';
+    s += 'stroke="var(--accent)" stroke-width="2.5"/>';
+
+    // Multi-line label support
+    const lines = node.label.split('\n');
+    const lineHeight = 13;
+    const startY = node.y - ((lines.length - 1) * lineHeight) / 2;
+    for (let li = 0; li < lines.length; li++) {
+      const fontSize = lines.length > 1 ? 9 : 11;
+      s += '<text x="' + node.x + '" y="' + (startY + li * lineHeight) + '" text-anchor="middle" ';
+      s += 'dominant-baseline="central" font-size="' + fontSize + '" font-weight="600" ';
+      s += 'fill="var(--text-heading)">' + escapeHtml(lines[li]) + '</text>';
+    }
+  }
+
+  svg.innerHTML = s;
+}
+
+function renderDAGOverlays() {
+  if (!currentDAG) return;
+  const svg = document.getElementById('dagSvg');
+  const legendEl = document.getElementById('dagOverlayLegend');
+
+  // Determine which designs are present in current data
+  const presentDesigns = new Set();
+  for (const s of studies) {
+    presentDesigns.add(s.design);
+  }
+
+  // Re-render base DAG first
+  renderDAG();
+
+  // Now overlay colors on edges based on present designs
+  const overlayInfo = [];
+  for (const designKey of presentDesigns) {
+    const overlay = DESIGN_DAG_OVERLAYS[designKey];
+    if (!overlay) continue;
+
+    for (const edge of currentDAG.edges) {
+      const edgeId = edge.from + '-' + edge.to;
+      const lineEl = svg.querySelector('[data-edge="' + edgeId + '"]');
+      if (!lineEl) continue;
+
+      if (overlay.blocks(edge)) {
+        // Design blocks this path -- green with strikethrough pattern
+        lineEl.setAttribute('stroke', 'var(--success)');
+        lineEl.setAttribute('stroke-width', '3');
+        lineEl.setAttribute('stroke-dasharray', '8,4');
+        lineEl.setAttribute('marker-end', 'url(#dagArrowGreen)');
+      } else if (overlay.addresses(edge)) {
+        // Design estimates this path
+        lineEl.setAttribute('stroke', overlay.color);
+        lineEl.setAttribute('stroke-width', '3');
+      }
+    }
+    overlayInfo.push({ color: overlay.color, label: overlay.label, design: designKey });
+  }
+
+  // Render legend
+  if (overlayInfo.length > 0) {
+    let html = '';
+    for (const info of overlayInfo) {
+      html += '<span class="dag-leg"><span class="dag-leg-swatch" style="background:' + info.color + '"></span>' + escapeHtml(info.label) + '</span>';
+    }
+    html += '<span class="dag-leg"><span class="dag-leg-swatch" style="background:var(--success);height:4px;border-top:2px dashed var(--success)"></span>Blocked path (green dashed)</span>';
+    legendEl.innerHTML = html;
+  } else {
+    legendEl.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted)">Load studies and run analysis to see design overlays on the DAG.</span>';
+  }
+}
+
+// ============================================================
+// Phase 3: GRADE-Style Certainty Mapping
+// ============================================================
+function getGRADECertainty(ces, dci, bds, designResults) {
+  // Base mapping from CES
+  let level, symbol, cls;
+  if (ces >= 0.7) { level = 'HIGH'; symbol = '++++'; cls = 'grade-high'; }
+  else if (ces >= 0.45) { level = 'MODERATE'; symbol = '+++'; cls = 'grade-moderate'; }
+  else if (ces >= 0.25) { level = 'LOW'; symbol = '++'; cls = 'grade-low'; }
+  else { level = 'VERY LOW'; symbol = '+'; cls = 'grade-very-low'; }
+
+  let upgraded = false, downgraded = false, reasons = [];
+
+  // Upgrade: DCI = 100% AND BDS > 0.5 (strong triangulation)
+  if (dci === 1 && bds > 0.5) {
+    if (level !== 'HIGH') {
+      upgraded = true;
+      reasons.push('Upgraded: perfect direction concordance with high bias diversity');
+      if (level === 'MODERATE') { level = 'HIGH'; symbol = '++++'; cls = 'grade-high'; }
+      else if (level === 'LOW') { level = 'MODERATE'; symbol = '+++'; cls = 'grade-moderate'; }
+      else if (level === 'VERY LOW') { level = 'LOW'; symbol = '++'; cls = 'grade-low'; }
+    }
+  }
+
+  // Downgrade: any design shows opposite direction to the majority
+  const designKeys = Object.keys(designResults);
+  const thetas = designKeys.map(k => designResults[k].theta);
+  const posCount = thetas.filter(t => t > 0).length;
+  const negCount = thetas.filter(t => t < 0).length;
+  const majorDir = posCount >= negCount ? 1 : -1;
+  const hasOpposite = thetas.some(t => Math.sign(t) !== 0 && Math.sign(t) !== majorDir);
+
+  if (hasOpposite) {
+    downgraded = true;
+    reasons.push('Downgraded: at least one design shows opposite direction');
+    if (level === 'HIGH') { level = 'MODERATE'; symbol = '+++'; cls = 'grade-moderate'; }
+    else if (level === 'MODERATE') { level = 'LOW'; symbol = '++'; cls = 'grade-low'; }
+    else if (level === 'LOW') { level = 'VERY LOW'; symbol = '+'; cls = 'grade-very-low'; }
+  }
+
+  return { level, symbol, cls, upgraded, downgraded, reasons };
+}
+
+// ============================================================
+// Phase 3: Auto-Generated Triangulation Report
+// ============================================================
+function generateReport() {
+  if (!triResults) return '';
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  const designLabels = designKeys.map(k => DESIGNS[k]?.label || k);
+  const grade = getGRADECertainty(r.CES, r.DCI, r.BDS, r.designResults);
+
+  // Check if CaMeA was applied
+  const hasP0 = studies.some(s => s.p0 != null);
+
+  // Methods text
+  let methods = 'METHODS\n\n';
+  methods += 'Evidence triangulation was performed using CausalSynth across ' + designKeys.length + ' study designs (' + designLabels.join(', ') + '). ';
+  methods += 'For each design, a DerSimonian-Laird random-effects meta-analysis was conducted. ';
+  methods += 'Convergence was assessed using the Direction Concordance Index (DCI), Magnitude Consistency Score (MCS), Bias Diversity Score (BDS), and composite Causal Evidence Score (CES).';
+  if (hasP0) {
+    methods += ' Causal correction was applied by converting log-OR estimates to risk differences using the CaMeA framework (Berenfeld et al., 2025).';
+  }
+
+  // Results text
+  let results = '\n\nRESULTS\n\n';
+  results += 'Across ' + r.nStudies + ' studies from ' + designKeys.length + ' designs, ';
+  results += 'the overall pooled effect was ' + r.overallResult.theta.toFixed(4) + ' ';
+  results += '[95% CI: ' + r.overallResult.lower.toFixed(3) + ', ' + r.overallResult.upper.toFixed(3) + ']. ';
+  results += 'Direction concordance was ' + (r.DCI * 100).toFixed(0) + '% with ';
+  results += (r.DCI === 1 ? 'all' : 'not all') + ' designs agreeing on direction. ';
+  results += 'Magnitude consistency was ' + r.MCS.toFixed(3) + ' and bias diversity was ' + r.BDS.toFixed(3) + ', ';
+  results += 'yielding a Causal Evidence Score of ' + r.CES.toFixed(3) + ' (' + grade.level + ').';
+
+  // Per-design summary
+  results += '\n\nPer-design pooled estimates:\n';
+  for (const dKey of designKeys) {
+    const dr = r.designResults[dKey];
+    const dLabel = DESIGNS[dKey]?.label || dKey;
+    results += '- ' + dLabel + ': ' + dr.theta.toFixed(4) + ' [95% CI: ' + dr.lower.toFixed(3) + ', ' + dr.upper.toFixed(3) + '] ';
+    results += '(k=' + dr.k + ', I\u00B2=' + dr.I2.toFixed(1) + '%)\n';
+  }
+
+  // Concordance summary
+  var pairCount = 0, pairAgree = 0;
+  for (var ci = 0; ci < designKeys.length; ci++) {
+    for (var cj = ci + 1; cj < designKeys.length; cj++) {
+      pairCount++;
+      var drA = r.designResults[designKeys[ci]];
+      var drB = r.designResults[designKeys[cj]];
+      if (Math.sign(drA.theta) === Math.sign(drB.theta) || drA.theta === 0 || drB.theta === 0) pairAgree++;
+    }
+  }
+  if (pairCount > 0) {
+    results += '\nPairwise concordance: ' + pairAgree + '/' + pairCount + ' design pairs agree on direction (' + (pairAgree/pairCount*100).toFixed(0) + '%).';
+  }
+
+  // Causal correction results if applicable
+  if (hasP0) {
+    results += '\nCausal correction (CaMeA-style): study-level log-OR estimates were converted to risk differences (RD) using reported baseline risks, then pooled on the RD scale.';
+  }
+
+  return methods + results;
+}
+
+function renderReport() {
+  const el = document.getElementById('reportText');
+  if (!el) return;
+  el.textContent = generateReport();
+}
+
+function copyReport(btn) {
+  const text = generateReport();
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copy to Clipboard';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ============================================================
+// Phase 3: R Code Export
+// ============================================================
+function generateRCode() {
+  if (!triResults || studies.length < 2) return '# No data loaded. Run triangulation first.';
+  const designKeys = Object.keys(triResults.designResults);
+
+  let code = '# ============================================================\n';
+  code += '# CausalSynth: Reproducible R code (metafor)\n';
+  code += '# Generated by CausalSynth - Causal Evidence Triangulation Engine\n';
+  code += '# ============================================================\n\n';
+  code += 'library(metafor)\n\n';
+
+  // Data frame
+  code += '# Data\n';
+  code += 'dat <- data.frame(\n';
+  code += '  study  = c(' + studies.map(function(s) { return '"' + s.study.replace(/"/g, '\\"') + '"'; }).join(', ') + '),\n';
+  code += '  design = c(' + studies.map(function(s) { return '"' + s.design + '"'; }).join(', ') + '),\n';
+  code += '  yi     = c(' + studies.map(function(s) { return s.yi.toString(); }).join(', ') + '),\n';
+  code += '  sei    = c(' + studies.map(function(s) { return s.se.toString(); }).join(', ') + ')\n';
+  code += ')\n\n';
+
+  // Overall MA
+  code += '# Overall meta-analysis (DerSimonian-Laird)\n';
+  code += 'res_overall <- rma(yi, sei = sei, data = dat, method = "DL")\n';
+  code += 'summary(res_overall)\n';
+  code += 'forest(res_overall, slab = dat$study)\n\n';
+
+  // Per-design MA
+  code += '# Per-design meta-analyses\n';
+  for (const dKey of designKeys) {
+    const varName = 'res_' + dKey.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    code += varName + ' <- rma(yi, sei = sei, data = dat[dat$design == "' + dKey + '", ], method = "DL")\n';
+    code += 'summary(' + varName + ')\n\n';
+  }
+
+  // Convergence metrics
+  code += '# ---- Convergence Metrics ----\n';
+  code += '# Direction Concordance Index\n';
+  code += 'design_ests <- sapply(unique(dat$design), function(d) {\n';
+  code += '  sub <- dat[dat$design == d, ]\n';
+  code += '  rma(yi, sei = sei, data = sub, method = "DL")$beta[1]\n';
+  code += '})\n';
+  code += 'DCI <- max(sum(design_ests > 0), sum(design_ests < 0)) / length(design_ests)\n';
+  code += 'cat("Direction Concordance Index:", DCI, "\\n")\n\n';
+
+  // Forest plot with design subgroups
+  code += '# Forest plot with design subgroups\n';
+  code += 'forest(res_overall, slab = dat$study,\n';
+  code += '       order = order(dat$design),\n';
+  code += '       rows = seq_len(nrow(dat)),\n';
+  code += '       header = "CausalSynth Triangulation")\n';
+
+  return code;
+}
+
+function renderRCode() {
+  const el = document.getElementById('rCodeBlock');
+  if (!el) return;
+  el.textContent = generateRCode();
+}
+
+function exportRCode() {
+  if (!triResults) {
+    alert('Run the triangulation analysis first, then export R code.');
+    return;
+  }
+  const code = generateRCode();
+  const blob = new Blob([code], { type: 'text/plain;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'causal_triangulation.R';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyRCode() {
+  const code = generateRCode();
+  navigator.clipboard.writeText(code).then(function() {
+    alert('R code copied to clipboard.');
+  });
+}
+
+// ---- WebR Cross-Validation ----
+let webrInstance = null;
+
+async function runWebRValidation() {
+  if (!triResults) {
+    alert('Run triangulation first before validating with R.');
+    return;
+  }
+
+  const card = document.getElementById('webrCard');
+  const badge = document.getElementById('webrBadge');
+  const results = document.getElementById('webrResults');
+  const btn = document.getElementById('webrRunBtn');
+  card.style.display = '';
+  btn.disabled = true;
+  badge.textContent = 'Loading WebR...';
+  badge.style.background = 'var(--warning)';
+  badge.style.color = '#fff';
+  results.innerHTML = '<p style="color:var(--text-muted)">Initializing WebR (this may take 10-30 seconds on first load)...</p>';
+
+  try {
+    if (!webrInstance) {
+      const { WebR } = await import('https://webr.r-wasm.org/v0.4.4/webr.mjs');
+      webrInstance = new WebR();
+      await webrInstance.init();
+      badge.textContent = 'Installing metafor...';
+      results.innerHTML = '<p style="color:var(--text-muted)">Installing metafor package...</p>';
+      await webrInstance.installPackages(['metafor']);
+    }
+    badge.textContent = 'Running R...';
+    results.innerHTML = '<p style="color:var(--text-muted)">Running R validation...</p>';
+
+    // Build data for R: yi, sei, design
+    const yiStr = studies.map(s => s.yi).join(',');
+    const seiStr = studies.map(s => s.se).join(',');
+    const designStr = studies.map(s => '"' + s.design + '"').join(',');
+
+    // Get unique design groups that have results
+    const designKeys = Object.keys(triResults.designResults);
+
+    // Build R code: overall DL + per-design DL
+    let rCode = `
+library(metafor)
+yi <- c(${yiStr})
+sei <- c(${seiStr})
+design <- c(${designStr})
+dat <- data.frame(yi=yi, sei=sei, design=design)
+overall <- rma(yi, sei=sei, data=dat, method="DL")
+results <- paste(overall$beta[1], overall$tau2, overall$I2, overall$se, sep="|")
+`;
+    for (const dKey of designKeys) {
+      rCode += `
+sub_${dKey} <- dat[dat$design=="${dKey}",]
+if(nrow(sub_${dKey}) >= 2) {
+  res_${dKey} <- rma(yi, sei=sei, data=sub_${dKey}, method="DL")
+  results <- paste(results, paste("${dKey}", res_${dKey}$beta[1], res_${dKey}$tau2, res_${dKey}$I2, res_${dKey}$se, sep="|"), sep="||")
+} else if(nrow(sub_${dKey}) == 1) {
+  results <- paste(results, paste("${dKey}", sub_${dKey}$yi[1], 0, 0, sub_${dKey}$sei[1], sep="|"), sep="||")
+}
+`;
+    }
+    rCode += '\ncat(results)';
+
+    const shelter = await webrInstance.shelter();
+    try {
+      await shelter.captureR('options(warn=-1)');
+      const rResult = await shelter.captureR(rCode);
+      const output = rResult.output.map(o => o.data).join('').trim();
+
+      // Parse R output: overall_theta|tau2|I2|se||design|theta|tau2|I2|se||...
+      const parts = output.split('||');
+      const overallVals = parts[0].split('|').map(Number);
+
+      const rOverall = { theta: overallVals[0], tau2: overallVals[1], I2: overallVals[2], se: overallVals[3] };
+      const rDesigns = {};
+      for (let i = 1; i < parts.length; i++) {
+        const dParts = parts[i].split('|');
+        const dName = dParts[0];
+        rDesigns[dName] = { theta: Number(dParts[1]), tau2: Number(dParts[2]), I2: Number(dParts[3]), se: Number(dParts[4]) };
+      }
+
+      // Build comparisons
+      const comparisons = [];
+
+      // Overall
+      const jsOverall = triResults.overallResult;
+      if (jsOverall) {
+        comparisons.push({ label: 'Overall theta', js: jsOverall.theta, r: rOverall.theta, tol: 1e-4 });
+        comparisons.push({ label: 'Overall SE', js: jsOverall.se, r: rOverall.se, tol: 1e-4 });
+        comparisons.push({ label: 'Overall tau2', js: jsOverall.tau2, r: rOverall.tau2, tol: 1e-3 });
+        comparisons.push({ label: 'Overall I2', js: jsOverall.I2, r: rOverall.I2, tol: 0.1 });
+      }
+
+      // Per-design
+      for (const dKey of designKeys) {
+        const jsD = triResults.designResults[dKey];
+        const rD = rDesigns[dKey];
+        if (jsD && rD) {
+          const dLabel = (DESIGNS[dKey] ? DESIGNS[dKey].short : dKey);
+          comparisons.push({ label: dLabel + ' theta', js: jsD.theta, r: rD.theta, tol: 1e-4 });
+          comparisons.push({ label: dLabel + ' SE', js: jsD.se, r: rD.se, tol: 1e-4 });
+          comparisons.push({ label: dLabel + ' tau2', js: jsD.tau2, r: rD.tau2, tol: 1e-3 });
+          comparisons.push({ label: dLabel + ' I2', js: jsD.I2, r: rD.I2, tol: 0.1 });
+        }
+      }
+
+      // Render
+      let matchCount = 0;
+      let totalCount = comparisons.length;
+      let html = '<table class="webr-table"><thead><tr><th>Metric</th><th>JS (CausalSynth)</th><th>R (metafor)</th><th>Diff</th><th>Match?</th></tr></thead><tbody>';
+      for (const c of comparisons) {
+        const diff = Math.abs(c.js - c.r);
+        const match = diff < c.tol;
+        if (match) matchCount++;
+        html += `<tr>
+          <td style="text-align:left;font-weight:600">${escapeHtml(c.label)}</td>
+          <td style="font-family:var(--mono)">${c.js.toFixed(6)}</td>
+          <td style="font-family:var(--mono)">${c.r.toFixed(6)}</td>
+          <td style="font-family:var(--mono)">${diff.toExponential(2)}</td>
+          <td class="${match ? 'webr-match' : 'webr-fail'}">${match ? 'YES' : 'NO'}</td>
+        </tr>`;
+      }
+      html += '</tbody></table>';
+
+      const allMatch = matchCount === totalCount;
+      html += `<div class="webr-summary ${allMatch ? 'pass' : 'fail'}">
+        ${allMatch ? 'PASS' : 'DISCREPANCIES'}: ${matchCount}/${totalCount} metrics match R metafor
+        (tolerance: 1e-4 for effects/SE, 1e-3 for tau2, 0.1 for I2)
+      </div>`;
+
+      results.innerHTML = html;
+      badge.textContent = allMatch ? 'ALL MATCH' : matchCount + '/' + totalCount + ' MATCH';
+      badge.style.background = allMatch ? 'var(--success)' : 'var(--danger)';
+    } finally {
+      shelter.purge();
+    }
+  } catch (e) {
+    badge.textContent = 'Error';
+    badge.style.background = 'var(--danger)';
+    results.innerHTML = '<p style="color:var(--danger)">WebR error: ' + escapeHtml(String(e.message || e)) + '</p>';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Show WebR card when results are displayed
+const origRenderResults = renderResults;
+renderResults = function() {
+  origRenderResults();
+  document.getElementById('webrCard').style.display = '';
+};
+
+// ============================================================
+// Phase 2: Design-Level Comparison Cards + Evidence Weight Bar
+// ============================================================
+function renderDesignCompareCards() {
+  const grid = document.getElementById('designCompareGrid');
+  const weightBar = document.getElementById('evidenceWeightBar');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  if (designKeys.length < 1) { grid.innerHTML = ''; weightBar.innerHTML = ''; return; }
+
+  // Compute total inverse-variance weight per design
+  const designWeights = {};
+  let totalWeight = 0;
+  for (const dKey of designKeys) {
+    const dr = r.designResults[dKey];
+    const w = 1 / (dr.se * dr.se);
+    designWeights[dKey] = w;
+    totalWeight += w;
+  }
+
+  // Cards
+  let html = '';
+  for (const dKey of designKeys) {
+    const dr = r.designResults[dKey];
+    const dInfo = DESIGNS[dKey] || { label: dKey, color: 'var(--text)', short: dKey };
+    const pctWeight = (designWeights[dKey] / totalWeight * 100).toFixed(1);
+    const sig = dr.pval < 0.05;
+    const expEffect = Math.exp(dr.theta);
+
+    html += '<div class="design-compare-card" tabindex="0" role="group" aria-label="' + escapeHtml(dInfo.label) + ' summary">';
+    html += '<div class="dc-header" style="border-color:' + dInfo.color + ';color:' + dInfo.color + '">' + escapeHtml(dInfo.label) + '</div>';
+    html += '<div class="dc-stat"><span class="dc-label">Studies (k)</span><span class="dc-value">' + dr.k + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">Pooled Effect</span><span class="dc-value">' + dr.theta.toFixed(4) + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">95% CI</span><span class="dc-value">[' + dr.lower.toFixed(3) + ', ' + dr.upper.toFixed(3) + ']</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">OR (exp)</span><span class="dc-value">' + expEffect.toFixed(3) + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">I\u00B2</span><span class="dc-value">' + dr.I2.toFixed(1) + '%</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">p-value</span><span class="dc-value" style="color:' + (sig ? 'var(--success)' : 'var(--text-muted)') + '">' + (dr.pval < 0.001 ? '<0.001' : dr.pval.toFixed(4)) + '</span></div>';
+    html += '<div class="dc-stat"><span class="dc-label">Evidence Weight</span><span class="dc-value">' + pctWeight + '%</span></div>';
+    // Strength bar
+    html += '<div class="strength-bar-container">';
+    html += '<div class="strength-bar-bg"><div class="strength-bar" style="width:' + pctWeight + '%;background:' + dInfo.color + '"></div></div>';
+    html += '</div>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+
+  // Evidence weight stacked bar
+  let barHtml = '';
+  for (const dKey of designKeys) {
+    const dInfo = DESIGNS[dKey] || { short: dKey, color: 'var(--text)' };
+    const pct = (designWeights[dKey] / totalWeight * 100);
+    if (pct < 2) {
+      barHtml += '<div class="evidence-weight-segment" style="width:' + pct.toFixed(1) + '%;background:' + dInfo.color + '" title="' + escapeHtml(dInfo.short) + ': ' + pct.toFixed(1) + '%"></div>';
+    } else {
+      barHtml += '<div class="evidence-weight-segment" style="width:' + pct.toFixed(1) + '%;background:' + dInfo.color + '" title="' + escapeHtml(dInfo.short) + ': ' + pct.toFixed(1) + '%">' + escapeHtml(dInfo.short) + ' ' + pct.toFixed(0) + '%</div>';
+    }
+  }
+  weightBar.innerHTML = barHtml;
+}
+
+// ============================================================
+// Phase 2: Enhanced Bias Architecture Heatmap (SVG)
+// ============================================================
+const BIAS_DETAILS = {
+  Confounding: {
+    RCT: { level: 'low', text: 'Randomization eliminates confounding by design. Imbalance possible in small trials, but expectation is zero bias.' },
+    cohort: { level: 'moderate', text: 'Measured confounders can be adjusted for, but unmeasured confounders remain a concern (e.g., healthy user bias).' },
+    cc: { level: 'moderate', text: 'Case-control studies can adjust for measured confounders, but residual confounding is common.' },
+    MR: { level: 'low', text: 'Mendelian randomization uses genetic instruments that are randomly allocated at conception, mimicking randomization.' },
+    ecological: { level: 'high', text: 'Ecological fallacy: population-level associations may not reflect individual-level confounding structures.' },
+    cross: { level: 'moderate', text: 'Cross-sectional designs can adjust for measured confounders but temporal precedence is unclear.' }
+  },
+  Selection: {
+    RCT: { level: 'moderate', text: 'Selection into trials is non-random (eligibility criteria, consent). Results may not generalize to target population.' },
+    cohort: { level: 'moderate', text: 'Selection into cohorts depends on recruitment; loss to follow-up introduces further selection.' },
+    cc: { level: 'high', text: 'Control selection is critical and often problematic. Hospital-based controls can introduce Berkson bias.' },
+    MR: { level: 'low', text: 'MR studies typically use population-based biobanks with minimal selection bias in genotype-outcome analyses.' },
+    ecological: { level: 'moderate', text: 'Populations included may be non-representative; data availability drives selection.' },
+    cross: { level: 'moderate', text: 'Response rates and sampling frame affect representativeness.' }
+  },
+  Measurement: {
+    RCT: { level: 'low', text: 'Blinding and standardized outcome assessment reduce measurement error. Double-blind RCTs have minimal information bias.' },
+    cohort: { level: 'moderate', text: 'Prospective measurement reduces recall bias, but exposure/outcome ascertainment may still vary.' },
+    cc: { level: 'high', text: 'Recall bias: cases may report exposure history differently than controls. Differential misclassification likely.' },
+    MR: { level: 'low', text: 'Genetic variants are measured with high precision (genotyping arrays, imputation). Minimal measurement error.' },
+    ecological: { level: 'moderate', text: 'Population-level measures may be crude aggregations with measurement error.' },
+    cross: { level: 'moderate', text: 'Self-reported measures susceptible to social desirability and recall bias.' }
+  },
+  'Reverse Causation': {
+    RCT: { level: 'low', text: 'Temporal ordering is enforced: treatment precedes outcome by design.' },
+    cohort: { level: 'moderate', text: 'Prospective design helps, but prevalent exposure at baseline could reflect reverse causation (prevalent user bias).' },
+    cc: { level: 'moderate', text: 'Temporal sequence unclear for exposures measured after disease onset. Protopathic bias possible.' },
+    MR: { level: 'low', text: 'Genetic variants are fixed at conception, preceding all phenotypic outcomes. Reverse causation virtually eliminated.' },
+    ecological: { level: 'high', text: 'Cross-sectional ecological data cannot establish temporal ordering.' },
+    cross: { level: 'high', text: 'No temporal ordering possible in cross-sectional data. Cause and effect indistinguishable.' }
+  },
+  Generalizability: {
+    RCT: { level: 'moderate', text: 'Strict eligibility criteria and volunteer bias limit external validity. Efficacy != effectiveness.' },
+    cohort: { level: 'high', text: 'Large population-based cohorts often have good external validity if representative of target population.' },
+    cc: { level: 'moderate', text: 'Generalizability depends on case/control sources. Population-based case-control better than hospital-based.' },
+    MR: { level: 'moderate', text: 'Genetic effects may differ across ancestries. Most MR studies are in European-ancestry populations.' },
+    ecological: { level: 'high', text: 'Population-level data can be broadly generalizable if populations are representative.' },
+    cross: { level: 'moderate', text: 'Depends on sampling frame. National surveys have good generalizability.' }
+  }
+};
+
+function renderBiasHeatmap() {
+  const container = document.getElementById('biasHeatmapContainer');
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  if (designKeys.length < 1) { container.innerHTML = ''; return; }
+
+  const cellW = 120, cellH = 40;
+  const headerH = 70, labelW = 160;
+  const W = labelW + designKeys.length * cellW + 20;
+  const H = headerH + BIAS_NAMES.length * cellH + 20;
+
+  const biasColors = { low: '#059669', moderate: '#d97706', high: '#dc2626' };
+  const biasColorsBg = { low: '#d1fae5', moderate: '#fef3c7', high: '#fee2e2' };
+
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg" class="bias-heatmap-svg" width="' + W + '" height="' + H + '" style="font-family:var(--font)" role="img" aria-label="Bias architecture heatmap">';
+
+  // Column headers (designs)
+  for (let ci = 0; ci < designKeys.length; ci++) {
+    const dKey = designKeys[ci];
+    const dInfo = DESIGNS[dKey] || { short: dKey, color: 'var(--text)' };
+    const x = labelW + ci * cellW + cellW / 2;
+    svg += '<text x="' + x + '" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="' + dInfo.color + '">' + escapeHtml(dInfo.short) + '</text>';
+    svg += '<text x="' + x + '" y="40" text-anchor="middle" font-size="9" fill="var(--text-muted)">k=' + r.designResults[dKey].k + '</text>';
+  }
+
+  // Rows (bias types)
+  for (let ri = 0; ri < BIAS_NAMES.length; ri++) {
+    const biasName = BIAS_NAMES[ri];
+    const y = headerH + ri * cellH;
+    // Row label
+    svg += '<text x="' + (labelW - 8) + '" y="' + (y + cellH / 2 + 4) + '" text-anchor="end" font-size="11" font-weight="600" fill="var(--text-heading)">' + escapeHtml(biasName) + '</text>';
+
+    for (let ci = 0; ci < designKeys.length; ci++) {
+      const dKey = designKeys[ci];
+      const profile = BIAS_PROFILE[dKey] || ['moderate','moderate','moderate','moderate','moderate'];
+      const level = profile[ri];
+      const x = labelW + ci * cellW;
+      const fillBg = biasColorsBg[level] || biasColorsBg.moderate;
+      const fillText = biasColors[level] || biasColors.moderate;
+
+      svg += '<rect x="' + x + '" y="' + y + '" width="' + cellW + '" height="' + cellH + '" fill="' + fillBg + '" stroke="var(--border)" stroke-width="1" ';
+      svg += 'style="cursor:pointer" data-bias="' + escapeHtml(biasName) + '" data-design="' + escapeHtml(dKey) + '" ';
+      svg += 'onclick="showBiasDetail(\'' + escapeHtml(biasName) + '\',\'' + escapeHtml(dKey) + '\')" ';
+      svg += 'tabindex="0" role="button" aria-label="' + escapeHtml(biasName) + ' for ' + escapeHtml(DESIGNS[dKey]?.short || dKey) + ': ' + level + ' risk"';
+      svg += '/>';
+
+      // Level text
+      const levelLabel = level.charAt(0).toUpperCase() + level.slice(1);
+      svg += '<text x="' + (x + cellW / 2) + '" y="' + (y + cellH / 2 + 4) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + fillText + '" style="pointer-events:none">' + levelLabel + '</text>';
+    }
+  }
+
+  // Bottom summary row: overall bias concern per design
+  const summaryY = headerH + BIAS_NAMES.length * cellH + 5;
+  svg += '<text x="' + (labelW - 8) + '" y="' + (summaryY + 10) + '" text-anchor="end" font-size="10" font-weight="600" fill="var(--text-muted)">High-risk count</text>';
+  for (let ci = 0; ci < designKeys.length; ci++) {
+    const dKey = designKeys[ci];
+    const profile = BIAS_PROFILE[dKey] || ['moderate','moderate','moderate','moderate','moderate'];
+    const highCount = profile.filter(function(l) { return l === 'high'; }).length;
+    const x = labelW + ci * cellW + cellW / 2;
+    const col = highCount >= 3 ? biasColors.high : highCount >= 1 ? biasColors.moderate : biasColors.low;
+    svg += '<text x="' + x + '" y="' + (summaryY + 10) + '" text-anchor="middle" font-size="11" font-weight="700" fill="' + col + '">' + highCount + '/5</text>';
+  }
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+
+  // Add keyboard event to SVG rects for accessibility
+  container.querySelectorAll('rect[data-bias]').forEach(function(rect) {
+    rect.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        showBiasDetail(rect.getAttribute('data-bias'), rect.getAttribute('data-design'));
+      }
+    });
+  });
+}
+
+function showBiasDetail(biasName, designKey) {
+  const panel = document.getElementById('biasDetailPanel');
+  const title = document.getElementById('biasDetailTitle');
+  const content = document.getElementById('biasDetailContent');
+  const dInfo = DESIGNS[designKey] || { label: designKey, color: 'var(--text)' };
+
+  const detail = (BIAS_DETAILS[biasName] && BIAS_DETAILS[biasName][designKey])
+    ? BIAS_DETAILS[biasName][designKey]
+    : { level: 'moderate', text: 'No detailed information available for this combination.' };
+
+  const dotColors = { low: '#059669', moderate: '#d97706', high: '#dc2626' };
+  title.textContent = biasName + ' in ' + dInfo.label;
+  content.innerHTML = '<div class="bias-detail-item">' +
+    '<span class="bias-dot" style="background:' + (dotColors[detail.level] || dotColors.moderate) + '"></span>' +
+    '<strong>' + detail.level.charAt(0).toUpperCase() + detail.level.slice(1) + ' Risk</strong>' +
+    '</div>' +
+    '<p style="margin-top:6px">' + escapeHtml(detail.text) + '</p>';
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ============================================================
+// Phase 2: Evidence Concordance Matrix
+// ============================================================
+function renderConcordanceMatrix() {
+  const r = triResults;
+  const designKeys = Object.keys(r.designResults);
+  if (designKeys.length < 2) {
+    document.getElementById('concDirectionMatrix').innerHTML = '<p style="color:var(--text-muted)">Need 2+ designs for concordance matrix.</p>';
+    document.getElementById('concOverlapMatrix').innerHTML = '';
+    document.getElementById('concSignifMatrix').innerHTML = '';
+    document.getElementById('concCompositeMatrix').innerHTML = '';
+    document.getElementById('concordanceSummary').innerHTML = '';
+    return;
+  }
+
+  const dLabels = designKeys.map(function(k) { return DESIGNS[k] ? DESIGNS[k].short : k; });
+
+  // Compute pairwise concordance metrics
+  const pairMetrics = [];
+  for (let i = 0; i < designKeys.length; i++) {
+    pairMetrics[i] = [];
+    for (let j = 0; j < designKeys.length; j++) {
+      if (i === j) { pairMetrics[i][j] = { direction: 'self', overlap: 'self', signif: 'self', composite: 'self' }; continue; }
+      const drA = r.designResults[designKeys[i]];
+      const drB = r.designResults[designKeys[j]];
+
+      // Direction: same sign?
+      const dirA = Math.sign(drA.theta);
+      const dirB = Math.sign(drB.theta);
+      const dirAgree = dirA === dirB || dirA === 0 || dirB === 0;
+
+      // CI Overlap: do 95% CIs overlap?
+      const overlapLo = Math.max(drA.lower, drB.lower);
+      const overlapHi = Math.min(drA.upper, drB.upper);
+      const ciOverlap = overlapHi >= overlapLo;
+      // Compute overlap fraction (of the smaller CI)
+      const ciWidthA = drA.upper - drA.lower;
+      const ciWidthB = drB.upper - drB.lower;
+      const minWidth = Math.min(ciWidthA, ciWidthB);
+      const overlapWidth = ciOverlap ? (overlapHi - overlapLo) : 0;
+      const overlapFrac = minWidth > 0 ? Math.min(1, overlapWidth / minWidth) : 0;
+
+      // Significance concordance: both sig, both non-sig, or discordant
+      const sigA = drA.pval < 0.05;
+      const sigB = drB.pval < 0.05;
+      const sigConcord = sigA === sigB ? (sigA ? 'both-sig' : 'both-nonsig') : 'discordant';
+
+      // Composite: direction + CI overlap + significance
+      let compositeScore = 0;
+      if (dirAgree) compositeScore += 0.4;
+      compositeScore += 0.4 * overlapFrac;
+      if (sigConcord === 'both-sig') compositeScore += 0.2;
+      else if (sigConcord === 'both-nonsig') compositeScore += 0.1;
+
+      pairMetrics[i][j] = {
+        direction: dirAgree ? 'agree' : 'disagree',
+        overlap: overlapFrac,
+        ciOverlap: ciOverlap,
+        signif: sigConcord,
+        composite: compositeScore
+      };
+    }
+  }
+
+  // Direction matrix
+  renderConcordanceTable('concDirectionMatrix', designKeys, dLabels, pairMetrics, 'direction');
+  // CI Overlap matrix
+  renderConcordanceTable('concOverlapMatrix', designKeys, dLabels, pairMetrics, 'overlap');
+  // Significance matrix
+  renderConcordanceTable('concSignifMatrix', designKeys, dLabels, pairMetrics, 'signif');
+  // Composite matrix
+  renderConcordanceTable('concCompositeMatrix', designKeys, dLabels, pairMetrics, 'composite');
+
+  // Summary
+  let agreeCount = 0, totalPairs = 0;
+  let totalComposite = 0;
+  for (let i = 0; i < designKeys.length; i++) {
+    for (let j = i + 1; j < designKeys.length; j++) {
+      totalPairs++;
+      if (pairMetrics[i][j].direction === 'agree') agreeCount++;
+      totalComposite += pairMetrics[i][j].composite;
+    }
+  }
+  const avgComposite = totalPairs > 0 ? (totalComposite / totalPairs) : 0;
+  const concordancePct = totalPairs > 0 ? (agreeCount / totalPairs * 100).toFixed(0) : '0';
+
+  let summaryClass = avgComposite >= 0.7 ? 'strong' : avgComposite >= 0.4 ? 'moderate' : 'weak';
+  let summaryHtml = '<div class="interp-panel" style="margin-top:0;padding:12px 16px">';
+  summaryHtml += '<strong>Pairwise Concordance Summary:</strong> ';
+  summaryHtml += concordancePct + '% of design pairs agree on direction (' + agreeCount + '/' + totalPairs + '). ';
+  summaryHtml += 'Average composite concordance: <strong class="verdict ' + summaryClass + '">' + avgComposite.toFixed(3) + '</strong> ';
+  summaryHtml += '(1.0 = perfect agreement, 0.0 = complete disagreement).';
+  summaryHtml += '</div>';
+  document.getElementById('concordanceSummary').innerHTML = summaryHtml;
+}
+
+function renderConcordanceTable(containerId, designKeys, dLabels, pairMetrics, metricType) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  let html = '<table class="conc-table" aria-label="Concordance matrix - ' + metricType + '">';
+  html += '<thead><tr><th scope="col"></th>';
+  for (let j = 0; j < dLabels.length; j++) {
+    const color = DESIGNS[designKeys[j]] ? DESIGNS[designKeys[j]].color : 'var(--text)';
+    html += '<th scope="col" style="color:' + color + '">' + escapeHtml(dLabels[j]) + '</th>';
+  }
+  html += '</tr></thead><tbody>';
+
+  for (let i = 0; i < designKeys.length; i++) {
+    const color = DESIGNS[designKeys[i]] ? DESIGNS[designKeys[i]].color : 'var(--text)';
+    html += '<tr><th scope="row" style="text-align:left;color:' + color + '">' + escapeHtml(dLabels[i]) + '</th>';
+    for (let j = 0; j < designKeys.length; j++) {
+      const pm = pairMetrics[i][j];
+      if (i === j) {
+        html += '<td class="conc-na">--</td>';
+        continue;
+      }
+
+      if (metricType === 'direction') {
+        const cls = pm.direction === 'agree' ? 'conc-agree' : 'conc-disagree';
+        const lbl = pm.direction === 'agree' ? 'Agree' : 'Disagree';
+        html += '<td class="' + cls + '">' + lbl + '</td>';
+      } else if (metricType === 'overlap') {
+        const pct = (pm.overlap * 100).toFixed(0);
+        const cls = pm.overlap >= 0.5 ? 'conc-agree' : pm.overlap > 0 ? 'conc-partial' : 'conc-disagree';
+        html += '<td class="' + cls + '">' + pct + '%</td>';
+      } else if (metricType === 'signif') {
+        if (pm.signif === 'both-sig') {
+          html += '<td class="conc-agree">Both sig.</td>';
+        } else if (pm.signif === 'both-nonsig') {
+          html += '<td class="conc-partial">Both n.s.</td>';
+        } else {
+          html += '<td class="conc-disagree">Discordant</td>';
+        }
+      } else if (metricType === 'composite') {
+        const score = pm.composite.toFixed(2);
+        const cls = pm.composite >= 0.7 ? 'conc-agree' : pm.composite >= 0.4 ? 'conc-partial' : 'conc-disagree';
+        html += '<td class="' + cls + '">' + score + '</td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function switchConcordanceTab(tabName) {
+  var tabs = ['direction', 'overlap', 'signif', 'composite'];
+  for (var i = 0; i < tabs.length; i++) {
+    var t = tabs[i];
+    var tabBtn = document.getElementById('conc' + t.charAt(0).toUpperCase() + t.slice(1) + 'Tab');
+    var panel = document.getElementById('conc' + t.charAt(0).toUpperCase() + t.slice(1) + 'Panel');
+    if (t === tabName) {
+      if (tabBtn) { tabBtn.classList.add('active'); tabBtn.setAttribute('aria-selected', 'true'); }
+      if (panel) panel.classList.add('active');
+    } else {
+      if (tabBtn) { tabBtn.classList.remove('active'); tabBtn.setAttribute('aria-selected', 'false'); }
+      if (panel) panel.classList.remove('active');
+    }
+  }
+}
+
+// ============================================================
+// Phase 2: Funnel Plot (Design-Colored)
+// ============================================================
+function renderFunnelPlot() {
+  var container = document.getElementById('funnelContainer');
+  var r = triResults;
+  if (!r || studies.length < 3) {
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.85rem">Need 3+ studies for funnel plot.</p>';
+    return;
+  }
+
+  var W = Math.max(container.clientWidth - 32, 500);
+  var H = 350;
+  var margin = { top: 20, right: 40, bottom: 40, left: 60 };
+  var plotW = W - margin.left - margin.right;
+  var plotH = H - margin.top - margin.bottom;
+
+  // X-axis: effect size (yi), Y-axis: standard error (inverted, small SE at top)
+  var allYi = studies.map(function(s) { return s.yi; });
+  var allSe = studies.map(function(s) { return s.se; });
+  var yiMin = Math.min.apply(null, allYi);
+  var yiMax = Math.max.apply(null, allYi);
+  var seMax = Math.max.apply(null, allSe);
+  var yiPad = (yiMax - yiMin) * 0.2 || 0.5;
+
+  var xMin = yiMin - yiPad;
+  var xMax = yiMax + yiPad;
+  var yMin = 0;
+  var yMax = seMax * 1.15;
+
+  function xScale(v) { return margin.left + ((v - xMin) / (xMax - xMin)) * plotW; }
+  function yScale(v) { return margin.top + (v / yMax) * plotH; } // SE increases downward
+
+  var pooled = r.overallResult.theta;
+
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" style="font-family:var(--font)" role="img" aria-label="Funnel plot showing study precision vs effect size, colored by design">';
+
+  // Pseudo-95% CI funnel region
+  var funnelSEs = [];
+  for (var si = 0; si <= 20; si++) funnelSEs.push(yMax * si / 20);
+  var z95 = normalQuantile(0.975);
+
+  // Left edge of funnel
+  var leftPoints = '';
+  for (var fsi = 0; fsi < funnelSEs.length; fsi++) {
+    var fse = funnelSEs[fsi];
+    var fx = xScale(pooled - z95 * fse);
+    var fy = yScale(fse);
+    leftPoints += fx + ',' + fy + ' ';
+  }
+  // Right edge of funnel (reversed)
+  var rightPoints = '';
+  for (var fsi2 = funnelSEs.length - 1; fsi2 >= 0; fsi2--) {
+    var fse2 = funnelSEs[fsi2];
+    var fx2 = xScale(pooled + z95 * fse2);
+    var fy2 = yScale(fse2);
+    rightPoints += fx2 + ',' + fy2 + ' ';
+  }
+  svg += '<polygon points="' + leftPoints + rightPoints + '" fill="var(--accent-light)" opacity="0.4"/>';
+
+  // Vertical line at pooled estimate
+  svg += '<line x1="' + xScale(pooled) + '" y1="' + margin.top + '" x2="' + xScale(pooled) + '" y2="' + (H - margin.bottom) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,3"/>';
+
+  // Null line at 0
+  if (xMin < 0 && xMax > 0) {
+    svg += '<line x1="' + xScale(0) + '" y1="' + margin.top + '" x2="' + xScale(0) + '" y2="' + (H - margin.bottom) + '" stroke="var(--border)" stroke-width="1"/>';
+  }
+
+  // Plot points
+  for (var pi = 0; pi < studies.length; pi++) {
+    var s = studies[pi];
+    var px = xScale(s.yi);
+    var py = yScale(s.se);
+    var dColor = DESIGNS[s.design] ? DESIGNS[s.design].color : 'var(--text)';
+    svg += '<circle cx="' + px + '" cy="' + py + '" r="5" fill="' + dColor + '" opacity="0.85" stroke="var(--bg-card)" stroke-width="1.5">';
+    svg += '<title>' + escapeHtml(s.study) + ' (' + (DESIGNS[s.design] ? DESIGNS[s.design].short : s.design) + '): yi=' + s.yi.toFixed(3) + ', SE=' + s.se.toFixed(3) + '</title>';
+    svg += '</circle>';
+  }
+
+  // Axes
+  // X-axis
+  svg += '<line x1="' + margin.left + '" y1="' + (H - margin.bottom) + '" x2="' + (W - margin.right) + '" y2="' + (H - margin.bottom) + '" stroke="var(--text-muted)" stroke-width="1"/>';
+  // Y-axis
+  svg += '<line x1="' + margin.left + '" y1="' + margin.top + '" x2="' + margin.left + '" y2="' + (H - margin.bottom) + '" stroke="var(--text-muted)" stroke-width="1"/>';
+
+  // X-axis ticks
+  var nXTicks = 7;
+  for (var xi = 0; xi <= nXTicks; xi++) {
+    var xv = xMin + (xMax - xMin) * xi / nXTicks;
+    var xx = xScale(xv);
+    svg += '<text x="' + xx + '" y="' + (H - margin.bottom + 16) + '" text-anchor="middle" font-size="9" fill="var(--text-muted)">' + xv.toFixed(2) + '</text>';
+  }
+  svg += '<text x="' + (margin.left + plotW / 2) + '" y="' + (H - 5) + '" text-anchor="middle" font-size="10" fill="var(--text-muted)">Effect Size (log-OR)</text>';
+
+  // Y-axis ticks
+  var nYTicks = 5;
+  for (var yi2 = 0; yi2 <= nYTicks; yi2++) {
+    var yv = yMax * yi2 / nYTicks;
+    var yy = yScale(yv);
+    svg += '<text x="' + (margin.left - 8) + '" y="' + (yy + 3) + '" text-anchor="end" font-size="9" fill="var(--text-muted)">' + yv.toFixed(2) + '</text>';
+  }
+  svg += '<text x="15" y="' + (margin.top + plotH / 2) + '" text-anchor="middle" font-size="10" fill="var(--text-muted)" transform="rotate(-90,15,' + (margin.top + plotH / 2) + ')">Standard Error</text>';
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+// ============================================================
+// Toast Notification
+// ============================================================
+function showToast(message) {
+  var toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 3000);
+}
+
+// ============================================================
+// Additional Example Datasets (Phase 2)
+// ============================================================
+EXAMPLE_DATASETS.alcohol = {
+  label: 'Alcohol & Liver Disease',
+  data: [
+    { study: 'Bellentani 1997 (RCT analog)', design: 'RCT', yi: 0.45, se: 0.18, n: 6534, p0: 0.03 },
+    { study: 'Becker 1996', design: 'RCT', yi: 0.51, se: 0.22, n: 1200, p0: 0.04 },
+    { study: 'Whitfield 2001 Cohort', design: 'cohort', yi: 0.62, se: 0.08, n: 45000, p0: 0.05 },
+    { study: 'EPIC-Norfolk 2010', design: 'cohort', yi: 0.55, se: 0.06, n: 78000, p0: 0.04 },
+    { study: 'UK Biobank Cohort 2018', design: 'cohort', yi: 0.49, se: 0.04, n: 340000, p0: 0.03 },
+    { study: 'Askgaard 2015 CC', design: 'cc', yi: 0.70, se: 0.15, n: 2400, p0: 0.05 },
+    { study: 'Tian 2020 MR', design: 'MR', yi: 0.38, se: 0.12, n: 280000, p0: 0.04 },
+    { study: 'Millwood 2019 MR (China)', design: 'MR', yi: 0.42, se: 0.10, n: 160000, p0: 0.06 },
+    { study: 'Rehm 2010 Ecological', design: 'ecological', yi: 0.58, se: 0.20, n: 50, p0: 0.04 }
+  ]
+};
+
+EXAMPLE_DATASETS.exercise = {
+  label: 'Exercise & Depression',
+  data: [
+    { study: 'Blumenthal 2007 (RCT)', design: 'RCT', yi: -0.50, se: 0.14, n: 202, p0: 0.15 },
+    { study: 'Schuch 2016 (RCT pool)', design: 'RCT', yi: -0.56, se: 0.08, n: 2500, p0: 0.12 },
+    { study: 'Rethorst 2009 (RCT)', design: 'RCT', yi: -0.42, se: 0.12, n: 126, p0: 0.18 },
+    { study: 'Harvey 2018 Cohort', design: 'cohort', yi: -0.29, se: 0.05, n: 33908, p0: 0.10 },
+    { study: 'Choi 2019 Cohort', design: 'cohort', yi: -0.35, se: 0.06, n: 611583, p0: 0.08 },
+    { study: 'Choi 2019 MR', design: 'MR', yi: -0.26, se: 0.11, n: 611583, p0: 0.09 },
+    { study: 'Stubbs 2017 MR', design: 'MR', yi: -0.20, se: 0.13, n: 300000, p0: 0.10 },
+    { study: 'Mammen 2013 Cross-Sec', design: 'cross', yi: -0.38, se: 0.07, n: 90000, p0: 0.11 }
+  ]
+};
+
+// ============================================================
+// Keyboard navigation for data table
+// ============================================================
+function setupTableKeyboardNav() {
+  document.getElementById('dataTable').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') return; // let normal tab work
+    var td = e.target.closest('td');
+    if (!td) return;
+    var tr = td.closest('tr');
+    if (!tr) return;
+    var cells = Array.from(tr.querySelectorAll('input, select'));
+    var idx = cells.indexOf(e.target);
+    if (idx < 0) return;
+
+    if (e.key === 'ArrowRight' && idx < cells.length - 1) {
+      e.preventDefault();
+      cells[idx + 1].focus();
+    } else if (e.key === 'ArrowLeft' && idx > 0) {
+      e.preventDefault();
+      cells[idx - 1].focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      var nextRow = tr.nextElementSibling;
+      if (nextRow) {
+        var nextCells = Array.from(nextRow.querySelectorAll('input, select'));
+        if (nextCells[idx]) nextCells[idx].focus();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      var prevRow = tr.previousElementSibling;
+      if (prevRow) {
+        var prevCells = Array.from(prevRow.querySelectorAll('input, select'));
+        if (prevCells[idx]) prevCells[idx].focus();
+      }
+    }
+  });
+}
+
+// ---- Init ----
+renderLegend();
+setupTableKeyboardNav();
+
+// Load default example dataset on startup so the tool is immediately usable
+loadExample('statins');
+</script>
+</body>
+</html>

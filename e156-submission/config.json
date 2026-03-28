@@ -1,0 +1,57 @@
+{
+  "title": "CausalSynth: Browser-Based Causal Evidence Triangulation Engine",
+  "slug": "causal-synth",
+  "author": "Mahmood Ahmad",
+  "date": "2026-03-26",
+  "path": "C:\\Models\\CausalSynth",
+  "type": "methods",
+  "primary_estimand": "Causal Evidence Score",
+  "summary": "First interactive tool to operationalize cross-design evidence triangulation with four convergence metrics and GRADE-style certainty mapping.",
+  "body": "Can cross-design evidence triangulation be quantified computationally to strengthen causal inference beyond what any single study design provides? Twelve studies spanning RCT, cohort, and Mendelian randomization designs were analyzed for the statin-cardiovascular disease relationship using three built-in clinical examples. CausalSynth, a browser-based application of 1,772 lines, implements design-grouped random-effects meta-analysis with CaMeA-style causal correction and four convergence metrics: Direction Consistency Index, Magnitude Convergence Score, Bias Diversity Score, and Causal Evidence Score. The statin example produced a pooled RR of 0.74 (95% CI 0.62-0.88) with a Causal Evidence Score of 0.48, corresponding to strong causal evidence with GRADE-style upgrade. Leave-one-design-out sensitivity analysis confirmed that removing any single design preserved directional consistency across the remaining evidence base. CausalSynth is the first interactive tool to operationalize evidence triangulation scoring across heterogeneous study designs without requiring any programming expertise. A limitation is that the convergence metrics depend on the accuracy of user-specified bias architecture classifications for each included study design.",
+  "sentences": [
+    {
+      "role": "Question",
+      "text": "Can cross-design evidence triangulation be quantified computationally to strengthen causal inference beyond what any single study design provides?"
+    },
+    {
+      "role": "Dataset",
+      "text": "Twelve studies spanning RCT, cohort, and Mendelian randomization designs were analyzed for the statin-cardiovascular disease relationship using three built-in clinical examples."
+    },
+    {
+      "role": "Method",
+      "text": "CausalSynth, a browser-based application of 1,772 lines, implements design-grouped random-effects meta-analysis with CaMeA-style causal correction and four convergence metrics: Direction Consistency Index, Magnitude Convergence Score, Bias Diversity Score, and Causal Evidence Score."
+    },
+    {
+      "role": "Primary result",
+      "text": "The statin example produced a pooled RR of 0.74 (95% CI 0.62-0.88) with a Causal Evidence Score of 0.48, corresponding to strong causal evidence with GRADE-style upgrade."
+    },
+    {
+      "role": "Robustness",
+      "text": "Leave-one-design-out sensitivity analysis confirmed that removing any single design preserved directional consistency across the remaining evidence base."
+    },
+    {
+      "role": "Interpretation",
+      "text": "CausalSynth is the first interactive tool to operationalize evidence triangulation scoring across heterogeneous study designs without requiring any programming expertise."
+    },
+    {
+      "role": "Boundary",
+      "text": "A limitation is that the convergence metrics depend on the accuracy of user-specified bias architecture classifications for each included study design."
+    }
+  ],
+  "notes": {
+    "app": "CausalSynth v1.0",
+    "data": "Statins-CVD, smoking-lung cancer, Mediterranean diet (built-in datasets)",
+    "code": "https://github.com/mahmood726-cyber/CausalSynth",
+    "doi": "",
+    "version": "1.0",
+    "date": "2026-03-26",
+    "validation": "DRAFT"
+  },
+  "affiliation": "Tahir Heart Institute",
+  "email": "mahmood.ahmad2@nhs.net",
+  "references": [
+    "Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021.",
+    "Higgins JPT, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in meta-analyses. BMJ. 2003;327(7414):557-560.",
+    "Cochrane Handbook for Systematic Reviews of Interventions. Version 6.4. Cochrane; 2023."
+  ]
+}

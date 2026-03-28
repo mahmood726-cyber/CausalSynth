@@ -1,0 +1,96 @@
+{
+  "title": "CausalSynth: Browser-Based Causal Evidence Triangulation Engine",
+  "slug": "causal-synth",
+  "author": "Mahmood Ahmad",
+  "date": "2026-03-26",
+  "body": "Can cross-design evidence triangulation be quantified computationally to strengthen causal inference beyond what any single study design provides? Twelve studies spanning RCT, cohort, and Mendelian randomization designs were analyzed for the statin-cardiovascular disease relationship using three built-in clinical examples. CausalSynth, a browser-based application of 1,772 lines, implements design-grouped random-effects meta-analysis with CaMeA-style causal correction and four convergence metrics: Direction Consistency Index, Magnitude Convergence Score, Bias Diversity Score, and Causal Evidence Score. The statin example produced a pooled RR of 0.74 (95% CI 0.62-0.88) with a Causal Evidence Score of 0.48, corresponding to strong causal evidence with GRADE-style upgrade. Leave-one-design-out sensitivity analysis confirmed that removing any single design preserved directional consistency across the remaining evidence base. CausalSynth is the first interactive tool to operationalize evidence triangulation scoring across heterogeneous study designs without requiring any programming expertise. A limitation is that the convergence metrics depend on the accuracy of user-specified bias architecture classifications for each included study design.",
+  "word_count": 156,
+  "sentence_count": 7,
+  "sentences": [
+    {
+      "role": "Question",
+      "text": "Can cross-design evidence triangulation be quantified computationally to strengthen causal inference beyond what any single study design provides?"
+    },
+    {
+      "role": "Dataset",
+      "text": "Twelve studies spanning RCT, cohort, and Mendelian randomization designs were analyzed for the statin-cardiovascular disease relationship using three built-in clinical examples."
+    },
+    {
+      "role": "Method",
+      "text": "CausalSynth, a browser-based application of 1,772 lines, implements design-grouped random-effects meta-analysis with CaMeA-style causal correction and four convergence metrics: Direction Consistency Index, Magnitude Convergence Score, Bias Diversity Score, and Causal Evidence Score."
+    },
+    {
+      "role": "Primary result",
+      "text": "The statin example produced a pooled RR of 0.74 (95% CI 0.62-0.88) with a Causal Evidence Score of 0.48, corresponding to strong causal evidence with GRADE-style upgrade."
+    },
+    {
+      "role": "Robustness",
+      "text": "Leave-one-design-out sensitivity analysis confirmed that removing any single design preserved directional consistency across the remaining evidence base."
+    },
+    {
+      "role": "Interpretation",
+      "text": "CausalSynth is the first interactive tool to operationalize evidence triangulation scoring across heterogeneous study designs without requiring any programming expertise."
+    },
+    {
+      "role": "Boundary",
+      "text": "A limitation is that the convergence metrics depend on the accuracy of user-specified bias architecture classifications for each included study design."
+    }
+  ],
+  "notes": {
+    "app": "CausalSynth v1.0",
+    "data": "Statins-CVD, smoking-lung cancer, Mediterranean diet (built-in datasets)",
+    "code": "https://github.com/mahmood726-cyber/CausalSynth",
+    "doi": "",
+    "version": "1.0",
+    "date": "2026-03-26",
+    "validation": "DRAFT"
+  },
+  "type": "methods",
+  "primary_estimand": "Causal Evidence Score",
+  "validation": {
+    "status": "pass",
+    "checks": [
+      {
+        "name": "single paragraph",
+        "ok": true,
+        "detail": "Body must not contain blank-line paragraph breaks."
+      },
+      {
+        "name": "sentence count",
+        "ok": true,
+        "detail": "Found 7 sentences."
+      },
+      {
+        "name": "word count",
+        "ok": true,
+        "detail": "Found 156 words."
+      },
+      {
+        "name": "no headings",
+        "ok": true,
+        "detail": "No markdown headings allowed in body."
+      },
+      {
+        "name": "no links",
+        "ok": true,
+        "detail": "No links or DOI links allowed in body."
+      },
+      {
+        "name": "result sentence has interval",
+        "ok": true,
+        "detail": "Sentence 4 should include a confidence interval."
+      },
+      {
+        "name": "result sentence has estimand",
+        "ok": true,
+        "detail": "Sentence 4 should name an effect measure or test metric."
+      },
+      {
+        "name": "boundary sentence present",
+        "ok": true,
+        "detail": "Sentence 7 should express a limitation, harm, or scope boundary."
+      }
+    ]
+  },
+  "schema": "e156-v0.2"
+}
