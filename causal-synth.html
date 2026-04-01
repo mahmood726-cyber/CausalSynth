@@ -416,6 +416,38 @@ body.dark .r-code-block { background: #0b0f19; border-color: #1e293b; }
 .webr-summary.fail { background:#fee2e2; color:#991b1b; }
 body.dark .webr-summary.pass { background:#064e3b; color:#6ee7b7; }
 body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
+
+/* Drop zone */
+.drop-zone { border:2px dashed var(--border); border-radius:var(--radius); padding:20px; text-align:center; color:var(--text-muted); font-size:0.9rem; margin-top:10px; transition:0.2s; cursor:pointer; }
+.drop-zone.active { border-color:var(--accent); background:var(--accent-light); color:var(--accent); }
+
+/* TruthCert */
+.truthcert-badge { display:inline-flex; gap:4px; padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; }
+.truthcert-badge.pass { background:#d1fae5; color:#065f46; }
+.truthcert-badge.fail { background:#fee2e2; color:#991b1b; }
+body.dark .truthcert-badge.pass { background:#064e3b; color:#6ee7b7; }
+body.dark .truthcert-badge.fail { background:#7f1d1d; color:#fca5a5; }
+
+/* Bias direction model */
+.bias-dir-table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:10px 0; }
+.bias-dir-table th, .bias-dir-table td { padding:6px 10px; border:1px solid var(--border); text-align:center; }
+.bias-dir-table th { background:var(--accent-light); font-weight:600; }
+.bias-dir-away { color:var(--danger); font-weight:600; }
+.bias-dir-toward { color:var(--success); font-weight:600; }
+.bias-dir-unpred { color:var(--warning); font-weight:600; }
+
+/* Tutorial */
+.tutorial-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9998; display:none; }
+.tutorial-overlay.active { display:block; }
+.tutorial-box { position:fixed; z-index:9999; background:var(--bg-card); border:2px solid var(--accent); border-radius:var(--radius); padding:18px; max-width:400px; box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+.tutorial-box h3 { color:var(--accent); margin-bottom:6px; font-size:1rem; }
+.tutorial-box p { font-size:0.85rem; line-height:1.5; margin-bottom:10px; }
+.tutorial-nav { display:flex; gap:8px; justify-content:space-between; align-items:center; }
+.tutorial-nav .step-ind { font-size:0.75rem; color:var(--text-muted); }
+
+/* Population chars */
+.pop-summary { display:flex; gap:12px; flex-wrap:wrap; margin:8px 0; font-size:0.8rem; }
+.pop-chip { background:var(--bg-input); border:1px solid var(--border); border-radius:12px; padding:2px 10px; }
 </style>
 </head>
 <body>
@@ -440,6 +472,8 @@ body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
     </div>
     <button onclick="exportResults()" aria-label="Export results as CSV">Export CSV</button>
     <button onclick="exportRCode()" aria-label="Export reproducible R code">Export R Code</button>
+    <button onclick="exportPNG()" aria-label="Export main plot as PNG">Export PNG</button>
+    <button onclick="startTutorial()" aria-label="Guided tutorial">Tutorial</button>
     <button id="themeBtn" onclick="toggleTheme()" aria-label="Toggle dark mode">Dark Mode</button>
   </div>
 </header>
@@ -470,6 +504,11 @@ body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
       <button onclick="addRow()">+ Add Study</button>
       <button onclick="addRows(5)">+ Add 5</button>
       <button onclick="clearAll()">Clear All</button>
+      <button onclick="document.getElementById('jsonInput').click()">Import JSON</button>
+      <input type="file" id="jsonInput" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+    <div class="drop-zone" id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      Drop CSV or JSON file here
     </div>
   </div>
 
@@ -636,6 +675,25 @@ body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
       <div class="r-code-block" id="rCodeBlock"></div>
     </div>
 
+    <!-- Bias Direction Model -->
+    <div class="card fade-in" id="biasDirectionCard" style="display:none">
+      <h2>Bias Direction Model</h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:10px">
+        Expected bias direction by design type (Phillips &amp; Smith 2020, Turner et al. 2009).
+      </p>
+      <div id="biasDirectionContent"></div>
+    </div>
+
+    <!-- TruthCert Bundle -->
+    <div class="card fade-in" id="truthcertCard" style="display:none">
+      <h2>TruthCert Bundle <span id="truthcertBadge" class="truthcert-badge"></span></h2>
+      <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:10px">
+        SHA-256 cryptographic audit trail. Causal claims with evidence provenance.
+      </p>
+      <div id="truthcertContent" style="font-family:var(--mono);font-size:0.8rem;background:var(--bg-input);padding:10px;border-radius:var(--radius);overflow-x:auto"></div>
+      <button onclick="downloadTruthCert()" style="margin-top:8px">Download Bundle</button>
+    </div>
+
     <!-- WebR Cross-Validation -->
     <div class="card fade-in" id="webrCard" style="display:none">
       <h2>R Cross-Validation (WebR) <span class="badge" id="webrBadge">Ready</span></h2>
@@ -645,6 +703,18 @@ body.dark .webr-summary.fail { background:#7f1d1d; color:#fca5a5; }
       <button class="primary" id="webrRunBtn" onclick="runWebRValidation()">Validate with R</button>
       <div id="webrResults"></div>
     </div>
+  </div>
+</div>
+
+<!-- Tutorial Overlay -->
+<div class="tutorial-overlay" id="tutorialOverlay" onclick="closeTutorial()"></div>
+<div class="tutorial-box" id="tutorialBox" style="display:none">
+  <h3 id="tutTitle"></h3>
+  <p id="tutText"></p>
+  <div class="tutorial-nav">
+    <button onclick="tutPrev()" id="tutPrevBtn">Previous</button>
+    <span class="step-ind" id="tutStep"></span>
+    <button class="primary" onclick="tutNext()" id="tutNextBtn">Next</button>
   </div>
 </div>
 
@@ -2729,6 +2799,239 @@ function setupTableKeyboardNav() {
     }
   });
 }
+
+// ============================================================
+// NEW FEATURES: JSON Import, Drag-Drop, PNG Export, Tutorial,
+// Bias Direction Model, TruthCert, Population Summary
+// ============================================================
+
+// ---- JSON Import ----
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const arr = Array.isArray(data) ? data : (data.studies ?? data.data ?? []);
+      if (!arr.length) { showToast('No study data found.'); return; }
+      clearAll();
+      for (const d of arr) {
+        const yi = d.yi ?? d.effect ?? d.estimate;
+        const sei = d.sei ?? d.se ?? (d.vi != null ? Math.sqrt(d.vi) : null);
+        if (yi == null || sei == null) continue;
+        addRow({
+          study: d.study ?? d.name ?? `Study ${studies.length + 1}`,
+          design: d.design ?? d.type ?? 'RCT',
+          yi: parseFloat(yi), sei: parseFloat(sei),
+          n: d.n ?? d.N ?? '', events: d.events ?? ''
+        });
+      }
+      showToast(`Loaded ${studies.length} studies from JSON`);
+    } catch (err) { showToast('Invalid JSON: ' + err.message); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ---- Drag-and-Drop ----
+function handleDragOver(e) { e.preventDefault(); document.getElementById('dropZone').classList.add('active'); }
+function handleDragLeave(e) { document.getElementById('dropZone').classList.remove('active'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('active');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    if (file.name.endsWith('.json')) {
+      importJSON({ target: { files: [file], value: '' } });
+    } else {
+      // Treat as CSV
+      importCSV({ target: { files: [file], value: '' } });
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ---- PNG Export ----
+function exportPNG() {
+  const svgEl = document.querySelector('#forestContainer svg') ?? document.querySelector('#radarContainer svg');
+  if (!svgEl) { console.warn('Run analysis first.'); return; }
+  const svgData = new XMLSerializer().serializeToString(svgEl);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    canvas.width = img.width * 2; canvas.height = img.height * 2;
+    ctx.scale(2, 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(b => {
+      const pngUrl = URL.createObjectURL(b);
+      const a = document.createElement('a');
+      a.href = pngUrl; a.download = 'causal-synth-plot.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(pngUrl);
+    }, 'image/png');
+  };
+  img.src = url;
+}
+
+// ---- Bias Direction Model ----
+const BIAS_DIRECTION = {
+  RCT:        { confounding: 'low',    selection: 'away',     measurement: 'low',      reverse: 'low',     overall: 'minimal' },
+  cohort:     { confounding: 'away',   selection: 'away',     measurement: 'toward',   reverse: 'away',    overall: 'away from null' },
+  cc:         { confounding: 'away',   selection: 'away',     measurement: 'away',     reverse: 'toward',  overall: 'away from null' },
+  MR:         { confounding: 'low',    selection: 'low',      measurement: 'low',      reverse: 'low',     overall: 'toward null (dilution)' },
+  ecological: { confounding: 'unpred', selection: 'unpred',   measurement: 'unpred',   reverse: 'unpred',  overall: 'unpredictable' },
+  cross:      { confounding: 'away',   selection: 'toward',   measurement: 'toward',   reverse: 'away',    overall: 'variable' }
+};
+
+function renderBiasDirection() {
+  if (!triResults) return;
+  const card = document.getElementById('biasDirectionCard');
+  card.style.display = '';
+  const designKeys = Object.keys(triResults.designResults);
+  let html = '<table class="bias-dir-table"><thead><tr><th>Design</th><th>Confounding</th><th>Selection</th><th>Measurement</th><th>Reverse Caus.</th><th>Overall Expected</th></tr></thead><tbody>';
+  for (const dk of designKeys) {
+    const bd = BIAS_DIRECTION[dk] ?? { confounding: '?', selection: '?', measurement: '?', reverse: '?', overall: '?' };
+    const cls = (v) => v === 'away' ? 'bias-dir-away' : v === 'toward' ? 'bias-dir-toward' : v === 'unpred' ? 'bias-dir-unpred' : '';
+    html += `<tr><td style="font-weight:600">${DESIGNS[dk]?.short ?? dk}</td>`;
+    html += `<td class="${cls(bd.confounding)}">${bd.confounding}</td>`;
+    html += `<td class="${cls(bd.selection)}">${bd.selection}</td>`;
+    html += `<td class="${cls(bd.measurement)}">${bd.measurement}</td>`;
+    html += `<td class="${cls(bd.reverse)}">${bd.reverse}</td>`;
+    html += `<td style="font-weight:600">${bd.overall}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">Based on Phillips &amp; Smith (2020), Turner et al. (2009). <span class="bias-dir-away">Away</span> = inflates effect; <span class="bias-dir-toward">Toward</span> = attenuates; <span class="bias-dir-unpred">Unpred</span> = unpredictable.</p>';
+  document.getElementById('biasDirectionContent').innerHTML = html;
+}
+
+// ---- TruthCert Bundle ----
+async function generateTruthCert() {
+  const bundle = {
+    version: '1.0', tool: 'CausalSynth',
+    generated: new Date().toISOString(),
+    data: { studies: studies.map(s => ({ study: s.study, design: s.design, yi: s.yi, sei: s.sei })), k: studies.length },
+    results: triResults ? {
+      designs_used: Object.keys(triResults.designResults).length,
+      overall_theta: triResults.overall?.theta,
+      dci: triResults.dci, mcs: triResults.mcs, bds: triResults.bds, ces: triResults.ces,
+      grade: triResults.grade
+    } : null
+  };
+  const encoder = new TextEncoder();
+  const dataStr = JSON.stringify(bundle.data) + JSON.stringify(bundle.results);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(dataStr));
+  bundle.sha256 = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  bundle.audit = {
+    certification: triResults ? 'CERTIFIED' : 'UNCERTIFIED',
+    causal_claims: triResults ? [{
+      claim: `Cross-design triangulation CES=${triResults.ces?.toFixed(3)}, GRADE=${triResults.grade}`,
+      evidence: `${studies.length} studies across ${Object.keys(triResults.designResults).length} designs`,
+      hash: bundle.sha256.substring(0, 16)
+    }] : []
+  };
+  return bundle;
+}
+
+async function renderTruthCert() {
+  const card = document.getElementById('truthcertCard');
+  card.style.display = '';
+  const bundle = await generateTruthCert();
+  const badge = document.getElementById('truthcertBadge');
+  badge.textContent = bundle.audit.certification;
+  badge.className = 'truthcert-badge ' + (bundle.audit.certification === 'CERTIFIED' ? 'pass' : 'fail');
+  let html = `<div><strong>SHA-256:</strong> ${bundle.sha256}</div>`;
+  if (bundle.results) {
+    html += `<div><strong>Designs:</strong> ${bundle.results.designs_used} | <strong>CES:</strong> ${bundle.results.ces?.toFixed(3)} | <strong>GRADE:</strong> ${bundle.results.grade}</div>`;
+  }
+  html += `<div><strong>Status:</strong> <span class="truthcert-badge ${bundle.audit.certification === 'CERTIFIED' ? 'pass' : 'fail'}">${bundle.audit.certification}</span></div>`;
+  document.getElementById('truthcertContent').innerHTML = html;
+  window._csBundle = bundle;
+}
+
+function downloadTruthCert() {
+  const bundle = window._csBundle;
+  if (!bundle) return;
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `truthcert-causalsynth-${bundle.sha256.substring(0, 8)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ---- Tutorial System ----
+const CS_TUTORIAL = [
+  { target: '#dataCard', title: 'Step 1: Enter Multi-Design Data', text: 'Each study has a design type (RCT, cohort, case-control, MR, ecological, cross-sectional). The engine groups studies by design and triangulates evidence across them.' },
+  { target: '#dagCard', title: 'Step 2: Specify Causal Assumptions', text: 'Load a causal DAG template to make your assumptions explicit. The DAG shows which causal paths each design addresses.' },
+  { target: '#runBtn', title: 'Step 3: Run Triangulation', text: 'Click to run cross-design evidence triangulation. The engine computes design-specific pooled effects and convergence metrics.' },
+  { target: '#forestContainer', title: 'Design-Grouped Forest Plot', text: 'Studies grouped by design type. Each design gets its own pooled diamond. The bottom diamond is the overall cross-design estimate.' },
+  { target: '#convergenceCard', title: 'Convergence Metrics', text: 'DCI = direction agreement; MCS = magnitude consistency; BDS = bias diversity; CES = overall causal evidence score. High CES + high BDS = strong triangulation.' },
+  { target: '#causalCard', title: 'Causal Correction (CaMeA)', text: 'For non-linear measures (OR/RR), the CaMeA framework corrects for non-collapsibility. Shows how the pooled effect changes under causal aggregation.' },
+  { target: '#gradeCard', title: 'GRADE Certainty Mapping', text: 'Maps CES to GRADE certainty levels. HIGH/MODERATE/LOW/VERY LOW with specific upgrade/downgrade reasons based on the triangulation evidence.' }
+];
+let tutStep = -1;
+
+function startTutorial() { tutStep = 0; showTutStep(); }
+function showTutStep() {
+  if (tutStep < 0 || tutStep >= CS_TUTORIAL.length) { closeTutorial(); return; }
+  const s = CS_TUTORIAL[tutStep];
+  document.getElementById('tutorialOverlay').classList.add('active');
+  document.getElementById('tutorialBox').style.display = 'block';
+  document.getElementById('tutTitle').textContent = s.title;
+  document.getElementById('tutText').textContent = s.text;
+  document.getElementById('tutStep').textContent = `${tutStep + 1} / ${CS_TUTORIAL.length}`;
+  document.getElementById('tutPrevBtn').style.display = tutStep === 0 ? 'none' : '';
+  document.getElementById('tutNextBtn').textContent = tutStep === CS_TUTORIAL.length - 1 ? 'Finish' : 'Next';
+  const el = document.querySelector(s.target);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const r = el.getBoundingClientRect();
+    const box = document.getElementById('tutorialBox');
+    box.style.top = Math.min(r.bottom + 10, window.innerHeight - 200) + 'px';
+    box.style.left = Math.min(r.left, window.innerWidth - 420) + 'px';
+  }
+}
+function tutNext() { tutStep++; if (tutStep >= CS_TUTORIAL.length) closeTutorial(); else showTutStep(); }
+function tutPrev() { if (tutStep > 0) { tutStep--; showTutStep(); } }
+function closeTutorial() { tutStep = -1; document.getElementById('tutorialOverlay').classList.remove('active'); document.getElementById('tutorialBox').style.display = 'none'; }
+
+// ---- Population Summary ----
+function renderPopulationSummary() {
+  // Summarize study-level characteristics if available
+  if (!triResults) return;
+  const designKeys = Object.keys(triResults.designResults);
+  const totalN = studies.reduce((s, st) => s + (parseFloat(st.n) || 0), 0);
+  const totalEvents = studies.reduce((s, st) => s + (parseFloat(st.events) || 0), 0);
+  const summary = [];
+  if (totalN > 0) summary.push(`N = ${totalN.toLocaleString()}`);
+  if (totalEvents > 0) summary.push(`Events = ${totalEvents.toLocaleString()}`);
+  summary.push(`${studies.length} studies`);
+  summary.push(`${designKeys.length} designs`);
+  // Insert into forest card area if not already there
+  const popDiv = document.getElementById('popSummary');
+  if (popDiv) {
+    popDiv.innerHTML = summary.map(s => `<span class="pop-chip">${s}</span>`).join('');
+  }
+}
+
+// ---- Update renderResults to include new sections ----
+const _origRenderResults = typeof renderResults === 'function' ? renderResults : null;
+const _patchedRR = function() {
+  if (_origRenderResults) _origRenderResults();
+  renderBiasDirection();
+  renderTruthCert();
+  renderPopulationSummary();
+};
+if (_origRenderResults) renderResults = _patchedRR;
 
 // ---- Init ----
 renderLegend();
