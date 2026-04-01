@@ -2842,16 +2842,11 @@ function handleDrop(e) {
   document.getElementById('dropZone').classList.remove('active');
   const file = e.dataTransfer.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    if (file.name.endsWith('.json')) {
-      importJSON({ target: { files: [file], value: '' } });
-    } else {
-      // Treat as CSV
-      importCSV({ target: { files: [file], value: '' } });
-    }
-  };
-  reader.readAsText(file);
+  if (file.name.endsWith('.json')) {
+    importJSON({ target: { files: [file], value: '' } });
+  } else {
+    importCSV({ target: { files: [file], value: '' } });
+  }
 }
 
 // ---- PNG Export ----
@@ -2887,7 +2882,7 @@ const BIAS_DIRECTION = {
   RCT:        { confounding: 'low',    selection: 'away',     measurement: 'low',      reverse: 'low',     overall: 'minimal' },
   cohort:     { confounding: 'away',   selection: 'away',     measurement: 'toward',   reverse: 'away',    overall: 'away from null' },
   cc:         { confounding: 'away',   selection: 'away',     measurement: 'away',     reverse: 'toward',  overall: 'away from null' },
-  MR:         { confounding: 'low',    selection: 'low',      measurement: 'low',      reverse: 'low',     overall: 'toward null (dilution)' },
+  MR:         { confounding: 'low',    selection: 'low',      measurement: 'low',      reverse: 'low',     overall: 'toward null (if valid IV); away if pleiotropy' },
   ecological: { confounding: 'unpred', selection: 'unpred',   measurement: 'unpred',   reverse: 'unpred',  overall: 'unpredictable' },
   cross:      { confounding: 'away',   selection: 'toward',   measurement: 'toward',   reverse: 'away',    overall: 'variable' }
 };
@@ -2901,7 +2896,7 @@ function renderBiasDirection() {
   for (const dk of designKeys) {
     const bd = BIAS_DIRECTION[dk] ?? { confounding: '?', selection: '?', measurement: '?', reverse: '?', overall: '?' };
     const cls = (v) => v === 'away' ? 'bias-dir-away' : v === 'toward' ? 'bias-dir-toward' : v === 'unpred' ? 'bias-dir-unpred' : '';
-    html += `<tr><td style="font-weight:600">${DESIGNS[dk]?.short ?? dk}</td>`;
+    html += `<tr><td style="font-weight:600">${escapeHtml(DESIGNS[dk]?.short ?? dk)}</td>`;
     html += `<td class="${cls(bd.confounding)}">${bd.confounding}</td>`;
     html += `<td class="${cls(bd.selection)}">${bd.selection}</td>`;
     html += `<td class="${cls(bd.measurement)}">${bd.measurement}</td>`;
@@ -2918,12 +2913,12 @@ async function generateTruthCert() {
   const bundle = {
     version: '1.0', tool: 'CausalSynth',
     generated: new Date().toISOString(),
-    data: { studies: studies.map(s => ({ study: s.study, design: s.design, yi: s.yi, sei: s.sei })), k: studies.length },
+    data: { studies: studies.map(s => ({ study: s.study, design: s.design, yi: s.yi, se: s.se })), k: studies.length },
     results: triResults ? {
       designs_used: Object.keys(triResults.designResults).length,
-      overall_theta: triResults.overall?.theta,
-      dci: triResults.dci, mcs: triResults.mcs, bds: triResults.bds, ces: triResults.ces,
-      grade: triResults.grade
+      overall_theta: triResults.overallResult?.theta,
+      dci: triResults.DCI, mcs: triResults.MCS, bds: triResults.BDS, ces: triResults.CES,
+      grade: getGRADECertainty(triResults.CES, triResults.DCI, triResults.BDS, triResults.designResults)?.level ?? 'N/A'
     } : null
   };
   const encoder = new TextEncoder();
@@ -2933,7 +2928,7 @@ async function generateTruthCert() {
   bundle.audit = {
     certification: triResults ? 'CERTIFIED' : 'UNCERTIFIED',
     causal_claims: triResults ? [{
-      claim: `Cross-design triangulation CES=${triResults.ces?.toFixed(3)}, GRADE=${triResults.grade}`,
+      claim: `Cross-design triangulation CES=${triResults.CES?.toFixed(3)}, GRADE=${getGRADECertainty(triResults.CES, triResults.DCI, triResults.BDS, triResults.designResults)?.level ?? 'N/A'}`,
       evidence: `${studies.length} studies across ${Object.keys(triResults.designResults).length} designs`,
       hash: bundle.sha256.substring(0, 16)
     }] : []
@@ -2974,9 +2969,9 @@ const CS_TUTORIAL = [
   { target: '#dagCard', title: 'Step 2: Specify Causal Assumptions', text: 'Load a causal DAG template to make your assumptions explicit. The DAG shows which causal paths each design addresses.' },
   { target: '#runBtn', title: 'Step 3: Run Triangulation', text: 'Click to run cross-design evidence triangulation. The engine computes design-specific pooled effects and convergence metrics.' },
   { target: '#forestContainer', title: 'Design-Grouped Forest Plot', text: 'Studies grouped by design type. Each design gets its own pooled diamond. The bottom diamond is the overall cross-design estimate.' },
-  { target: '#convergenceCard', title: 'Convergence Metrics', text: 'DCI = direction agreement; MCS = magnitude consistency; BDS = bias diversity; CES = overall causal evidence score. High CES + high BDS = strong triangulation.' },
-  { target: '#causalCard', title: 'Causal Correction (CaMeA)', text: 'For non-linear measures (OR/RR), the CaMeA framework corrects for non-collapsibility. Shows how the pooled effect changes under causal aggregation.' },
-  { target: '#gradeCard', title: 'GRADE Certainty Mapping', text: 'Maps CES to GRADE certainty levels. HIGH/MODERATE/LOW/VERY LOW with specific upgrade/downgrade reasons based on the triangulation evidence.' }
+  { target: '#convMetrics', title: 'Convergence Metrics', text: 'DCI = direction agreement; MCS = magnitude consistency; BDS = bias diversity; CES = overall causal evidence score. High CES + high BDS = strong triangulation.' },
+  { target: '#causalCorrectionCard', title: 'Causal Correction (CaMeA)', text: 'For non-linear measures (OR/RR), the CaMeA framework corrects for non-collapsibility. Shows how the pooled effect changes under causal aggregation.' },
+  { target: '#interpretCard', title: 'GRADE Certainty Mapping', text: 'Maps CES to GRADE certainty levels. HIGH/MODERATE/LOW/VERY LOW with specific upgrade/downgrade reasons based on the triangulation evidence.' }
 ];
 let tutStep = -1;
 
