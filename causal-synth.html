@@ -507,8 +507,8 @@ body.dark .truthcert-badge.fail { background:#7f1d1d; color:#fca5a5; }
       <button onclick="document.getElementById('jsonInput').click()">Import JSON</button>
       <input type="file" id="jsonInput" accept=".json" style="display:none" onchange="importJSON(event)">
     </div>
-    <div class="drop-zone" id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-      Drop CSV or JSON file here
+    <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Drop CSV or JSON file here, or press Enter to browse" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.querySelector('.import-area input[type=file]').click()}" onclick="document.querySelector('.import-area input[type=file]').click()">
+      Drop CSV or JSON file here (or click)
     </div>
   </div>
 
@@ -708,7 +708,7 @@ body.dark .truthcert-badge.fail { background:#7f1d1d; color:#fca5a5; }
 
 <!-- Tutorial Overlay -->
 <div class="tutorial-overlay" id="tutorialOverlay" onclick="closeTutorial()"></div>
-<div class="tutorial-box" id="tutorialBox" style="display:none">
+<div class="tutorial-box" id="tutorialBox" style="display:none" role="dialog" aria-modal="true" aria-labelledby="tutTitle">
   <h3 id="tutTitle"></h3>
   <p id="tutText"></p>
   <div class="tutorial-nav">
@@ -985,17 +985,16 @@ function runTriangulation() {
   const majorityCount = Math.max(posCount, negCount) + zeroCount;
   const DCI = designKeys.length > 0 ? Math.min(1, majorityCount / designKeys.length) : 0;
 
-  // 2. Magnitude Consistency Score (MCS) — coefficient of variation approach
-  // CV-based metric: penalizes relative spread of design-level estimates
+  // 2. Magnitude Consistency Score (MCS) — range-based approach
+  // Penalizes absolute spread of design-level estimates (robust to near-zero means)
   let MCS;
   if (designKeys.length > 1) {
-    // CV of design-level point estimates
-    const meanEffect = designEstimates.reduce((a,b) => a+b, 0) / designEstimates.length;
-    const cv = Math.abs(meanEffect) > 1e-10
-      ? Math.sqrt(designEstimates.reduce((s,e) => s + (e-meanEffect)**2, 0) / designEstimates.length) / Math.abs(meanEffect)
-      : 0;
-    // MCS = 1 / (1 + cv*5) — scales nicely: cv=0 -> 1, cv=0.2 -> 0.5, cv=1 -> 0.17
-    MCS = 1 / (1 + cv * 5);
+    const range = Math.max(...designEstimates) - Math.min(...designEstimates);
+    // Normalize range by pooled SE for scale-invariance
+    const pooledSE = overallResult ? overallResult.se : 1;
+    const normRange = pooledSE > 0 ? range / pooledSE : range;
+    // MCS = 1 / (1 + normRange * 0.5) — scales: range=0 -> 1, range=2*SE -> 0.5, range=10*SE -> 0.17
+    MCS = 1 / (1 + normRange * 0.5);
   } else {
     MCS = 1; // single design: no between-design inconsistency measurable
   }
@@ -1900,7 +1899,7 @@ function getGRADECertainty(ces, dci, bds, designResults) {
   let upgraded = false, downgraded = false, reasons = [];
 
   // Upgrade: DCI = 100% AND BDS > 0.5 (strong triangulation)
-  if (dci === 1 && bds > 0.5) {
+  if (dci === 1 && bds > 0.5 && Object.keys(designResults).length >= 3) {
     if (level !== 'HIGH') {
       upgraded = true;
       reasons.push('Upgraded: perfect direction concordance with high bias diversity');
@@ -2975,7 +2974,8 @@ const CS_TUTORIAL = [
 ];
 let tutStep = -1;
 
-function startTutorial() { tutStep = 0; showTutStep(); }
+function csTutEsc(e) { if (e.key === 'Escape') closeTutorial(); }
+function startTutorial() { tutStep = 0; document.addEventListener('keydown', csTutEsc); showTutStep(); }
 function showTutStep() {
   if (tutStep < 0 || tutStep >= CS_TUTORIAL.length) { closeTutorial(); return; }
   const s = CS_TUTORIAL[tutStep];
@@ -2994,10 +2994,11 @@ function showTutStep() {
     box.style.top = Math.min(r.bottom + 10, window.innerHeight - 200) + 'px';
     box.style.left = Math.min(r.left, window.innerWidth - 420) + 'px';
   }
+  setTimeout(() => document.getElementById('tutNextBtn').focus(), 100);
 }
 function tutNext() { tutStep++; if (tutStep >= CS_TUTORIAL.length) closeTutorial(); else showTutStep(); }
 function tutPrev() { if (tutStep > 0) { tutStep--; showTutStep(); } }
-function closeTutorial() { tutStep = -1; document.getElementById('tutorialOverlay').classList.remove('active'); document.getElementById('tutorialBox').style.display = 'none'; }
+function closeTutorial() { tutStep = -1; document.removeEventListener('keydown', csTutEsc); document.getElementById('tutorialOverlay').classList.remove('active'); document.getElementById('tutorialBox').style.display = 'none'; }
 
 // ---- Population Summary ----
 function renderPopulationSummary() {
