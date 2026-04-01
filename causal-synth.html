@@ -742,7 +742,7 @@ const BIAS_PROFILE = {
   RCT:        [   'low',       'moderate','low',       'low',        'moderate' ],
   cohort:     [   'moderate',  'moderate','moderate',  'moderate',   'high'     ],
   cc:         [   'moderate',  'high',    'high',      'moderate',   'moderate' ],
-  MR:         [   'low',       'low',     'low',       'low',        'moderate' ],
+  MR:         [   'moderate',  'low',     'low',       'low',        'moderate' ], // confounding 'moderate' due to pleiotropy risk
   ecological: [   'high',      'moderate','moderate',  'high',       'high'     ],
   cross:      [   'moderate',  'moderate','moderate',  'high',       'moderate' ]
 };
@@ -949,6 +949,7 @@ function toggleExampleDropdown(event) {
 // ---- Triangulation Engine ----
 function runTriangulation() {
   if (studies.length < 2) return;
+  window._csBundle = null; // clear stale bundle
 
   // Group by design
   const groups = {};
@@ -1162,8 +1163,11 @@ function renderForestPlot() {
       if (row.piUpper != null) allUpper.push(row.piUpper);
     }
   }
-  const xMin = Math.min(...allLower) * 1.15;
-  const xMax = Math.max(...allUpper) * 1.15;
+  const rawMin = Math.min(...allLower);
+  const rawMax = Math.max(...allUpper);
+  const pad = (rawMax - rawMin) * 0.12 || 0.5;
+  const xMin = rawMin - pad;
+  const xMax = rawMax + pad;
   const xRange = xMax - xMin || 1;
   const xScale = v => plotLeft + ((v - xMin) / xRange) * plotW;
 
@@ -1947,7 +1951,7 @@ function generateReport() {
   methods += 'For each design, a DerSimonian-Laird random-effects meta-analysis was conducted. ';
   methods += 'Convergence was assessed using the Direction Concordance Index (DCI), Magnitude Consistency Score (MCS), Bias Diversity Score (BDS), and composite Causal Evidence Score (CES).';
   if (hasP0) {
-    methods += ' Causal correction was applied by converting log-OR estimates to risk differences using the CaMeA framework (Berenfeld et al., 2025).';
+    methods += ' Causal correction was applied by converting log-OR estimates to risk differences (Greenland, 1987; Berenfeld et al., 2025 CaMeA framework).';
   }
 
   // Results text
@@ -2903,7 +2907,7 @@ function renderBiasDirection() {
     html += `<td style="font-weight:600">${bd.overall}</td></tr>`;
   }
   html += '</tbody></table>';
-  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">Based on Phillips &amp; Smith (2020), Turner et al. (2009). <span class="bias-dir-away">Away</span> = inflates effect; <span class="bias-dir-toward">Toward</span> = attenuates; <span class="bias-dir-unpred">Unpred</span> = unpredictable.</p>';
+  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">Based on Phillips &amp; Smith (2020), Turner et al. (2009). <span class="bias-dir-away" aria-label="Away from null (inflates effect)">Away</span> = inflates effect; <span class="bias-dir-toward" aria-label="Toward null (attenuates effect)">Toward</span> = attenuates; <span class="bias-dir-unpred" aria-label="Unpredictable direction">Unpred</span> = unpredictable.</p>';
   document.getElementById('biasDirectionContent').innerHTML = html;
 }
 
