@@ -21,7 +21,3 @@ References
 1. Lawlor DA, Tilling K, Davey Smith G. Triangulation in aetiological epidemiology. Int J Epidemiol. 2016;45(6):1866-1886.
 2. Munafo MR, Davey Smith G. Robust research needs many lines of evidence. Nature. 2018;553:399-401.
 3. Greenland S. Quantitative methods in the review of epidemiologic literature. Epidemiol Rev. 1987;9:1-30.
-
-AI Disclosure
-
-This work represents a compiler-generated evidence micro-publication. AI (Claude, Anthropic) was used as a constrained synthesis engine for infrastructure generation, not as an autonomous author. The 156-word body was written and verified by the author, who takes full responsibility. This disclosure follows ICMJE 2023, COPE, and WAME recommendations. All analysis code, data, and TruthCert bundles are archived for independent verification.

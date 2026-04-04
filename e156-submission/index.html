@@ -268,7 +268,7 @@ const D = {
   "source_article": "",
   "body": "Can cross-design evidence triangulation be quantified computationally to strengthen causal inference beyond what any single study design provides? Five clinical examples spanning RCT, cohort, case-control, Mendelian randomization, and ecological designs were analyzed, including statins-CVD, smoking-lung cancer, and Mediterranean diet-mortality. CausalSynth, a browser-based application of 3,045 lines, implements design-grouped random-effects meta-analysis with CaMeA-style causal correction, bias direction modeling, and four convergence metrics: Direction Consistency Index, Magnitude Convergence Score, Bias Diversity Score, and Causal Evidence Score, with TruthCert SHA-256 provenance. The statin example produced a pooled RR of 0.74 (95% CI 0.62-0.88) with a Causal Evidence Score of 0.48, corresponding to strong causal evidence with GRADE-style certainty mapping. Leave-one-design-out sensitivity analysis confirmed directional consistency, and the bias direction model identified expected bias patterns per Phillips and Smith 2020. CausalSynth is the first interactive tool to operationalize evidence triangulation with causal correction and cryptographic audit trails. A limitation is that convergence metrics depend on user-specified bias classifications for each study design.",
   "validation": {
-    "status": "pass",
+    "status": "fail",
     "checks": [
       {
         "name": "single paragraph",
@@ -282,8 +282,8 @@ const D = {
       },
       {
         "name": "word count",
-        "ok": true,
-        "detail": "Found 156 words."
+        "ok": false,
+        "detail": "Found 158 words."
       },
       {
         "name": "no headings",
@@ -298,7 +298,7 @@ const D = {
       {
         "name": "result sentence has interval",
         "ok": true,
-        "detail": "Sentence 4 should include a confidence interval."
+        "detail": "Sentence 4 should include a quantitative result such as a percentage, count, or interval."
       },
       {
         "name": "result sentence has estimand",
@@ -319,27 +319,27 @@ const D = {
     },
     {
       "role": "Dataset",
-      "text": "Twelve studies spanning RCT, cohort, and Mendelian randomization designs were analyzed for the statin-cardiovascular disease relationship using three built-in clinical examples."
+      "text": "Five clinical examples spanning RCT, cohort, case-control, Mendelian randomization, and ecological designs were analyzed, including statins-CVD, smoking-lung cancer, and Mediterranean diet-mortality."
     },
     {
       "role": "Method",
-      "text": "CausalSynth, a browser-based application of 1,772 lines, implements design-grouped random-effects meta-analysis with CaMeA-style causal correction and four convergence metrics: Direction Consistency Index, Magnitude Convergence Score, Bias Diversity Score, and Causal Evidence Score."
+      "text": "CausalSynth, a browser-based application of 3,045 lines, implements design-grouped random-effects meta-analysis with CaMeA-style causal correction, bias direction modeling, and four convergence metrics: Direction Consistency Index, Magnitude Convergence Score, Bias Diversity Score, and Causal Evidence Score, with TruthCert SHA-256 provenance."
     },
     {
       "role": "Primary result",
-      "text": "The statin example produced a pooled RR of 0.74 (95% CI 0.62-0.88) with a Causal Evidence Score of 0.48, corresponding to strong causal evidence with GRADE-style upgrade."
+      "text": "The statin example produced a pooled RR of 0.74 (95% CI 0.62-0.88) with a Causal Evidence Score of 0.48, corresponding to strong causal evidence with GRADE-style certainty mapping."
     },
     {
       "role": "Robustness",
-      "text": "Leave-one-design-out sensitivity analysis confirmed that removing any single design preserved directional consistency across the remaining evidence base."
+      "text": "Leave-one-design-out sensitivity analysis confirmed directional consistency, and the bias direction model identified expected bias patterns per Phillips and Smith 2020."
     },
     {
       "role": "Interpretation",
-      "text": "CausalSynth is the first interactive tool to operationalize evidence triangulation scoring across heterogeneous study designs without requiring any programming expertise."
+      "text": "CausalSynth is the first interactive tool to operationalize evidence triangulation with causal correction and cryptographic audit trails."
     },
     {
       "role": "Boundary",
-      "text": "A limitation is that the convergence metrics depend on the accuracy of user-specified bias architecture classifications for each included study design."
+      "text": "A limitation is that convergence metrics depend on user-specified bias classifications for each study design."
     }
   ],
   "primary_plot": {},
@@ -349,13 +349,13 @@ const D = {
   "included_papers": [],
   "analysis_modules": [],
   "author": "Mahmood Ahmad",
-  "affiliation": "Tahir Heart Institute",
-  "email": "author@example.com",
+  "affiliation": "Royal Free Hospital, London",
+  "email": "mahmood.ahmad2@nhs.net",
   "slug": "causal-synth",
   "references": [
-    "Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021.",
-    "Higgins JPT, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in meta-analyses. BMJ. 2003;327(7414):557-560.",
-    "Cochrane Handbook for Systematic Reviews of Interventions. Version 6.4. Cochrane; 2023."
+    "Lawlor DA, Tilling K, Davey Smith G. Triangulation in aetiological epidemiology. Int J Epidemiol. 2016;45(6):1866-1886.",
+    "Munafo MR, Davey Smith G. Robust research needs many lines of evidence. Nature. 2018;553:399-401.",
+    "Greenland S. Quantitative methods in the review of epidemiologic literature. Epidemiol Rev. 1987;9:1-30."
   ],
   "_assets": [
     "causal-synth.html",
