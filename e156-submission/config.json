@@ -47,11 +47,12 @@
     "date": "2026-04-01",
     "validation": "PASS (60/60 tests, WebR, 3-round review clean)"
   },
-  "affiliation": "Royal Free Hospital, London",
+  "affiliation": "Tahir Heart Institute",
   "email": "mahmood.ahmad2@nhs.net",
   "references": [
     "Lawlor DA, Tilling K, Davey Smith G. Triangulation in aetiological epidemiology. Int J Epidemiol. 2016;45(6):1866-1886.",
     "Munafo MR, Davey Smith G. Robust research needs many lines of evidence. Nature. 2018;553:399-401.",
     "Greenland S. Quantitative methods in the review of epidemiologic literature. Epidemiol Rev. 1987;9:1-30."
-  ]
+  ],
+  "submitted": false
 }

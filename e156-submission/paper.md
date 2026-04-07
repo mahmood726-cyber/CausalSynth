@@ -1,5 +1,5 @@
 Mahmood Ahmad
-Royal Free Hospital, London
+Tahir Heart Institute
 mahmood.ahmad2@nhs.net
 
 CausalSynth: Browser-Based Causal Evidence Triangulation Engine
