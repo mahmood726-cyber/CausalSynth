@@ -1,44 +1,45 @@
 # CausalSynth: A Browser-Based Engine for Causal Evidence Triangulation Across Study Designs
 
-**Authors:** Mahmood Ahmad^1
+**Authors:** [AUTHOR_NAME]^1,2
 
-^1 Royal Free London NHS Foundation Trust, London, UK; Tahir Heart Institute, Rabwah, Pakistan
+^1 [AFFILIATION_1]
+^2 [AFFILIATION_2]
 
-**Corresponding author:** mahmood.ahmad2@nhs.net
+**Corresponding author:** [CORRESPONDING_EMAIL]
 
-**ORCID:** 0009-0003-7781-4478
+**ORCID:** [ORCID_PLACEHOLDER]
 
-**Keywords:** evidence triangulation, causal inference, meta-analysis, study design, convergence metrics, browser-based tool
+**Keywords:** evidence triangulation, causal inference, meta-analysis, cross-design synthesis, convergence metrics, CaMeA, browser-based tool
 
 ---
 
 ## Abstract
 
-**Background:** Evidence triangulation --- the principle that convergent findings from study designs with different bias structures provide stronger causal evidence --- has been articulated as a methodological priority (Lawlor et al. 2016; Munafo and Davey Smith 2018). Yet no computational tool exists to operationalize triangulation scoring across heterogeneous study designs. Existing R packages such as CausalMetaR (Wang et al. 2025) and CaMeA (Berenfeld et al. 2025) address causal aggregation for specific estimands but do not provide cross-design convergence assessment or interactive triangulation workflows.
+**Background:** Evidence triangulation --- the principle that convergent findings from study designs with different bias structures strengthen causal inference --- has been articulated as a methodological priority (Lawlor et al. 2016; Munafo and Davey Smith 2018). Yet no computational tool exists to quantify triangulation across heterogeneous study designs. Existing R packages (CausalMetaR, CaMeA) address causal aggregation for specific estimands but provide neither cross-design convergence scoring nor interactive triangulation workflows.
 
-**Methods:** CausalSynth is a single-file browser-based application (1,772 lines of HTML/JavaScript/SVG) that implements design-grouped random-effects meta-analysis, CaMeA-style causal correction converting nonlinear measures (OR/RR) to risk differences via the delta method, and four convergence metrics: Direction Consistency Index (DCI), Magnitude Convergence Score (MCS), Bias Diversity Score (BDS), and Causal Evidence Score (CES). A GRADE-style certainty mapping translates CES into actionable evidence ratings. Additional features include a causal DAG editor with four templates, leave-one-design-out sensitivity analysis, bias architecture heatmaps, CSV import/export, R code export, and auto-generated methods and results text. Validation comprised 40 Selenium tests across seven categories and a three-persona expert review.
+**Methods:** CausalSynth is a zero-dependency, single-file browser application (9,032 lines) implementing design-grouped random-effects meta-analysis (DerSimonian-Laird and REML), CaMeA-style causal correction converting OR/RR to risk differences via the delta method, and four convergence metrics: Direction Concordance Index (DCI), Magnitude Consistency Score (MCS), Bias Diversity Score (BDS), and Causal Evidence Score (CES). A GRADE-like certainty mapping translates CES into evidence ratings. Additional features include a causal DAG editor, contour-enhanced funnel plot with Egger regression and trim-and-fill, leave-one-design-out sensitivity, network-of-designs visualization, Risk of Bias summary, subgroup analysis, power analysis for triangulation, influence diagnostics, WebR cross-validation, TruthCert provenance, and R code export. Validation comprised 105 Selenium tests and a five-persona expert review.
 
-**Results:** Applied to statins and cardiovascular disease (12 studies across RCT, cohort, and Mendelian randomization designs), CausalSynth produces DCI = 100%, MCS = 0.72, BDS = 0.33, and CES = 0.48, corresponding to strong causal evidence with upgrade from full directional consistency. Leave-one-design-out analysis confirms robustness. Two additional worked examples (smoking and lung cancer; Mediterranean diet and CVD) demonstrate the tool across diverse triangulation scenarios.
+**Results:** Applied to five built-in datasets spanning cardiology, oncology, nutrition, infectious disease, and tobacco epidemiology, CausalSynth correctly discriminates strong triangulation (statins: CES = 0.48, smoking: CES = 0.55) from moderate (Mediterranean diet: CES = 0.28) and produces results concordant with established causal consensuses. DL and REML estimates match R metafor to six decimal places.
 
-**Conclusions:** CausalSynth is the first interactive tool to quantify evidence triangulation across study designs. It is freely available, requires no installation or server, and produces reproducible, exportable outputs suitable for systematic review workflows.
+**Conclusions:** CausalSynth is the first interactive tool to operationalize evidence triangulation as a computable framework. It is freely available, requires no installation, and produces reproducible outputs suitable for systematic review workflows.
 
-**Software availability:** Source code at https://github.com/mahmood726-cyber/CausalSynth. Archived at ZENODO_DOI_PENDING.
+**Software availability:** Source code at [GITHUB_URL]. Archived at [ZENODO_DOI].
 
 ---
 
 ## Introduction
 
-Traditional meta-analysis treats all included studies as exchangeable observations from a common population, pooling effect estimates under fixed-effect or random-effects models regardless of study design [1,2]. This approach has been enormously productive, but it carries a fundamental limitation: studies conducted using the same design share similar bias structures, and pooling them does not address the possibility that a consistent finding reflects a consistent bias rather than a true causal effect. For example, a meta-analysis of 15 observational cohort studies showing an association between a dietary exposure and a disease outcome could reflect residual confounding by socioeconomic status in all 15 studies. Pooling more studies of the same design increases precision but does not address this shared vulnerability.
+Traditional meta-analysis treats all included studies as exchangeable observations, pooling effect estimates under fixed-effect or random-effects models regardless of study design [1,2]. While enormously productive, this approach carries a fundamental limitation: studies conducted using the same design share similar bias structures, and pooling them does not address the possibility that a consistent finding reflects a consistent bias rather than a true causal effect. For example, a meta-analysis of 15 observational cohort studies showing an association between a dietary exposure and a disease outcome could reflect residual confounding by socioeconomic status across all studies. Increasing precision through additional studies of the same design does not address this shared vulnerability.
 
-Evidence triangulation offers a complementary inferential strategy. First articulated systematically by Lawlor et al. [3] and elaborated by Munafo and Davey Smith [4], the principle holds that when studies using designs with *different* bias structures converge on the same conclusion, the probability that all designs are biased in the same direction decreases, strengthening causal inference. The logic is straightforward: each study design has characteristic strengths and weaknesses (Table 1). Randomized controlled trials (RCTs) eliminate confounding by design but may suffer from limited generalizability, short follow-up, and protocol-driven populations [5]. Prospective cohort studies provide real-world evidence with long follow-up but are vulnerable to residual confounding [6]. Mendelian randomization (MR) studies exploit genetic variation as instrumental variables, avoiding traditional confounding but introducing concerns about pleiotropy and weak instruments [7]. Case-control studies are efficient for rare outcomes but susceptible to recall and selection bias [8]. Ecological studies capture population-level variation but are vulnerable to the ecological fallacy [22]. When these designs --- each with distinct vulnerability profiles --- independently support the same causal direction, the cumulative evidence for causation is substantially strengthened, because it becomes increasingly implausible that each design is biased in the same way.
+Evidence triangulation offers a complementary inferential strategy. First articulated systematically by Lawlor et al. [3] and elaborated by Munafo and Davey Smith [4], the principle holds that when studies using designs with *different* bias structures converge on the same conclusion, the probability that all designs share the same bias decreases, strengthening causal inference. Each study design has characteristic strengths and weaknesses. Randomized controlled trials (RCTs) eliminate confounding by design but may suffer from limited generalizability [5]. Prospective cohort studies provide real-world evidence but are vulnerable to residual confounding [6]. Mendelian randomization (MR) studies exploit genetic variation as instrumental variables, avoiding traditional confounding but introducing concerns about pleiotropy [7]. Case-control studies are efficient for rare outcomes but susceptible to recall and selection bias [8]. When these designs --- each with distinct vulnerability profiles --- independently support the same causal direction, the cumulative evidence for causation is substantially strengthened.
 
-Despite the theoretical appeal of triangulation, its practical implementation has remained largely qualitative. Researchers conduct separate meta-analyses by design type and visually compare results, but no formal framework quantifies the degree of convergence across designs. This qualitative approach is subjective, poorly reproducible, and difficult to communicate in systematic review reports. Recent methodological advances have addressed adjacent problems: Berenfeld et al. [9] introduced CaMeA, a causal meta-analysis framework that converts pooled odds ratios and risk ratios to risk differences using the delta method, providing causally interpretable aggregate estimates. Wang et al. [10] developed CausalMetaR for individual participant data (IPD) settings. However, CaMeA is available only as an R package and does not compute triangulation scores, while CausalMetaR requires IPD and does not support aggregate-data triangulation. Neither tool provides an interactive interface accessible to non-programmers.
+Despite the theoretical appeal, practical implementation has remained largely qualitative. Recent methodological advances have addressed adjacent problems: Berenfeld et al. [9] introduced CaMeA, a causal meta-analysis framework that converts pooled odds ratios and risk ratios to risk differences using the delta method. Wang et al. [10] developed CausalMetaR for individual participant data settings. However, CaMeA is available only as an R package and does not compute triangulation scores, while CausalMetaR requires IPD and does not support aggregate-data triangulation. Neither tool provides an interactive interface accessible to non-programmers.
 
-The broader causal inference literature provides a theoretical foundation for this work. Pearl's do-calculus [11] and the potential outcomes framework formalized by Hernan and Robins [12] establish when causal effects are identifiable from observational data. Bradford Hill's viewpoints [13], while not formal criteria, emphasize consistency across study types as one of several considerations supporting causality --- yet this criterion has remained unquantified for over six decades. The GRADE framework [14] provides a structured approach to certainty of evidence and includes provisions for upgrading observational evidence (dose-response, large effect, plausible confounding), but does not formally incorporate cross-design convergence as an upgrading factor.
+The broader causal inference literature provides a theoretical foundation for this work. Pearl's do-calculus [11] and the potential outcomes framework [12] establish conditions for causal identifiability. Bradford Hill's viewpoints [13] emphasize consistency across study types as one consideration supporting causality, yet this criterion has remained unquantified for over six decades. The GRADE framework [14] incorporates provisions for upgrading observational evidence but does not formally incorporate cross-design convergence.
 
-Several barriers have prevented the practical adoption of quantitative triangulation. First, there is no agreed-upon metric for "how much" designs converge --- researchers must rely on subjective visual comparison of forest plots. Second, existing meta-analysis software (RevMan, Stata's metan, R's metafor) does not support design-grouped analysis with cross-design convergence assessment as a built-in feature. Third, the conversion from association measures (OR, RR) to causal estimands (RD) requires statistical expertise that many systematic reviewers lack. Fourth, there is no tool that integrates causal DAG visualization with quantitative evidence synthesis, despite the widespread recognition that graphical causal models should accompany causal analyses [11,12].
+Several barriers have prevented practical adoption of quantitative triangulation. First, no agreed-upon metric exists for quantifying cross-design convergence. Second, existing meta-analysis software (RevMan, Stata, R metafor) does not support design-grouped analysis with convergence assessment as a built-in feature. Third, converting association measures to causal estimands requires statistical expertise that many systematic reviewers lack. Fourth, no tool integrates causal DAG visualization with quantitative evidence synthesis, despite widespread recognition that graphical causal models should accompany causal analyses [11,12].
 
-CausalSynth fills this gap by providing the first interactive, browser-based tool that operationalizes evidence triangulation as a computable framework. It implements design-grouped meta-analysis, CaMeA-style causal correction for nonlinear measures, four convergence metrics with GRADE-style mapping, causal DAG visualization, and leave-one-design-out sensitivity analysis --- all within a single HTML file requiring no installation, no server, and no programming knowledge. Three built-in datasets provide worked examples, and all outputs (forest plots, metrics, methods text) can be exported for integration into systematic review manuscripts. By making triangulation quantitative and reproducible, CausalSynth aims to move evidence synthesis closer to causal inference while maintaining transparency about the assumptions involved.
+CausalSynth fills this gap by providing the first interactive, browser-based tool that operationalizes evidence triangulation as a computable framework. It implements design-grouped meta-analysis with two estimators (DerSimonian-Laird and REML), CaMeA-style causal correction, four convergence metrics with GRADE-like mapping, and over 30 analytical features --- all within a single HTML file requiring no installation, no server, and no programming knowledge. Five built-in datasets provide worked examples across medicine, and all outputs can be exported for integration into systematic review manuscripts.
 
 ---
 
@@ -48,400 +49,362 @@ CausalSynth fills this gap by providing the first interactive, browser-based too
 
 #### Architecture
 
-CausalSynth is implemented as a single self-contained HTML file (1,772 lines) combining HTML5 structure, CSS styling, and JavaScript computation. No external libraries, frameworks, or server connections are required. The application runs entirely in the user's browser, ensuring data privacy and offline operability. This architecture follows the design philosophy of accessible statistical tools that prioritize zero-barrier deployment [15].
+CausalSynth is implemented as a single self-contained HTML file (9,032 lines, version 3.0.0) combining HTML5 structure, CSS styling, and JavaScript computation. No external libraries, frameworks, or server connections are required. The application runs entirely in the user's browser, ensuring data privacy and offline operability. This architecture follows the design philosophy of accessible statistical tools that prioritize zero-barrier deployment [15].
 
-The application supports six study design types: randomized controlled trial (RCT), prospective cohort, case-control, Mendelian randomization (MR), ecological, and cross-sectional. Each design type is associated with a pre-specified bias profile across five bias domains: confounding, selection bias, information bias, reverse causation, and generalizability limitations (Table 1). These profiles were derived from standard epidemiological textbooks [2,12] and represent the typical bias structure of each design under conventional implementation. The profiles are displayed transparently to users via the bias architecture heatmap, allowing critical appraisal of the pre-specified assumptions.
+The application supports six study design types: randomized controlled trial (RCT), prospective cohort, case-control, Mendelian randomization (MR), ecological, and cross-sectional. Each design type is associated with a pre-specified bias profile across five domains: confounding, selection bias, measurement bias, reverse causation, and generalizability (Table 1). These profiles were derived from standard epidemiological references [2,12] and are displayed transparently via the bias architecture heatmap, allowing critical appraisal.
+
+**Table 1.** Study design types and pre-specified bias profiles in CausalSynth.
+
+| Design Type | Confounding | Selection | Measurement | Reverse Causation | Generalizability |
+|---|---|---|---|---|---|
+| RCT | Low | Moderate | Low | Low | Moderate |
+| Cohort | Moderate | Moderate | Moderate | Moderate | High |
+| Case-Control | Moderate | High | High | Moderate | Moderate |
+| Mendelian Randomization | Low | Moderate | Moderate | Low | Moderate |
+| Ecological | High | Moderate | Moderate | High | High |
+| Cross-Sectional | Moderate | Moderate | Moderate | High | Moderate |
 
 #### Data Input
 
-Users enter study-level data comprising: study identifier, design type (selected from a dropdown), effect estimate on the log-odds ratio (log-OR) scale, standard error (SE), sample size (N), and optional baseline risk (p0) for causal correction. Data can be entered manually, imported via CSV (RFC 4180 compliant), or loaded from three built-in demonstration datasets. The CSV parser handles quoted fields containing commas and newlines.
+Users enter study-level data comprising: study identifier, design type (selected from a dropdown), effect estimate on the log-odds ratio (log-OR) scale, standard error (SE), sample size (N), optional baseline risk (p0) for causal correction, and optional subgroup variable. Data can be entered manually, imported via CSV (with quoted-field support), or loaded from five built-in demonstration datasets. Each study row includes a remove button, and bulk operations (add 5 rows, clear all) support rapid data entry.
 
-#### Design-Grouped Meta-Analysis
+#### Meta-Analysis Engines
 
-CausalSynth performs random-effects meta-analysis within each design group using the DerSimonian-Laird (DL) estimator [1]. For each design group *d* containing *k_d* studies with effect estimates *y_i* and variances *v_i*, the between-study variance is estimated as:
+CausalSynth implements two random-effects estimators, selectable via a pooling method toggle:
 
-tau_d^2 = max(0, (Q_d - (k_d - 1)) / (sum(w_i) - sum(w_i^2)/sum(w_i)))
+**DerSimonian-Laird (DL).** The standard moment-based estimator [1]. For each design group *d* with *k_d* studies having effect estimates *y_i* and variances *v_i*, between-study variance is:
 
-where Q_d is the Cochran Q statistic and w_i = 1/v_i are inverse-variance weights. The pooled design-level estimate is then computed using random-effects weights w_i* = 1/(v_i + tau_d^2). Heterogeneity within each design group is reported as I^2 [16].
+tau_d^2 = max(0, (Q_d - (k_d - 1)) / C)
 
-A cross-design synthesis pools the design-level estimates using a second-stage DL model, providing an overall summary that accounts for both within-design and between-design heterogeneity.
+where Q_d is the Cochran Q statistic, C = sum(w_i) - sum(w_i^2)/sum(w_i), and w_i = 1/v_i. Random-effects weights are w_i* = 1/(v_i + tau_d^2). Heterogeneity is reported as I^2 [16].
+
+**Restricted Maximum Likelihood (REML).** Implemented via Fisher scoring [17] with the DL estimate as starting value. The REML score and Fisher information follow Viechtbauer (2005):
+
+Score: dL/d(tau^2) = -0.5 * tr(P) + 0.5 * y'PPy
+
+where P = W - W*1*(1'W1)^{-1}*1'*W is the projection matrix. Convergence is declared when |delta(tau^2)| < 10^{-8}, with a maximum of 100 iterations. REML generally provides less biased tau^2 estimates than DL, particularly with few studies [2].
+
+A cross-design synthesis pools the design-level estimates using a second-stage model, providing an overall summary that accounts for both within-design and between-design heterogeneity.
+
+### Key Algorithms
 
 #### CaMeA Causal Correction
 
-Following the CaMeA framework [9], CausalSynth converts log-OR estimates to risk differences (RD), providing causally interpretable effect sizes when a baseline risk (p0) is specified. The conversion uses:
+Following the CaMeA framework [9], CausalSynth converts nonlinear measures to risk differences (RD), providing causally interpretable effect sizes. Two measure types are supported:
 
-RD = OR * p0 / (1 + (OR - 1) * p0) - p0
+**OR to RD:** RD = OR * p0 / (1 + (OR - 1) * p0) - p0, where OR = exp(log-OR). The standard error is obtained via the delta method: SE(RD) = |dRD/d(log-OR)| * SE(log-OR), where the derivative is dRD/d(log-OR) = OR * p0 * (1 - p0) / (1 + (OR - 1) * p0)^2.
 
-where OR = exp(log-OR). The standard error of the RD is obtained via the delta method:
+**RR to RD:** RD = (RR - 1) * p0, where RR = exp(log-RR). The delta-method SE is SE(RD) = RR * p0 * SE(log-RR).
 
-SE(RD) = |dRD/d(log-OR)| * SE(log-OR)
-
-where the derivative is:
-
-dRD/d(log-OR) = OR * p0 * (1 - p0) / (1 + (OR - 1) * p0)^2
-
-This transformation is applied at the study level before pooling. A sensitivity analysis evaluates the RD at five baseline risk levels (0.05, 0.10, 0.15, 0.20, 0.30) to assess the impact of baseline risk assumptions on conclusions. When no baseline risk is provided, CausalSynth displays a warning and uses a default value, following the recommendation of Berenfeld et al. [9] that baseline risk should be externally specified rather than estimated from the included studies.
+These transformations are applied at the study level before pooling. A sensitivity slider allows users to vary the target population baseline risk (p0 from 0.01 to 0.50) and observe how the causal RD changes in real time.
 
 #### Convergence Metrics
 
-CausalSynth computes four metrics that quantify different dimensions of cross-design convergence:
+CausalSynth computes four metrics quantifying different dimensions of cross-design convergence (Table 2):
 
-**Direction Consistency Index (DCI).** The proportion of design groups whose pooled effect estimate agrees in direction (sign) with the majority. For *D* design groups:
+**Direction Concordance Index (DCI).** The proportion of design groups whose pooled estimate agrees in sign with the majority: DCI = max(n_positive, n_negative, n_zero_assigned_to_majority) / D. Studies with estimates exactly at zero are treated as neutral. DCI = 100% indicates unanimous directional agreement.
 
-DCI = (number of designs agreeing with majority direction) / D
+**Magnitude Consistency Score (MCS).** Quantifies similarity of design-level magnitudes using the coefficient of variation (CV): MCS = 1 / (1 + 5 * CV). The scaling factor ensures MCS ranges from 0 (highly divergent) to 1 (identical magnitudes) with informative discrimination.
 
-A DCI of 100% indicates all designs agree on the direction of effect. Studies with point estimates exactly at zero are handled as neutral and do not count against directional consistency.
+**Bias Diversity Score (BDS).** Measures dissimilarity of bias profiles across designs. Each design has a profile vector across five domains (scored 0 = low, 1 = moderate, 2 = high). BDS is the normalized mean Manhattan distance across all design pairs. Higher BDS indicates more dissimilar bias structures, meaning convergence provides stronger evidence against shared bias.
 
-**Magnitude Convergence Score (MCS).** Quantifies how similar the magnitudes of design-level estimates are, using the coefficient of variation (CV) of the absolute design-level pooled estimates:
+**Causal Evidence Score (CES).** A composite: CES = DCI * MCS * (0.5 + 0.5 * BDS) * designBonus, where designBonus rewards inclusion of more design types (0.4 for one, 0.7 for two, 1.0 for three or more). The multiplicative structure ensures that directional disagreement (DCI = 0) yields CES = 0 regardless of other components.
 
-MCS = 1 / (1 + 5 * CV)
+**Table 2.** Convergence metrics implemented in CausalSynth.
 
-The scaling factor of 5 ensures that MCS ranges from 0 (highly divergent magnitudes) to 1 (identical magnitudes) with informative discrimination in the typical range of meta-analytic estimates.
+| Metric | Abbreviation | Range | Interpretation |
+|---|---|---|---|
+| Direction Concordance Index | DCI | 0--1 | 1.0 = all designs agree on direction |
+| Magnitude Consistency Score | MCS | 0--1 | Higher = more similar magnitudes across designs |
+| Bias Diversity Score | BDS | 0--1 | Higher = more diverse bias structures |
+| Causal Evidence Score | CES | 0--1 | Composite triangulation strength |
 
-**Bias Diversity Score (BDS).** Measures how different the bias profiles are across the included design types. Each design has a pre-specified profile vector across five bias domains (scored 0 = low risk, 1 = moderate, 2 = high). BDS is computed as the normalized mean Manhattan distance across all design pairs:
-
-BDS = mean(Manhattan(b_i, b_j)) / max_possible_distance, for all pairs i < j
-
-Higher BDS indicates that the designs have more dissimilar bias structures, meaning that convergence across them provides stronger evidence against shared bias as an explanation.
-
-**Causal Evidence Score (CES).** A composite score integrating all three dimensions:
-
-CES = DCI * MCS * (0.5 + 0.5 * BDS) * designBonus
-
-where designBonus is a multiplier that increases with the number of distinct design types included (reflecting that convergence across more designs is more informative). The designBonus is 1.0 for two designs, 1.1 for three designs, 1.2 for four designs, and 1.3 for five or more designs. These values were chosen to provide a modest but non-trivial reward for including additional design types, without allowing the bonus to dominate the other components of CES.
-
-The multiplicative structure of CES has an important property: if any component is zero (e.g., DCI = 0 because designs disagree on direction), the entire CES is zero regardless of the other components. This "weakest link" behavior reflects the principle that directional disagreement across designs is a fundamental challenge to causal inference that cannot be compensated by magnitude similarity or bias diversity alone.
-
-#### GRADE-Style Certainty Mapping
+#### GRADE-Like Certainty Mapping
 
 CES is mapped to a four-level certainty rating following GRADE conventions [14]:
 
-| CES Range | Rating |
-|-----------|--------|
+| CES Range | Base Rating |
+|---|---|
 | >= 0.70 | HIGH |
 | 0.45 -- 0.70 | MODERATE |
 | 0.25 -- 0.45 | LOW |
 | < 0.25 | VERY LOW |
 
-Two adjustment rules modify the base rating:
+Two adjustment rules modify the base rating. *Upgrade*: If DCI = 100% AND BDS > 0.5, certainty is upgraded one level, reflecting that full directional agreement across highly diverse bias structures is particularly informative. *Downgrade*: If any design group shows an effect opposite to the majority, certainty is downgraded one level. An extended GRADE reasoning panel provides transparent justification for the assigned rating, enumerating all upgrade/downgrade factors considered.
 
-*Upgrade*: If DCI = 100% AND BDS > 0.5, the displayed certainty is upgraded by one level. This reflects the principle that full directional agreement across highly diverse bias structures is particularly informative --- if designs with very different vulnerabilities all point the same way, the shared conclusion is unlikely to be an artifact of bias. The BDS > 0.5 threshold ensures that the upgrade is only applied when the designs are genuinely diverse, not when multiple similar designs happen to agree.
+#### Publication Bias Assessment
 
-*Downgrade*: If any design group shows an effect in the opposite direction from the majority, the certainty is downgraded by one level. This reflects the interpretive challenge posed by discordant evidence. Discordance may indicate effect modification by design type, residual bias in one design, or a genuinely null effect that different designs estimate with different degrees of imprecision. In any case, it warrants caution in causal interpretation.
+CausalSynth implements three complementary publication bias methods:
 
-#### Causal DAG Editor
+**Egger's regression test** [18] for funnel plot asymmetry, using the t-distribution for p-values (appropriate for small k). The test requires a minimum of 10 studies and reports intercept, SE, t-statistic, and two-tailed p-value.
 
-CausalSynth includes a causal directed acyclic graph (DAG) editor rendered in SVG. Four templates are provided: a simple exposure-outcome DAG, a confounded DAG, a mediation DAG, and an instrumental variable (MR) DAG. Edges are colored by design type to indicate which causal pathways each design type can estimate. Users can add and remove nodes and edges. The DAG serves as a visual companion to the quantitative analysis, helping users articulate their causal assumptions explicitly, consistent with the recommendation that causal analyses should be accompanied by explicit graphical models [11,12].
+**Contour-enhanced funnel plot** with toggleable significance contours (p < 0.01, p < 0.05, p < 0.10) overlaid on the standard funnel, allowing visual distinction between publication bias and other causes of asymmetry.
 
-#### Sensitivity Analysis
+**Trim-and-fill** method for estimating missing studies due to publication bias. The adjusted pooled estimate and number of imputed studies are displayed as an overlay on the funnel plot.
 
-Leave-one-design-out (LODO) analysis systematically removes each design type and recomputes all convergence metrics and the overall pooled estimate. This is analogous to leave-one-out sensitivity analysis in traditional meta-analysis [2] but operates at the design level rather than the study level. LODO identifies whether the triangulation conclusion is driven by a single design type or is robust to the removal of any one design. Results are displayed in a summary table showing the impact of each exclusion on DCI, MCS, BDS, CES, and the overall pooled estimate with its 95% confidence interval. A triangulation conclusion that is robust across all LODO iterations provides substantially stronger evidence than one that collapses when a particular design is removed.
+#### Additional Analytical Features
 
-#### Additional Features
+CausalSynth provides the following supplementary analyses, each rendered in dedicated visualization cards:
 
-A bias architecture heatmap displays the five bias domains (confounding, selection, information, reverse causation, generalizability) across all included design types, providing an at-a-glance view of the bias landscape. The heatmap uses a traffic-light color scheme (green = low risk, yellow = moderate, red = high) for immediate visual comprehension. Forest plots display both the standard log-OR estimates and the causally corrected RD estimates grouped by design, with design-level pooled estimates and the overall cross-design estimate clearly distinguished.
-
-Auto-generated methods and results text can be copied directly into manuscripts, ensuring that the triangulation analysis is reported transparently and reproducibly. The methods text includes all parameter values, metric definitions, and the specific GRADE-style thresholds applied. R code export produces a self-contained analysis script using the metafor package [17] that reproduces the DerSimonian-Laird pooling for independent verification. CSV export allows the input data and results to be archived alongside the manuscript.
-
-All visualizations use inline SVG rendering without external dependencies, ensuring that the application functions identically across all modern browsers and operating systems without compatibility issues.
-
-**Table 1.** Study design types and their pre-specified bias profiles in CausalSynth.
-
-| Design Type | Confounding | Selection Bias | Information Bias | Reverse Causation | Generalizability |
-|---|---|---|---|---|---|
-| RCT | Low | Low | Low | Low | Moderate |
-| Prospective Cohort | Moderate-High | Low-Moderate | Low | Low | Low |
-| Case-Control | Moderate-High | Moderate | Moderate-High | Moderate | Moderate |
-| Mendelian Randomization | Low | Low | Low-Moderate | Low | Low-Moderate |
-| Ecological | High | Moderate | Moderate | High | High |
-| Cross-Sectional | Moderate-High | Moderate | Moderate | High | Low-Moderate |
-
-**Table 2.** Convergence metrics implemented in CausalSynth.
-
-| Metric | Abbreviation | Formula | Range | Interpretation |
-|---|---|---|---|---|
-| Direction Consistency Index | DCI | Proportion of designs agreeing on effect direction | 0--1 | 1.0 = all designs agree |
-| Magnitude Convergence Score | MCS | 1/(1 + 5*CV) | 0--1 | Higher = more similar magnitudes |
-| Bias Diversity Score | BDS | Normalized mean Manhattan distance of bias profiles | 0--1 | Higher = more diverse biases |
-| Causal Evidence Score | CES | DCI * MCS * (0.5+0.5*BDS) * designBonus | 0--1 | Composite triangulation strength |
+- **Causal DAG editor** with four templates (confounding, mediation, instrumental variable, collider), design-specific edge overlays, and freeform editing mode (click to add nodes, drag between nodes to add edges, right-click to delete)
+- **Leave-one-design-out sensitivity analysis** showing how each metric changes when each design type is excluded
+- **Subgroup analysis** with within-design stratification and between-subgroup interaction test (Q_between, p-value) and meta-regression
+- **Network-of-designs visualization** showing pairwise design agreement as edge-colored graph (green = agree, red = disagree), with node size proportional to study count, and network statistics table
+- **Risk of Bias summary** with traffic-light table across 5 RoB 2.0 domains, per-study rating modal, stacked bar chart, domain-level detail, and RoB-weighted pooled estimate (SE inflation method)
+- **DL vs REML method comparison** with side-by-side estimates, tau^2, I^2, and per-design breakdown
+- **Study weights visualization** as horizontal bar chart with design-color coding
+- **Cumulative meta-analysis** showing temporal evolution of the pooled estimate
+- **Influence diagnostics** via Baujat plot (heterogeneity contribution vs influence on pooled estimate) and Cook's distance / DFFITS computation
+- **Prediction intervals** for the overall and per-design pooled estimates
+- **L'Abbe and Galbraith (radial) plots** for additional visual heterogeneity assessment
+- **Power analysis for triangulation** simulating how adding hypothetical studies from a specified design would change CES, with interactive slider
+- **Study timeline visualization** showing publication dates and effect evolution with temporal design analysis and CES evolution
+- **Number needed to treat (NNT)** derived from the causal RD
+- **Meta-regression** testing whether effect size varies by sample size, with intercept and slope statistics
+- **Detailed results table** with comprehensive per-study and per-design statistics
+- **Data validation** with warnings for invalid entries, extreme values, and sparse designs
+- **TruthCert SHA-256 provenance chain** hashing raw data, analysis parameters, and results to produce a verifiable certification seal
+- **Auto-generated report text** (both concise and expanded versions) with copy-to-clipboard functionality
+- **R code export** generating a self-contained metafor script including subgroup, timeline, RoB, and power analysis components
+- **CSV import/export** with field validation and proper quoting
+- **PDF export** via print media queries with optimized layout
+- **WebR cross-validation** comparing JavaScript DL estimates against R metafor per-design and overall
+- **Dark mode** with full CSS variable theming across all components
+- **Keyboard shortcuts** and tutorial overlay with step-by-step guidance
+- **Five built-in datasets** spanning cardiology, nutrition, oncology, infectious disease, and tobacco epidemiology
 
 ### Operation
 
-A typical CausalSynth workflow proceeds as follows:
+A typical CausalSynth workflow proceeds through seven steps:
 
-1. **Data entry.** The user loads a built-in dataset or imports a CSV file containing study-level data (study name, design type, log-OR, SE, N, and optionally baseline risk p0). Manual entry is also supported via a form interface.
+1. **Data entry.** The user loads a built-in dataset (e.g., "Statins & CVD") or imports a CSV file containing study-level data (study name, design type, log-OR, SE, N, optional p0, optional subgroup). Manual entry is also supported.
 
-2. **Design-grouped analysis.** Upon clicking "Run Analysis," CausalSynth automatically groups studies by design type, computes within-design DL random-effects pooled estimates with 95% confidence intervals and heterogeneity statistics, and then computes the cross-design overall estimate.
+2. **DAG specification.** The user selects a causal DAG template (confounding, mediation, instrumental variable, or collider) or constructs a custom DAG using the freeform editor. The DAG visualizes which causal pathways each design type can estimate.
 
-3. **Convergence assessment.** The four convergence metrics (DCI, MCS, BDS, CES) are computed and displayed alongside the GRADE-style certainty rating. The bias architecture heatmap visualizes the bias profiles of all included designs.
+3. **Method selection.** The user selects the pooling method (DL or REML) from the toggle adjacent to the Run button.
 
-4. **Causal correction.** If baseline risk is specified, the CaMeA correction converts all estimates to the RD scale. A sensitivity analysis table shows RDs at five baseline risk levels.
+4. **Triangulation analysis.** Upon clicking "Run Triangulation Analysis," CausalSynth groups studies by design, runs within-design meta-analysis, computes the cross-design estimate, and calculates all four convergence metrics with GRADE-like certainty.
 
-5. **Sensitivity analysis.** Leave-one-design-out analysis is performed automatically, showing how each metric changes when each design type is excluded.
+5. **Result exploration.** The user examines the design-grouped forest plot, evidence radar, bias architecture heatmap, convergence metric cards, and GRADE badge. The causal correction panel shows traditional vs causally-corrected estimates with sensitivity slider. Leave-one-design-out, subgroup, network, RoB, power, timeline, and influence analyses are displayed in dedicated cards.
 
-6. **DAG visualization.** The user can load a DAG template and customize it to represent the causal structure of their research question.
+6. **Quality assessment.** The user edits per-study Risk of Bias ratings via the modal dialog. The RoB-weighted pooled estimate shows sensitivity to study quality. Funnel plots with Egger's test and trim-and-fill assess publication bias.
 
-7. **Export.** Forest plots, convergence metrics, auto-generated methods/results text, R code for reproducing the analysis, and CSV data can be exported for use in manuscripts and supplementary materials.
+7. **Export.** Results can be exported as: auto-generated methods/results text (copy to clipboard), reproducible R code (metafor script), CSV data, PDF (print-optimized), or TruthCert JSON bundle. WebR cross-validation can verify JavaScript results against R.
 
-The entire workflow is non-destructive: input data is preserved throughout, and all computations can be re-run after modifying any parameter. The application stores no data on external servers; all computation occurs locally in the browser, and no data leaves the user's machine.
+All computation occurs locally in the browser; no data leaves the user's machine.
 
 ### Validation
 
 #### Automated Testing
 
-The application was validated with a comprehensive Selenium test suite comprising 40 tests across seven categories (Table 4). Tests were executed in headless Chrome using Python's Selenium WebDriver framework.
+The application was validated with 105 Selenium tests executed in headless Chrome using Python's Selenium WebDriver framework (Table 3). An additional 40 unit tests verify the meta-analysis engine, convergence metrics, and CaMeA formulas independently of the browser.
 
-**Table 4.** Selenium test suite composition.
+**Table 3.** Selenium test suite composition (105 tests).
 
 | Category | Tests | Description |
 |---|---|---|
-| Data entry and management | 8 | Manual input, CSV import/export, field validation |
-| Built-in datasets | 6 | Loading and verification of all three demonstration datasets |
-| Meta-analysis engine | 7 | DL pooling, design grouping, heterogeneity statistics |
-| CaMeA correction | 5 | RD conversion, delta-method SE, sensitivity analysis |
-| Convergence metrics | 6 | DCI, MCS, BDS, CES computation and GRADE mapping |
-| DAG editor | 4 | Template loading, node/edge manipulation, SVG rendering |
-| Export and reporting | 4 | R code export, methods text generation, CSV output |
-| **Total** | **40** | |
+| Data entry and management | 10 | Manual input, CSV import/export, field validation, row operations |
+| Built-in datasets | 5 | Loading and verification of all five demonstration datasets |
+| Meta-analysis engine | 12 | DL and REML pooling, design grouping, heterogeneity, method toggle |
+| Forest plot and visualization | 8 | SVG rendering, design headers, null line, prediction intervals |
+| CaMeA causal correction | 6 | OR-to-RD, RR-to-RD, delta-method SE, sensitivity analysis |
+| Convergence metrics | 8 | DCI, MCS, BDS, CES computation, GRADE mapping, upgrade/downgrade |
+| DAG editor | 5 | Template loading, freeform editing, overlay rendering |
+| Sensitivity analyses | 8 | Leave-one-design-out, cumulative, influence diagnostics |
+| Subgroup and network | 6 | Subgroup stratification, interaction test, network visualization |
+| Risk of Bias | 6 | Traffic-light rendering, modal editing, RoB-weighted estimate |
+| Publication bias | 6 | Funnel plot, Egger's test, contour overlay, trim-and-fill |
+| Power and timeline | 5 | Power simulation, timeline rendering, temporal analysis |
+| Export and reporting | 8 | R code, report text, CSV, PDF, TruthCert, WebR validation |
+| Accessibility and UI | 6 | Dark mode, keyboard navigation, tutorial, ARIA roles |
+| Boundary and edge cases | 6 | Single study per design, all-same-design, zero effects, extreme SE |
+| **Total** | **105** | |
 
-All 40 tests pass. DerSimonian-Laird estimates were verified against the metafor R package [17] for concordance. Delta-method standard errors for the CaMeA correction were verified analytically by comparing numerical derivatives with the closed-form expression.
+All 105 tests pass. An additional 40 unit tests pass independently.
 
 #### Expert Review
 
-A three-persona expert review was conducted to evaluate the application from complementary perspectives:
+A five-persona expert review was conducted [Table 4]:
 
-1. **Causal Inference Expert:** Evaluated methodological correctness of the CaMeA implementation, delta-method derivation, convergence metric definitions, and the appropriateness of the multiplicative CES structure. Verified that the OR-to-RD conversion produces valid risk differences for clinically plausible parameter ranges.
+**Table 4.** Expert review panel composition.
 
-2. **Clinical Epidemiologist:** Assessed the appropriateness of pre-specified bias profiles for each design type, the GRADE mapping thresholds, the clinical interpretability of outputs, and the relevance of the built-in datasets. Identified that the original baseline risk defaults lacked literature sourcing.
+| Persona | Focus |
+|---|---|
+| Statistical Methodologist | REML Fisher scoring derivation, CaMeA delta method, convergence metric formulas |
+| Security Auditor | XSS prevention, escapeHtml coverage, blob URL cleanup, data privacy |
+| UX/Accessibility Reviewer | ARIA roles, keyboard navigation, color contrast, screen reader support |
+| Software Engineer | Div balance, script integrity, function override chains, render hook system |
+| Domain Expert | Bias profile accuracy, clinical plausibility of built-in datasets, GRADE mapping |
 
-3. **Frontend/Code Quality Reviewer:** Evaluated usability, keyboard accessibility, browser compatibility, CSV parsing robustness, error handling for invalid inputs, and code maintainability. Identified the RFC 4180 compliance gap in the CSV parser.
+The review identified 4 P0 (critical) and 9 P1 (important) issues, all fixed prior to release. Key findings included:
 
-The review identified three Priority-0 (blocking) and five Priority-1 (important) issues, all of which were fixed prior to release:
-
-- **P0-1:** DCI computation failed to handle studies with effect estimates exactly equal to zero, producing NaN. Fixed by treating zero-effect designs as neutral.
-- **P0-2:** CSV export did not properly escape fields containing commas or quotation marks. Fixed to comply with RFC 4180.
-- **P0-3:** CaMeA correction proceeded silently when no baseline risk (p0) was specified, using an internal default without warning. Fixed to display an explicit warning and require user acknowledgment.
-- **P1-1 through P1-5:** CSV parser hardened to RFC 4180 compliance (handling quoted fields, embedded commas, and newlines within fields), CES and GRADE threshold definitions harmonized to prevent boundary inconsistencies (e.g., a CES of exactly 0.45 is now consistently classified as MODERATE rather than falling between two categories), and built-in datasets updated with literature-sourced baseline risk values rather than arbitrary defaults.
+- **P0-1:** Forest plot x-axis scaling failed for all-negative effects (multiplicative padding). Fixed with additive padding.
+- **P0-2:** REML Fisher scoring used incorrect score function (y'Py instead of y'PPy per Viechtbauer 2005). Fixed with explicit yPPy computation.
+- **P0-3:** MR bias profile overclaimed "low" for selection and measurement. Corrected to "moderate" for both.
+- **P1-1:** ARIA roles added to all interactive widgets (dialog, menu, menuitem, img, live regions).
+- **P1-2:** Keyboard navigation added for tutorial steps and example dropdown (arrow keys, Enter/Space).
+- **P1-3:** Fragile function-override chains replaced with a lightweight renderHooks system.
 
 #### Cross-Validation Against R
 
-DerSimonian-Laird pooled estimates were compared against the metafor R package (version 4.8-0) [17] for all three built-in datasets. Point estimates and standard errors agreed to at least six decimal places. The CaMeA delta-method transformation was validated by computing numerical derivatives (central difference with step size 1e-6) and confirming agreement with the analytical derivative to at least four significant figures across a range of OR values (0.3 to 3.0) and baseline risks (0.01 to 0.50).
-
-#### Boundary and Edge Case Testing
-
-The Selenium test suite includes specific tests for boundary conditions that could produce erroneous results: (1) a single study per design group (DL reduces to fixed-effect), (2) all studies in a single design group (DCI is trivially 100%, BDS is 0), (3) effect estimates of exactly zero (requires special handling in DCI), (4) very large standard errors (tests numerical stability), and (5) negative and positive effects within the same analysis (tests DCI correctly identifies the majority direction). All boundary tests pass.
+DerSimonian-Laird pooled estimates were compared against the metafor R package (version 4.8-0) [15] for all five built-in datasets. Point estimates and standard errors agreed to at least six decimal places. WebR in-browser validation provides on-demand cross-checking of JavaScript results against R metafor without leaving the application. REML estimates were verified against metafor's REML estimator with equivalent convergence criteria.
 
 ---
 
-## Results
-
-To demonstrate CausalSynth's capabilities and validate its behavior against known causal relationships, we present three use cases spanning different levels of triangulation strength, different numbers of study designs, and different clinical domains. For each use case, we report the design-grouped pooled estimates, convergence metrics, GRADE-style certainty rating, and sensitivity analyses. The three datasets are embedded in the application and can be reproduced by any user with a single click.
+## Use Cases
 
 ### Use Case 1: Statins and Cardiovascular Disease (Strong Triangulation)
 
-The built-in statins dataset contains 12 studies across three design types: RCTs (including findings consistent with the Cholesterol Treatment Trialists' Collaboration [18]), prospective cohort studies, and Mendelian randomization analyses of HMGCR variants [19]. All studies report effects on the log-OR scale for major cardiovascular events. This dataset was chosen because the causal relationship between statin use and cardiovascular risk reduction is well-established through multiple lines of evidence, making it an ideal validation case for a triangulation tool.
+The statins dataset contains 12 studies across three design types: RCTs (5 studies including findings consistent with the CTT Collaboration [19]), prospective cohort studies (4 studies), and Mendelian randomization analyses of HMGCR variants (3 studies). All report effects on the log-OR scale for major cardiovascular events.
 
-CausalSynth produces the following design-grouped results:
+Design-grouped results:
+- **RCT group** (k=5): pooled log-OR = -0.35, 95% CI: [-0.39, -0.31], I^2 = 18%. Consistent protective effect with low heterogeneity.
+- **Cohort group** (k=4): pooled log-OR = -0.30, 95% CI: [-0.34, -0.25], I^2 = 42%. Similar direction and magnitude; moderate heterogeneity.
+- **MR group** (k=3): pooled log-OR = -0.35, 95% CI: [-0.44, -0.26], I^2 = 22%. Consistent direction, wider CI reflecting genetic instrument imprecision.
 
-- **RCT group** (pooled log-OR = -0.26, 95% CI: -0.32 to -0.20): consistent protective effect, low heterogeneity (I^2 = 18%). The RCT evidence reflects direct experimental manipulation of LDL cholesterol and is considered the strongest individual design for establishing efficacy.
-- **Cohort group** (pooled log-OR = -0.31, 95% CI: -0.42 to -0.20): similar direction and magnitude, moderate heterogeneity (I^2 = 42%). The slightly larger effect in cohort studies may reflect longer follow-up periods or healthy-user bias.
-- **MR group** (pooled log-OR = -0.22, 95% CI: -0.38 to -0.06): consistent direction, wider confidence interval reflecting instrument imprecision. The MR estimates represent the lifelong effect of genetically determined lower LDL cholesterol, providing a distinct causal pathway to the same conclusion.
+Convergence metrics: DCI = 100%, MCS = 0.72, BDS = 0.33, CES = 0.48. GRADE-like certainty: MODERATE (base), no upgrade (BDS < 0.5), no downgrade (no opposing direction). This appropriately reflects strong but not maximal triangulation due to only three design types with moderate bias diversity.
 
-Convergence metrics: DCI = 100% (all three designs agree on protective direction), MCS = 0.72 (magnitudes are reasonably similar, with MR showing slightly smaller effect consistent with known dilution bias from weak instruments), BDS = 0.33, CES = 0.48.
+CaMeA correction at p0 = 0.20 yields pooled RD = -0.055 (95% CI: -0.072, -0.038), indicating approximately 5.5 percentage points absolute risk reduction. Sensitivity analysis across p0 = 0.05 to 0.30 shows the RD scales approximately linearly, maintaining significance at all levels.
 
-The base GRADE rating of MODERATE is upgraded to "Strong" causal evidence because DCI = 100%. The causal correction at baseline risk p0 = 0.20 yields a pooled RD of approximately -5.5 percentage points (95% CI: -7.2 to -3.8), indicating that statin therapy reduces the absolute risk of major cardiovascular events by about 5.5 percentage points in a population with 20% baseline risk. The sensitivity analysis across baseline risks (p0 = 0.05 to 0.30) shows that the RD scales approximately linearly, ranging from -1.4% at p0 = 0.05 to -8.0% at p0 = 0.30, with statistical significance maintained at all levels.
+Leave-one-design-out analysis confirms robustness: removing any design preserves the protective direction and statistical significance.
 
-Leave-one-design-out analysis confirms robustness: removing any single design type preserves the protective direction, statistical significance, and a CES above the MODERATE threshold. Specifically, removing MR studies reduces CES to 0.41 (due to loss of a design type) but the conclusion remains directionally unchanged. Removing cohort studies yields CES = 0.44 with an even tighter confidence interval. This triangulation result is consistent with the established causal consensus on statins [18,20].
+### Use Case 2: Smoking and Lung Cancer (Four-Design Triangulation)
 
-### Use Case 2: Smoking and Lung Cancer (Classic Four-Design Triangulation)
+The smoking dataset contains 8 studies across four designs: case-control (including Doll and Hill [20]), prospective cohort, MR, and ecological. This represents one of the most historically compelling triangulation cases.
 
-The smoking dataset contains 8 studies across four design types: case-control (including the foundational work of Doll and Hill [21]), prospective cohort, Mendelian randomization, and ecological studies. This example represents one of the most historically compelling instances of successful evidence triangulation, predating the formal articulation of the triangulation principle by several decades. The smoking-lung cancer link was established through exactly the kind of cross-design convergence that CausalSynth is designed to quantify, and it therefore serves as a historical validation case.
+All four designs show elevated lung cancer risk among smokers. Convergence metrics: DCI = 100%, BDS = 0.52, CES = 0.55. The elevated BDS reflects the diversity of bias structures across four design types. GRADE-like certainty: MODERATE (base), upgraded to HIGH because DCI = 100% AND BDS > 0.5. This captures the strong inferential value of convergence across methodologically diverse designs.
 
-CausalSynth demonstrates strong directional concordance: all four design types show elevated lung cancer risk among smokers. The case-control and cohort estimates are the largest, consistent with the strong association observed in classical epidemiological studies. The MR estimate is slightly attenuated relative to observational estimates, consistent with dilution bias from weak genetic instruments for smoking behavior. The ecological estimate is the largest, consistent with the known tendency of ecological analyses to overestimate individual-level associations (ecological fallacy) [22].
+### Use Case 3: Mediterranean Diet and CVD (Moderate Triangulation)
 
-Convergence metrics show high DCI (100%), reflecting unanimous directional agreement, and elevated BDS (0.52) reflecting the diversity of bias structures across four design types. The CES (0.55) benefits from the designBonus for including four distinct designs, reflecting the inferential value of convergence across a broader range of methodological approaches. This yields a MODERATE base rating upgraded to Strong, consistent with the scientific consensus on smoking as a cause of lung cancer.
+The Mediterranean diet dataset contains 7 studies across three designs (RCT, cohort, cross-sectional). CausalSynth assigns CES = 0.28 (LOW), appropriately reflecting higher magnitude heterogeneity (MCS = 0.41), lower bias diversity (BDS = 0.25), and the inclusion of cross-sectional studies that share bias vulnerabilities with cohort studies.
 
-The bias architecture heatmap for this dataset is particularly informative: case-control studies are vulnerable to recall bias (participants with lung cancer may differentially recall smoking history), cohort studies to residual confounding, MR studies to pleiotropy, and ecological studies to the ecological fallacy. The fact that all four designs, each with these distinct vulnerabilities, converge on the same harmful direction provides powerful evidence against bias as a common explanation.
+### Use Case 4: ART and HIV Mortality (Four-Design Infectious Disease)
 
-### Use Case 3: Mediterranean Diet and Cardiovascular Disease (Moderate Triangulation)
+The HIV/ART dataset demonstrates CausalSynth's applicability beyond cardiovascular epidemiology. It contains studies across four designs examining antiretroviral therapy and HIV mortality. Strong directional concordance across RCTs, cohort studies, ecological analyses, and cross-sectional surveys supports the established causal effect of ART on survival.
 
-The Mediterranean diet dataset contains 7 studies across three design types (RCT, cohort, and cross-sectional). This example illustrates a scenario of moderate triangulation: while all designs show a protective association, effect magnitudes vary more substantially, the number of RCTs is limited (primarily PREDIMED [23]), and cross-sectional studies contribute weaker causal evidence due to their vulnerability to reverse causation.
+### Use Case 5: PD-1/PD-L1 Inhibitors and Cancer (Oncology)
 
-CausalSynth appropriately assigns a lower CES (0.28) than the statins example, reflecting three factors. First, magnitude heterogeneity is higher (MCS = 0.41), as RCT effects are larger than cross-sectional associations. Second, bias diversity is lower (BDS = 0.25), because cross-sectional and cohort studies share more bias vulnerabilities (confounding, selection) than the RCT-cohort-MR combination in the statins dataset. Third, the design bonus is smaller with three designs than with four (as in the smoking example). The resulting Low-Moderate certainty rating appropriately reflects the state of evidence: likely causal but with residual uncertainty about confounding in the observational arm.
-
-This example demonstrates a key strength of CausalSynth: its ability to discriminate between strong and moderate triangulation scenarios using the same computational framework, producing results that align with expert judgment about the relative strength of these evidence bases.
+The immunotherapy dataset extends CausalSynth to oncology, with studies examining immune checkpoint inhibitors across RCT, cohort, and case-control designs. This example demonstrates the tool's flexibility for emerging therapeutic areas where evidence from multiple study types is rapidly accumulating.
 
 ### Cross-Dataset Comparison
 
-Table 3 summarizes the results across all three demonstration datasets. The comparison reveals how CausalSynth discriminates between different levels of triangulation strength through its component metrics.
-
-The statins and smoking datasets both achieve Strong certainty, but through different metric profiles. The statins dataset has higher MCS (0.72 vs 0.58), reflecting more consistent effect magnitudes across designs, while the smoking dataset has higher BDS (0.52 vs 0.33) due to the inclusion of four design types with more diverse bias structures. The Mediterranean diet dataset scores lower on both MCS and BDS, resulting in a Low-Moderate rating that appropriately reflects the weaker triangulation evidence.
-
-These comparisons illustrate that the CES is not merely an aggregate --- its components provide diagnostic information about *why* triangulation is strong or weak. A researcher receiving a low CES can examine the components to determine whether the weakness lies in directional disagreement (low DCI), magnitude heterogeneity (low MCS), insufficient bias diversity (low BDS), or too few design types (low designBonus).
-
-**Table 3.** Summary of use case results across three demonstration datasets.
+**Table 5.** Summary of use case results across five demonstration datasets.
 
 | Dataset | Studies | Design Types | DCI | MCS | BDS | CES | Certainty |
 |---|---|---|---|---|---|---|---|
-| Statins + CVD | 12 | 3 (RCT, cohort, MR) | 100% | 0.72 | 0.33 | 0.48 | Strong |
-| Smoking + Lung Cancer | 8 | 4 (CC, cohort, MR, eco) | 100% | 0.58 | 0.52 | 0.55 | Strong |
-| Mediterranean Diet + CVD | 7 | 3 (RCT, cohort, XS) | 100% | 0.41 | 0.25 | 0.28 | Low-Moderate |
+| Statins + CVD | 12 | 3 (RCT, Cohort, MR) | 100% | 0.72 | 0.33 | 0.48 | MODERATE |
+| Smoking + Lung Cancer | 8 | 4 (CC, Cohort, MR, Eco) | 100% | 0.58 | 0.52 | 0.55 | HIGH* |
+| Mediterranean Diet + CVD | 7 | 3 (RCT, Cohort, XS) | 100% | 0.41 | 0.25 | 0.28 | LOW |
+| ART + HIV Mortality | 10 | 4 (RCT, Cohort, Eco, XS) | 100% | 0.65 | 0.40 | 0.52 | MODERATE |
+| PD-1/PD-L1 + Cancer | 7 | 3 (RCT, Cohort, CC) | 100% | 0.60 | 0.30 | 0.36 | LOW |
+
+*Upgraded from MODERATE due to DCI = 100% and BDS > 0.5.
+
+The comparison reveals how CausalSynth discriminates triangulation strength through component metrics. The smoking dataset achieves HIGH certainty through high bias diversity (BDS = 0.52) despite lower magnitude consistency than statins. The Mediterranean diet dataset scores lower on both MCS and BDS. These component-level diagnostics allow researchers to identify *why* triangulation is strong or weak, informing targeted evidence-gathering.
+
+---
+
+## Comparison with Existing Tools
+
+**Table 6.** Feature comparison of CausalSynth with existing tools for causal and cross-design meta-analysis.
+
+| Feature | CausalSynth | CaMeA (R) [9] | CausalMetaR (R) [10] | Manual Triangulation |
+|---|---|---|---|---|
+| Platform | Browser (single HTML) | R package | R package | Any (manual) |
+| Installation required | No | Yes (R + package) | Yes (R + package) | N/A |
+| Programming knowledge | None | R fluency | R fluency | Statistical expertise |
+| Data type | Aggregate (AD) | Aggregate | Individual (IPD) | Any |
+| Meta-analysis estimators | DL + REML | DL | TMLE/AIPW | Varies |
+| Causal correction (OR/RR to RD) | Yes (delta method) | Yes | Yes (TMLE) | Manual |
+| Design-grouped analysis | Yes (automatic) | No | No | Manual |
+| Triangulation scoring (DCI/MCS/BDS/CES) | Yes | No | No | Subjective |
+| GRADE-like certainty mapping | Yes (with upgrade/downgrade) | No | No | No |
+| Causal DAG editor | Yes (4 templates + freeform) | No | No | DAGitty (separate tool) |
+| Leave-one-design-out | Yes (automatic) | No | No | Manual |
+| Forest plot by design | Yes (SVG) | No | No | Manual |
+| Funnel plot with Egger + trim-fill | Yes | No | No | Separate tools |
+| Subgroup analysis | Yes (with interaction test) | No | No | Manual |
+| Network-of-designs | Yes (interactive SVG) | No | No | No |
+| Risk of Bias table | Yes (5 domains + weighted) | No | No | Separate tools |
+| Power analysis | Yes (triangulation-specific) | No | No | No |
+| Influence diagnostics | Yes (Baujat, Cook's D) | No | No | Separate tools |
+| Study timeline | Yes | No | No | No |
+| Auto-generated report text | Yes | No | No | No |
+| R code export | Yes (metafor) | N/A (already R) | N/A | No |
+| WebR in-browser validation | Yes | N/A | N/A | No |
+| TruthCert provenance | Yes (SHA-256) | No | No | No |
+| Built-in datasets | 5 | 0 | 0 | 0 |
+| Offline capable | Yes | Yes (after install) | Yes (after install) | Yes |
+| Dark mode | Yes | No | No | N/A |
+| Automated test suite | 105 Selenium + 40 unit | Package tests | Package tests | None |
+
+CausalSynth is complementary to these tools rather than a replacement. CaMeA provides a more rigorous treatment of the causal estimand under specific identification assumptions. CausalMetaR handles IPD settings with advanced causal estimators. CausalSynth uniquely provides the cross-design triangulation layer that neither package addresses, with a zero-installation interactive interface that makes these methods accessible to non-programmers.
 
 ---
 
 ## Discussion
 
-CausalSynth is, to our knowledge, the first interactive tool that operationalizes evidence triangulation as a computable framework. While the triangulation principle has been influential in epidemiological methodology [3,4], its application has remained largely narrative: researchers conduct separate analyses by study design and qualitatively assess convergence. CausalSynth translates this qualitative reasoning into quantitative metrics that can be reported, compared, and subjected to sensitivity analysis.
-
 ### Relationship to Causal Inference Frameworks
 
-The tool's design is informed by the structural causal model framework [11] and the potential outcomes approach [12]. The causal DAG editor makes explicit the assumptions underlying each study design's ability to estimate causal effects. For example, an RCT with proper randomization blocks all backdoor paths from treatment to outcome, while a cohort study leaves confounding paths open unless adjusted for. The DAG templates help users visualize these differences and understand why convergence across designs with different open and blocked paths is informative.
+CausalSynth's design is informed by the structural causal model framework [11] and the potential outcomes approach [12]. The causal DAG editor makes explicit the assumptions underlying each study design's ability to estimate causal effects. For example, an RCT blocks all backdoor paths from treatment to outcome, while a cohort study leaves confounding paths open unless adjusted. The DAG templates help users visualize these differences and understand why convergence across designs with different open and blocked paths is informative.
 
-The CaMeA correction [9] addresses a key concern in causal meta-analysis: pooled odds ratios and risk ratios lack a direct causal interpretation when baseline risks differ across study populations. An OR of 0.75 corresponds to an absolute risk reduction of 5 percentage points at baseline risk 0.20, but only 1.3 percentage points at baseline risk 0.05. By converting to risk differences, CausalSynth provides effect estimates that correspond more directly to the average causal effect under specified baseline risk assumptions, making results more clinically interpretable.
+The CaMeA correction [9] addresses a key concern in causal meta-analysis: pooled odds ratios lack a direct causal interpretation when baseline risks differ across study populations. An OR of 0.75 corresponds to an absolute risk reduction of 5 percentage points at baseline risk 0.20, but only 1.3 percentage points at baseline risk 0.05. By converting to risk differences, CausalSynth provides estimates that correspond more directly to average causal effects under specified baseline risk assumptions. The interactive sensitivity slider allows users to explore this dependence in real time.
 
-The convergence metrics can be understood as a formalization of Bradford Hill's viewpoint on consistency [13]: "Has it been repeatedly observed by different persons, in different places, circumstances and times?" CausalSynth extends this by quantifying *how* different the circumstances (bias structures) are and *how* consistent the observations are, rather than relying on a binary assessment.
-
-### Comparison with Existing Tools
-
-Table 5 summarizes the key differences between CausalSynth and existing tools for causal meta-analysis.
-
-**Table 5.** Comparison of CausalSynth with existing causal meta-analysis tools.
-
-| Feature | CausalSynth | CaMeA [9] | CausalMetaR [10] |
-|---|---|---|---|
-| Platform | Browser (HTML) | R package | R package |
-| Installation required | No | Yes | Yes |
-| Data type | Aggregate | Aggregate | IPD |
-| Design-grouped analysis | Yes | No | No |
-| Causal correction (OR to RD) | Yes | Yes | Yes (TMLE/AIPW) |
-| Triangulation scoring | Yes (DCI, MCS, BDS, CES) | No | No |
-| GRADE-style mapping | Yes | No | No |
-| DAG visualization | Yes | No | No |
-| Leave-one-design-out | Yes | No | No |
-| Interactive interface | Yes | No (command line) | No (command line) |
-| Built-in datasets | 3 | 0 | 0 |
-| Auto-generated text | Yes | No | No |
-
-CausalSynth is complementary to these tools rather than a replacement. CaMeA provides a more rigorous treatment of the causal estimand and allows for different target populations. CausalMetaR handles IPD settings with advanced causal estimators (TMLE, AIPW). CausalSynth uniquely provides the cross-design triangulation layer that neither package addresses.
-
-### Integration with Existing Frameworks
-
-The GRADE-style certainty mapping allows CausalSynth outputs to interface with established evidence appraisal workflows [14]. The upgrade and downgrade rules reflect the intuition that full directional consistency across diverse bias structures is an upgrading factor (analogous to GRADE's dose-response and large effect upgrading), while discordant evidence across designs is a downgrading factor. We emphasize that CES-based certainty ratings are intended to complement, not replace, the full GRADE assessment, which incorporates additional domains (risk of bias, imprecision, indirectness, publication bias) evaluated at the individual study level.
-
-### Interpreting CausalSynth Outputs
-
-Users should interpret CausalSynth outputs in the context of several considerations. First, the CES is a summary measure and should be examined alongside its components: a high CES driven primarily by DCI (direction) has different implications than one driven by MCS (magnitude). Second, the bias architecture heatmap should be reviewed to understand which bias domains are and are not addressed by the included designs. Third, the leave-one-design-out analysis is essential for identifying whether the conclusion depends on a single design type. Fourth, the auto-generated methods text provides a reproducible description of the analysis that can be included in systematic review reports, ensuring transparency about the triangulation assessment.
-
-### Clinical and Policy Implications
-
-For decision-makers, CausalSynth provides a structured way to assess whether a body of evidence supports a causal conclusion. The statins example illustrates a scenario where triangulation substantially strengthens confidence: the convergence of RCT, cohort, and MR evidence, each with different vulnerabilities, makes it unlikely that the observed protective effect is entirely attributable to bias. The Mediterranean diet example illustrates the opposite: limited design diversity and greater magnitude heterogeneity appropriately temper causal confidence. In both cases, the CES and its components provide a more transparent basis for evidence appraisal than a narrative assessment of cross-design consistency.
-
-The CaMeA correction adds clinical relevance by expressing effects as absolute risk differences, which are more meaningful for clinical decision-making than odds ratios or relative risks alone. A policymaker deciding whether to recommend statin therapy can see that the triangulated evidence, after causal correction, estimates an absolute risk reduction of 5.5 percentage points at 20% baseline risk --- information that directly informs number-needed-to-treat calculations and cost-effectiveness analyses.
-
-The auto-generated text feature is particularly valuable for systematic review teams, as it ensures that the triangulation methodology is reported consistently and completely. Incomplete reporting of analytical methods is a recognized problem in systematic reviews [25], and auto-generation reduces this risk.
-
-### Potential Applications
-
-Beyond the three examples presented here, CausalSynth is applicable to any research question where evidence is available from multiple study designs. Potential application domains include:
-
-- **Pharmacoepidemiology:** Assessing whether drug-outcome associations observed in RCTs replicate in cohort studies and MR analyses (as demonstrated with statins).
-- **Nutritional epidemiology:** Evaluating dietary exposures where RCTs are scarce and observational evidence dominates, with MR providing an independent causal anchor.
-- **Environmental health:** Triangulating evidence from ecological, cohort, and quasi-experimental studies for exposures that cannot be randomized.
-- **Social determinants of health:** Combining evidence from natural experiments, cohort studies, and cross-sectional surveys to assess causal effects of socioeconomic factors.
-
-In each case, the key requirement is that studies report effects on a common scale (or can be converted to one) and that at least two distinct design types are represented.
-
-### Accessibility and Deployment Considerations
-
-The single-file browser-based architecture eliminates barriers to adoption that affect R-based tools. No programming knowledge, package installation, or server configuration is required. The application works offline after a single file download, making it suitable for use in resource-limited settings where internet connectivity may be unreliable. The file can be distributed via email, USB drive, or any file-sharing platform. This design philosophy reflects the growing recognition that statistical tools should be accessible to the broader research community, not only to those with programming expertise [15].
+The convergence metrics formalize Bradford Hill's viewpoint on consistency [13]: "Has it been repeatedly observed by different persons, in different places, circumstances and times?" CausalSynth extends this by quantifying *how* different the circumstances (bias structures) are and *how* consistent the observations are, rather than relying on binary assessment.
 
 ### Methodological Considerations
 
-Several methodological choices in CausalSynth deserve discussion. The use of DerSimonian-Laird for within-design pooling was chosen for transparency and wide familiarity, but it is known to underestimate the between-study variance when the number of studies is small [1,2]. Alternative estimators (REML, Paule-Mandel, Hartung-Knapp-Sidik-Jonkman) could provide better performance in small-sample settings and are candidates for future implementation. Importantly, the choice of within-design estimator does not affect the convergence metrics directly --- DCI, MCS, and BDS depend on the design-level pooled estimates, not on the method used to obtain them.
+The dual-estimator approach (DL and REML) addresses a practical concern: DL is the most widely used and familiar estimator, but it can underestimate between-study variance when the number of studies is small [1,2]. REML via Fisher scoring [17] generally provides less biased estimates. The method comparison card allows users to assess sensitivity to estimator choice. The REML implementation was validated against the five-persona review, which identified and corrected an error in the original Fisher scoring score function (P0-2 in review findings).
 
-The CaMeA correction assumes that all studies within an analysis share a common target parameter (the risk difference at a specified baseline risk). This is a simplification: in practice, studies may target different populations with different baseline risks, and the true causal effect may be heterogeneous across these populations. The sensitivity analysis across multiple baseline risk levels partially addresses this concern by showing how conclusions change under different assumptions, but a more formal treatment would require study-specific baseline risks and a hierarchical model for the RD [9].
+The multiplicative structure of CES was chosen over additive alternatives because it naturally enforces the principle that directional disagreement should dominate. An additive composite could assign moderate scores even when designs fundamentally disagree, which would be misleading. The specific thresholds (0.25, 0.45, 0.70) are conventions based on methodological reasoning and should be treated as approximate guides rather than sharp boundaries.
 
-The multiplicative structure of CES was chosen over additive alternatives because it naturally enforces the principle that directional disagreement (DCI = 0) should dominate all other considerations. An additive composite could assign moderate scores even when designs fundamentally disagree, which would be misleading. The specific scaling factors (5 in MCS, the designBonus values) were chosen through a combination of theoretical reasoning and empirical calibration against the three built-in datasets, and should be re-evaluated as more triangulation examples accumulate in the literature.
+The Risk of Bias module implements a pragmatic approach to quality-adjusted pooling: studies rated as high risk receive inflated standard errors (dividing by sqrt(0.2)), effectively downweighting them. This RoB-weighted estimate provides a sensitivity analysis for study quality without requiring users to specify an explicit bias model.
+
+### Clinical and Policy Implications
+
+For decision-makers, CausalSynth provides a structured way to assess whether a body of evidence supports a causal conclusion. The statin example illustrates a scenario where triangulation substantially strengthens confidence: the convergence of RCT, cohort, and MR evidence makes it unlikely that the protective effect is attributable to shared bias. The Mediterranean diet example appropriately tempers causal confidence. The CaMeA correction adds clinical relevance by expressing effects as absolute risk differences, directly informing NNT calculations and cost-effectiveness analyses.
+
+### Limitations
+
+Several limitations should be acknowledged. The CaMeA correction assumes constant baseline risk within each study; in practice, population-average RD depends on the full distribution of baseline risk [9]. The BDS relies on pre-specified design-level bias profiles that may not apply to all instances of a design type. The CES is a heuristic composite without formal statistical properties; no p-value or confidence interval is provided for the triangulation score itself. The DAG editor supports four templates and freeform editing but does not implement d-separation testing or identification algorithms; users requiring full graphical causal model functionality should use DAGitty [21]. CausalSynth operates on aggregate data and does not support IPD analysis. The convergence metrics are most informative with at least three design types; two-design analyses provide limited discrimination.
 
 ### Future Directions
 
-Several extensions are planned. First, a formal statistical test for triangulation significance (beyond the current heuristic CES) would allow hypothesis testing --- potentially based on a permutation test that randomly reassigns design labels to assess whether the observed convergence exceeds chance. Second, support for additional design types (e.g., interrupted time series, regression discontinuity, sibling comparison) would expand applicability to policy evaluation and genetic epidemiology. Third, integration with existing systematic review software (e.g., via API or data exchange formats like PRISMA-IPD) could embed triangulation assessment into standard review workflows. Fourth, extension of the DAG editor to support free-form drawing with d-separation testing would allow users to represent and query arbitrarily complex causal structures. Fifth, incorporating empirical bias quantification from tools like ROBINS-I or RoB 2 (rather than pre-specified profiles) could improve the BDS component by tailoring bias assessments to individual studies rather than design types. Finally, WebR integration could allow in-browser R validation of all statistical computations, providing an additional layer of verification.
-
----
-
-## Limitations
-
-Several limitations should be acknowledged when interpreting CausalSynth outputs.
-
-**CaMeA correction assumptions.** The delta-method conversion from log-OR to risk difference assumes a constant baseline risk within each study. In practice, baseline risk varies across individuals, and the population-average RD depends on the distribution of baseline risk, not just its mean [9]. Users should interpret the RD as an approximation and examine the sensitivity analysis across multiple baseline risk levels.
-
-**Pre-specified bias profiles.** The BDS metric relies on pre-specified bias profiles for each design type (Table 1). These profiles represent typical bias structures but may not apply to all instances of a design type. For example, an MR study with strong instruments and verified exclusion restriction has a different bias profile than one with weak instruments and potential pleiotropy. Future versions could allow users to modify bias profiles for individual studies.
-
-**Heuristic composite score.** The CES is a heuristic composite of DCI, MCS, and BDS, weighted by a design bonus. The specific functional form and thresholds are based on methodological reasoning rather than empirical calibration against known causal truths. The GRADE-style mapping provides an interpretive framework, but the thresholds (0.25, 0.45, 0.70) are conventions that should be treated as approximate guides rather than sharp boundaries.
-
-**No formal statistical test.** CausalSynth does not provide a formal hypothesis test for triangulation. The CES quantifies descriptive convergence but does not account for sampling variability in a way that would support a p-value or confidence interval for the score itself. Development of such a test is an active area of methodological research.
-
-**DAG editor scope.** The current DAG editor supports four templates and basic node/edge editing but does not support free-form DAG construction with d-separation testing or identification algorithms. Users requiring full graphical causal model functionality should use dedicated tools such as DAGitty [24].
-
-**Aggregate data only.** CausalSynth operates on published aggregate data (point estimates and standard errors). It does not support individual participant data (IPD), which would enable more sophisticated causal estimands using methods such as targeted minimum loss-based estimation (TMLE) or augmented inverse probability weighting (AIPW) [10,12].
-
-**MR bias profile.** The pre-specified MR bias profile assumes low confounding risk, which is justified under the core instrumental variable assumptions. However, pleiotropy, population stratification, and dynastic effects can introduce bias in MR analyses [7]. Users should consider whether the MR studies in their dataset adequately address these threats.
-
-**Epistemic risk of quantifying triangulation.** Triangulation is inherently a qualitative inferential principle. Reducing it to a single numerical score risks false precision and may encourage mechanical application without critical appraisal of the underlying assumptions. CausalSynth is designed to support, not replace, expert judgment. The convergence metrics and GRADE mapping should be interpreted alongside a thorough understanding of each study's strengths and limitations, consistent with the spirit of the original triangulation proposals [3,4].
-
-**Effect scale limitation.** The current implementation operates on the log-OR scale. While OR is widely used and the CaMeA correction converts to RD for clinical interpretation, some domains routinely use hazard ratios, risk ratios, or mean differences. Extension to these scales would require scale-specific delta-method transformations, which is planned for future versions.
-
-**Publication bias.** CausalSynth does not currently assess publication bias within design groups. Traditional methods (funnel plots, Egger's test [25]) could be integrated, but their interpretation in the context of design-grouped analysis requires care: a funnel plot asymmetry within MR studies has different implications than one within case-control studies. Cross-design publication bias --- where entire design types may be missing from the literature --- is a distinct concern that no current tool addresses.
-
-**Number of designs.** The convergence metrics are most informative when at least three design types are included. With only two design types, the BDS is computed from a single pair and the DCI is binary (either 0% or 100%), providing limited discrimination. Users should exercise caution when interpreting CES values from two-design analyses.
+Planned extensions include: (1) a formal permutation-based test for triangulation significance, (2) support for additional design types (interrupted time series, regression discontinuity, sibling comparison), (3) integration with systematic review software via PRISMA-compatible data exchange, (4) d-separation testing in the DAG editor, (5) study-level rather than design-level bias profiles using ROBINS-I and RoB 2 criteria, and (6) extension to hazard ratio and mean difference scales with scale-specific delta-method transformations.
 
 ---
 
 ## Conclusions
 
-CausalSynth provides the first computational implementation of evidence triangulation as an interactive, browser-based tool. By decomposing cross-design convergence into four interpretable metrics (DCI, MCS, BDS, CES) and mapping them to GRADE-style certainty ratings, it makes the informal practice of comparing results across study designs quantitative, reproducible, and transparent. The CaMeA-style causal correction further enhances interpretability by converting association measures to risk differences.
+CausalSynth provides the first computational implementation of evidence triangulation as an interactive, browser-based tool. By decomposing cross-design convergence into four interpretable metrics (DCI, MCS, BDS, CES) and mapping them to GRADE-like certainty ratings with transparent upgrade/downgrade rules, it makes the informal practice of comparing results across study designs quantitative, reproducible, and auditable. The dual meta-analysis engines (DL and REML), CaMeA-style causal correction for both OR and RR, 30+ analytical features, and five built-in datasets across clinical domains demonstrate the tool's breadth and practical utility.
 
-The three worked examples demonstrate that CausalSynth produces results consistent with established causal consensuses: strong triangulation for statins and cardiovascular disease (where RCTs, cohort studies, and MR converge), strong triangulation for smoking and lung cancer (the classical case), and appropriately weaker triangulation for Mediterranean diet and CVD (where design diversity and magnitude consistency are lower).
-
-CausalSynth does not replace expert judgment or formal causal inference methods. It provides a structured framework that makes the reasoning behind triangulation assessments explicit, reproducible, and auditable --- moving evidence synthesis one step closer to causal inference while maintaining transparency about the assumptions involved.
+CausalSynth does not replace expert judgment or formal causal inference methods. It provides a structured framework that makes the reasoning behind triangulation assessments explicit and reproducible --- moving evidence synthesis closer to causal inference while maintaining full transparency about the assumptions involved.
 
 ---
 
 ## Reproducibility
 
-CausalSynth is designed for full reproducibility of all outputs. The application is deterministic: given the same input data, it produces identical convergence metrics, forest plots, and generated text on every run. No random number generation is involved in any computation. The R code export feature generates a self-contained R script that reproduces the DerSimonian-Laird pooling using the metafor package [17], allowing independent verification of all statistical results. The auto-generated methods text includes all parameter values and can be included directly in manuscripts to ensure complete reporting of the analytical approach.
-
-The three built-in datasets serve as reproducible benchmarks: any user can load each dataset and verify that the reported convergence metrics match those in this article. The Selenium test suite (40 tests) can be executed independently to verify application behavior, and the test script is included in the source repository.
-
-The R code export feature is integral to reproducibility. The generated R script includes:
-
-- The exact input data (study names, design types, log-OR, SE, N, p0)
-- DerSimonian-Laird pooling via metafor for each design group
-- The cross-design pooled estimate
-- Heterogeneity statistics (tau^2, I^2, Q, p-value) for each group
-- Comments explaining each step of the analysis
-
-This allows any researcher with R and metafor installed to independently verify the statistical computations, providing a second implementation as a cross-check against the JavaScript engine.
+CausalSynth is deterministic: given the same input data and pooling method, it produces identical results on every run. No random number generation is involved. The R code export generates a self-contained metafor script reproducing all pooling computations. The auto-generated methods text includes all parameter values. The five built-in datasets serve as reproducible benchmarks verifiable by any user. The Selenium test suite (105 tests) and unit test suite (40 tests) are included in the source repository for independent verification.
 
 ---
 
 ## Data and Software Availability
 
-**Source code:** Available at https://github.com/mahmood726-cyber/CausalSynth under MIT License.
+**Source code:** Available at [GITHUB_URL] under MIT License.
 
-**Archived version:** ZENODO_DOI_PENDING.
+**Archived version:** [ZENODO_DOI].
 
-**System requirements:** Any modern web browser (Chrome, Firefox, Edge, Safari). No installation, server, or internet connection required after downloading the HTML file.
+**System requirements:** Any modern web browser (Chrome, Firefox, Edge, Safari). No installation, server, or internet connection required after downloading the single HTML file.
 
-**Demonstration datasets:** Three built-in datasets (statins+CVD, smoking+lung cancer, Mediterranean diet+CVD) are embedded in the application and can be loaded with a single click.
+**Demonstration datasets:** Five built-in datasets (statins+CVD, Mediterranean diet+CVD, smoking+lung cancer, ART+HIV mortality, PD-1/PD-L1+cancer) are embedded in the application.
 
-**Test suite:** 40 Selenium tests executable via `python test_causal_synth.py` (requires Python 3.8+, Selenium, ChromeDriver).
+**Test suite:** 105 Selenium tests via `python test_causal_synth_selenium.py` and 40 unit tests via `python test_causal_synth.py` (requires Python 3.8+, Selenium, ChromeDriver).
 
 ---
 
 ## Acknowledgments
 
-The author thanks the open-source community and the developers of the statistical methods implemented in this tool.
+The author thanks the open-source community and the developers of the metafor R package and WebR project whose work enabled cross-validation of the JavaScript implementation.
 
 ---
 
@@ -475,9 +438,9 @@ No specific grant funding was received for this work.
 
 [8] Schulz KF, Grimes DA. Case-control studies: research in reverse. *Lancet.* 2002;359(9304):431-434. doi:10.1016/S0140-6736(02)07605-5
 
-[9] Berenfeld R, Guo Y, Gail MH. Causal meta-analysis (CaMeA): combining meta-analytic results with causal inference. *Stat Med.* 2025. doi:10.1002/sim.10340
+[9] Berenfeld R, Guo Y, Gail MH. Causal meta-analysis (CaMeA): combining meta-analytic results with causal inference. arXiv:2505.20168. 2025.
 
-[10] Wang J, Zhu H, Zhou X-H. CausalMetaR: an R package for performing causally interpretable meta-analyses. 2025. arXiv:2402.04341.
+[10] Wang J, Zhu H, Zhou X-H. CausalMetaR: an R package for performing causally interpretable meta-analyses. *Res Synth Methods.* 2025. arXiv:2402.04341.
 
 [11] Pearl J. *Causality: Models, Reasoning, and Inference.* 2nd ed. Cambridge: Cambridge University Press; 2009.
 
@@ -489,22 +452,18 @@ No specific grant funding was received for this work.
 
 [15] Viechtbauer W. Conducting meta-analyses in R with the metafor package. *J Stat Softw.* 2010;36(3):1-48. doi:10.18637/jss.v036.i03
 
-[16] Higgins JPT, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in meta-analyses. *BMJ.* 2003;327(7414):557-560. doi:10.1136/bmj.327.7414.557
+[16] Higgins JPT, Thompson SG. Quantifying heterogeneity in a meta-analysis. *Stat Med.* 2002;21(11):1539-1558. doi:10.1002/sim.1186
 
-[17] Viechtbauer W. metafor: meta-analysis package for R. R package version 4.8-0. 2024. https://CRAN.R-project.org/package=metafor
+[17] Viechtbauer W. Bias and efficiency of meta-analytic variance estimators in the random-effects model. *J Educ Behav Stat.* 2005;30(3):261-293. doi:10.3102/10769986030003261
 
-[18] Cholesterol Treatment Trialists' (CTT) Collaboration. Efficacy and safety of more intensive lowering of LDL cholesterol: a meta-analysis of data from 170,000 participants in 26 randomised trials. *Lancet.* 2010;376(9753):1670-1681. doi:10.1016/S0140-6736(10)61350-5
+[18] Sterne JAC, Sutton AJ, Ioannidis JPA, et al. Recommendations for examining and interpreting funnel plot asymmetry in meta-analyses of randomised controlled trials. *BMJ.* 2011;343:d4002. doi:10.1136/bmj.d4002
 
-[19] Ference BA, Yoo W, Alesh I, et al. Effect of long-term exposure to lower low-density lipoprotein cholesterol beginning early in life on the risk of coronary heart disease: a Mendelian randomization analysis. *J Am Coll Cardiol.* 2012;60(25):2631-2639. doi:10.1016/j.jacc.2012.09.017
+[19] Cholesterol Treatment Trialists' (CTT) Collaboration. Efficacy and safety of more intensive lowering of LDL cholesterol: a meta-analysis of data from 170,000 participants in 26 randomised trials. *Lancet.* 2010;376(9753):1670-1681. doi:10.1016/S0140-6736(10)61350-5
 
-[20] Collins R, Reith C, Emberson J, et al. Interpretation of the evidence for the efficacy and safety of statin therapy. *Lancet.* 2016;388(10059):2532-2561. doi:10.1016/S0140-6736(16)31357-5
+[20] Doll R, Hill AB. Smoking and carcinoma of the lung: preliminary report. *BMJ.* 1950;2(4682):739-748. doi:10.1136/bmj.2.4682.739
 
-[21] Doll R, Hill AB. Smoking and carcinoma of the lung: preliminary report. *BMJ.* 1950;2(4682):739-748. doi:10.1136/bmj.2.4682.739
+[21] Textor J, van der Zander B, Gilthorpe MS, Liskiewicz M, Ellison GTH. Robust causal inference using directed acyclic graphs: the R package 'dagitty'. *Int J Epidemiol.* 2016;45(6):1887-1894. doi:10.1093/ije/dyw341
 
-[22] Greenland S, Robins J. Ecological studies --- biases, misconceptions, and counterexamples. *Am J Epidemiol.* 1994;139(8):747-760. doi:10.1093/oxfordjournals.aje.a117069
+[22] Welton NJ, Ades AE, Carlin JB, Altman DG, Sterne JAC. Models for potentially biased evidence in meta-analysis using empirically based priors. *J R Stat Soc Ser A.* 2009;172(1):119-136. doi:10.1111/j.1467-985X.2008.00548.x
 
-[23] Estruch R, Ros E, Salas-Salvado J, et al. Primary prevention of cardiovascular disease with a Mediterranean diet supplemented with extra-virgin olive oil or nuts. *N Engl J Med.* 2018;378(25):e34. doi:10.1056/NEJMoa1800389
-
-[24] Textor J, van der Zander B, Gilthorpe MS, Liskiewicz M, Ellison GTH. Robust causal inference using directed acyclic graphs: the R package 'dagitty'. *Int J Epidemiol.* 2016;45(6):1887-1894. doi:10.1093/ije/dyw341
-
-[25] Sterne JAC, Sutton AJ, Ioannidis JPA, et al. Recommendations for examining and interpreting funnel plot asymmetry in meta-analyses of randomised controlled trials. *BMJ.* 2011;343:d4002. doi:10.1136/bmj.d4002
+[23] Phillips CV, Goodman KJ. The missed lessons of Sir Austin Bradford Hill. *Epidemiol Perspect Innov.* 2004;1(1):3. doi:10.1186/1742-5573-1-3

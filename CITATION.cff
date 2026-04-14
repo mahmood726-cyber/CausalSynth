@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: "CausalSynth: Browser-Based Causal Evidence Triangulation Engine"
+message: "If you use this software, please cite it as below."
+type: software
+version: "1.0.0"
+date-released: "2026-03-24"
+license: MIT
+authors:
+  - name: "[AUTHOR_PLACEHOLDER]"
+    orcid: "[ORCID_PLACEHOLDER]"
+repository-code: "[REPOSITORY_URL_PLACEHOLDER]"
+keywords:
+  - causal inference
+  - triangulation
+  - CaMeA
+  - meta-analysis
+  - evidence synthesis
+abstract: "World-first browser-based causal evidence triangulation engine. Implements CaMeA causal aggregation for nonlinear effect measures (OR, RR), supports 6 study design types (RCT, cohort, case-control, Mendelian randomization, ecological, cross-sectional), computes convergence metrics (DCI, MCS, BDS, CES), and applies CaMeA causal correction to produce causally interpretable pooled estimates with interactive DAG visualization and bias architecture heatmaps."

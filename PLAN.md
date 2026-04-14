@@ -229,3 +229,43 @@ For each study design, model the expected bias:
 - [ ] 200+ Selenium tests pass
 - [ ] TruthCert bundle validates causal claims
 - [ ] Publishable paper demonstrating causal correction changes pooled estimate by >10% in real data
+
+---
+
+## Current Status (2026-03-24)
+
+### Phase 1: Foundation + Traditional Cross-Design MA — COMPLETE
+- Multi-design data input operational (RCT, cohort, MR + 3 additional design types)
+- Design-grouped forest plot with standard RE pooling
+- Direction concordance index computed
+- Built-in datasets included
+- Grew from 1,946 to 9,033 lines
+
+### Phase 2: Causal Aggregation — COMPLETE
+- REML estimator implemented
+- CaMeA RR causal correction operational
+- Bias adjustment framework with design-specific models
+- p0 (baseline risk) slider for sensitivity analysis on causal correction magnitude
+- Traditional vs causally-corrected pooled effect comparison functional
+
+### Phase 3: Full Triangulation — COMPLETE
+- Interactive DAG editor with drag-and-drop nodes and causal path visualization
+- Funnel plot with Egger's regression test for publication bias
+- Network visualization of cross-design evidence relationships
+- Subgroup analysis by design type and study characteristics
+- Risk of Bias assessment integrated (RoB 2 for RCTs, ROBINS-I for observational)
+- Agreement matrix showing pairwise design concordance
+
+### Phase 4: Publication-Ready — PARTIALLY COMPLETE
+- TruthCert integration: DONE (causal claims carry provenance chain)
+- Tutorial walkthrough: DONE (step-by-step guided tour)
+- 5 built-in datasets: DONE (exceeds 3+ target)
+- 105 Selenium tests: DONE (passing)
+- Remaining: auto-generated reporting text, WebR validation, dark mode polish, multi-persona review, manuscript
+
+### Phase 5: Advanced Causal Methods (NEW — planned)
+- **WebR CaMeA/CausalMetaR parity validation**: cross-validate all causal aggregation formulas against R packages with tolerance 1e-6; automated R script export for each analysis
+- **Full population standardization**: implement IPTW and g-computation standardization to common target population for nonlinear measures; support user-supplied covariate distributions
+- **Dose-response triangulation**: extend CaMeA correction to dose-response curves; triangulate dose-response shapes across designs (RCT titration vs cohort exposure gradients vs MR per-allele effects)
+- **Multi-outcome CaMeA**: apply causal correction across correlated outcomes simultaneously; multivariate CaMeA with shared baseline risk modeling
+- **Collaborative URL sharing**: LZ-string compressed state encoding for shareable analysis URLs; import/export via JSON snapshots; version history tracking
