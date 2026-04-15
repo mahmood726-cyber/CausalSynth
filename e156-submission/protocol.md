@@ -10,16 +10,16 @@ Outside Notes
 
 Type: protocol
 Primary estimand: Causal Evidence Score
-App: CausalSynth v1.0
+App: CausalSynth v2.0
 Code: https://github.com/mahmood726-cyber/CausalSynth
-Date: 2026-03-26
+Date: 2026-04-01
 Validation: DRAFT
 
 References
 
-1. Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021.
-2. Higgins JPT, Thompson SG, Deeks JJ, Altman DG. Measuring inconsistency in meta-analyses. BMJ. 2003;327(7414):557-560.
-3. Cochrane Handbook for Systematic Reviews of Interventions. Version 6.4. Cochrane; 2023.
+1. Guyatt GH, Oxman AD, Vist GE, et al. GRADE: an emerging consensus on rating quality of evidence and strength of recommendations. BMJ. 2008;336(7650):924-926.
+2. Schunemann HJ, Higgins JPT, Vist GE, et al. Completing 'Summary of findings' tables and grading the certainty of the evidence. Cochrane Handbook Chapter 14. Cochrane; 2023.
+3. Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021.
 
 AI Disclosure
 

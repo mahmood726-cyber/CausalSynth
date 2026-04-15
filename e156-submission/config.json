@@ -3,7 +3,7 @@
   "slug": "causal-synth",
   "author": "Mahmood Ahmad",
   "date": "2026-04-01",
-  "path": "C:\\Models\\CausalSynth",
+  "path": "C:\\CausalSynth",
   "type": "methods",
   "primary_estimand": "Causal Evidence Score",
   "summary": "First browser-based causal evidence triangulation engine with CaMeA correction, bias direction modeling, GRADE mapping, and TruthCert provenance across five clinical examples.",
@@ -50,9 +50,9 @@
   "affiliation": "Tahir Heart Institute",
   "email": "mahmood.ahmad2@nhs.net",
   "references": [
-    "Lawlor DA, Tilling K, Davey Smith G. Triangulation in aetiological epidemiology. Int J Epidemiol. 2016;45(6):1866-1886.",
-    "Munafo MR, Davey Smith G. Robust research needs many lines of evidence. Nature. 2018;553:399-401.",
-    "Greenland S. Quantitative methods in the review of epidemiologic literature. Epidemiol Rev. 1987;9:1-30."
+    "Guyatt GH, Oxman AD, Vist GE, et al. GRADE: an emerging consensus on rating quality of evidence and strength of recommendations. BMJ. 2008;336(7650):924-926.",
+    "Schunemann HJ, Higgins JPT, Vist GE, et al. Completing 'Summary of findings' tables and grading the certainty of the evidence. Cochrane Handbook Chapter 14. Cochrane; 2023.",
+    "Borenstein M, Hedges LV, Higgins JPT, Rothstein HR. Introduction to Meta-Analysis. 2nd ed. Wiley; 2021."
   ],
   "submitted": false
 }
