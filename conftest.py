@@ -1,14 +1,15 @@
 """Pytest config for CausalSynth.
 
-All test_*.py files in this repo are Selenium E2E suites that require a
-Chrome/chromedriver + local HTTP server on port 8780. By default, pytest
-collection skips them — set `RUN_BROWSER_TESTS=1` to include them.
+The browser-heavy Selenium suites in this repo require Chrome/chromedriver +
+local HTTP server support. By default, pytest collection skips those suites
+and leaves lightweight smoke tests enabled — set `RUN_BROWSER_TESTS=1` to
+include the browser checks.
 
 Rationale: these Selenium files also reassign `sys.stdout`/`sys.stderr` at
 module level, which breaks pytest's terminal writer at session-finish
 (ValueError: I/O operation on closed file). Excluding them from collection
-avoids that teardown crash entirely and makes `pytest` runnable in CI/triage
-contexts without a browser.
+avoids that teardown crash entirely and keeps `pytest` runnable in CI/triage
+contexts without a browser while still preserving a default smoke contract.
 
 To run browser tests manually:
     $Env:RUN_BROWSER_TESTS = "1"

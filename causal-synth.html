@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CausalSynth — Causal Evidence Triangulation Engine</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#6366f1">
 <style>
 :root {
   --bg: #f5f6f8; --bg-card: #ffffff; --bg-input: #f8f9fb;
@@ -5041,7 +5043,17 @@ function computeTrimAndFill() {
   const k0 = Math.abs(right - left);  // estimated missing studies
 
   if (k0 === 0) {
-    return { k0: 0, adjTheta: theta0, adjLower: overall.lower, adjUpper: overall.upper, message: 'No missing studies estimated' };
+    return {
+      k0: 0,
+      adjTheta: theta0,
+      adjLower: overall.lower,
+      adjUpper: overall.upper,
+      adjI2: overall.I2,
+      origTheta: theta0,
+      origLower: overall.lower,
+      origUpper: overall.upper,
+      message: 'No missing studies estimated'
+    };
   }
 
   // Step 4: Mirror the most extreme studies on the sparse side
@@ -9144,7 +9156,7 @@ function renderDoseResponseSection() {
 }
 
 // Hook into render pipeline
-renderHooks.push(function() { renderDoseResponseSection(); });
+renderHooks.add('afterResults', function() { renderDoseResponseSection(); });
 
 // ============================================================
 // Phase 5: Multi-Outcome Analysis
@@ -9261,7 +9273,7 @@ function renderMultiOutcomeSummary() {
   container.innerHTML = html;
 }
 
-renderHooks.push(function() { renderMultiOutcomeSummary(); });
+renderHooks.add('afterResults', function() { renderMultiOutcomeSummary(); });
 
 // ============================================================
 // Phase 5: Prediction Intervals for Cross-Design Pooled Estimate
@@ -9313,7 +9325,7 @@ function renderPredictionIntervals() {
   container.innerHTML = html;
 }
 
-renderHooks.push(function() { renderPredictionIntervals(); });
+renderHooks.add('afterResults', function() { renderPredictionIntervals(); });
 
 // ============================================================
 // Phase 5: Bootstrap Confidence Interval for CES
@@ -9441,7 +9453,7 @@ function renderBootstrapCES() {
   container.innerHTML = html;
 }
 
-renderHooks.push(function() { renderBootstrapCES(); });
+renderHooks.add('afterResults', function() { renderBootstrapCES(); });
 
 // ============================================================
 // Phase 5: Study Quality Weighting
@@ -9481,7 +9493,7 @@ function renderQualityWeightedAnalysis() {
   container.innerHTML = html;
 }
 
-renderHooks.push(function() { renderQualityWeightedAnalysis(); });
+renderHooks.add('afterResults', function() { renderQualityWeightedAnalysis(); });
 
 // ============================================================
 // Phase 5: Export Enhancements
