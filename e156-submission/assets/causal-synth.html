@@ -752,12 +752,12 @@ function addRow(d) {
   const p0Val = (data.p0 !== undefined && data.p0 !== '') ? data.p0 : '';
   tr.innerHTML = `
     <td style="text-align:center;color:var(--text-muted)">${rowNum}</td>
-    <td><input type="text" value="${escapeHtml(data.study)}" data-f="study" placeholder="Author Year"></td>
-    <td><select data-f="design">${designOpts}</select></td>
-    <td><input type="text" value="${data.yi}" data-f="yi" placeholder="log-OR"></td>
-    <td><input type="text" value="${data.se}" data-f="se" placeholder="SE"></td>
-    <td><input type="text" value="${data.n}" data-f="n" placeholder="N"></td>
-    <td><input type="text" value="${p0Val}" data-f="p0" placeholder="0.2"></td>
+    <td><input type="text" aria-label="Study name" value="${escapeHtml(data.study)}" data-f="study" placeholder="Author Year"></td>
+    <td><select aria-label="Study design" data-f="design">${designOpts}</select></td>
+    <td><input type="text" aria-label="Effect size (yi)" value="${data.yi}" data-f="yi" placeholder="log-OR"></td>
+    <td><input type="text" aria-label="Standard error (SE)" value="${data.se}" data-f="se" placeholder="SE"></td>
+    <td><input type="text" aria-label="Sample size (N)" value="${data.n}" data-f="n" placeholder="N"></td>
+    <td><input type="text" aria-label="Baseline risk (p0)" value="${p0Val}" data-f="p0" placeholder="0.2"></td>
     <td><button onclick="this.closest('tr').remove();sync()" style="padding:2px 7px;border:none;background:none;color:var(--danger);cursor:pointer;font-size:1.1rem">&times;</button></td>
   `;
   tr.querySelectorAll('input,select').forEach(el => el.addEventListener('input', sync));

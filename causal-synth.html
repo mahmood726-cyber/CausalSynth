@@ -580,7 +580,7 @@ table.subgroup-table td { background: var(--bg-input); color: var(--text); }
     <button onclick="exportResults()">Export CSV</button>
     <button onclick="exportRCode()">Export R Code</button>
     <button onclick="exportJSON()">Export JSON</button>
-    <div class="import-area"><button>Import JSON</button><input type="file" accept=".json" onchange="importJSON(event)"></div>
+    <div class="import-area"><button>Import JSON</button><input type="file" accept=".json" aria-label="Import JSON file" onchange="importJSON(event)"></div>
     <button onclick="openTutorial()">Tutorial</button>
     <button onclick="exportPDF()">Export PDF</button>
     <button id="themeBtn" onclick="toggleTheme()">Dark Mode</button>
@@ -691,7 +691,7 @@ table.subgroup-table td { background: var(--bg-input); color: var(--text); }
         The causal correction converts to the risk difference (RD) scale, pools linearly, then shows both.
       </p>
       <div style="margin-bottom:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <label style="font-size:0.82rem;font-weight:600;color:var(--text-heading)">Measure type:</label>
+        <label for="measureTypeSelect" style="font-size:0.82rem;font-weight:600;color:var(--text-heading)">Measure type:</label>
         <select id="measureTypeSelect" onchange="renderCausalCorrection()">
           <option value="OR" selected>Odds Ratio (OR)</option>
           <option value="RR">Risk Ratio (RR)</option>
@@ -699,7 +699,7 @@ table.subgroup-table td { background: var(--bg-input); color: var(--text); }
       </div>
       <div class="causal-grid" id="causalGrid"></div>
       <div class="p0-slider-wrap" id="p0SliderWrap" style="display:none">
-        <label>Target Population Baseline Risk (p0): <span class="p0-slider-val" id="p0SliderVal">0.20</span></label>
+        <label for="p0Slider">Target Population Baseline Risk (p0): <span class="p0-slider-val" id="p0SliderVal">0.20</span></label>
         <input type="range" id="p0Slider" min="0.01" max="0.50" step="0.01" value="0.20" oninput="onP0SliderChange(this.value)">
       </div>
       <div id="causalSensContainer"></div>
@@ -1174,13 +1174,13 @@ function addRow(d) {
   const sgVal = (data.subgroup !== undefined && data.subgroup !== '') ? data.subgroup : '';
   tr.innerHTML = `
     <td style="text-align:center;color:var(--text-muted)">${rowNum}</td>
-    <td><input type="text" value="${escapeHtml(data.study)}" data-f="study" placeholder="Author Year"></td>
-    <td><select data-f="design">${designOpts}</select></td>
-    <td><input type="text" value="${data.yi}" data-f="yi" placeholder="log-OR"></td>
-    <td><input type="text" value="${data.se}" data-f="se" placeholder="SE"></td>
-    <td><input type="text" value="${data.n}" data-f="n" placeholder="N"></td>
-    <td><input type="text" value="${p0Val}" data-f="p0" placeholder="0.2"></td>
-    <td><input type="text" value="${escapeHtml(sgVal)}" data-f="subgroup" placeholder="e.g. Primary"></td>
+    <td><input type="text" aria-label="Study name" value="${escapeHtml(data.study)}" data-f="study" placeholder="Author Year"></td>
+    <td><select aria-label="Study design" data-f="design">${designOpts}</select></td>
+    <td><input type="text" aria-label="Effect size (yi)" value="${data.yi}" data-f="yi" placeholder="log-OR"></td>
+    <td><input type="text" aria-label="Standard error (SE)" value="${data.se}" data-f="se" placeholder="SE"></td>
+    <td><input type="text" aria-label="Sample size (N)" value="${data.n}" data-f="n" placeholder="N"></td>
+    <td><input type="text" aria-label="Baseline risk (p0)" value="${p0Val}" data-f="p0" placeholder="0.2"></td>
+    <td><input type="text" aria-label="Subgroup" value="${escapeHtml(sgVal)}" data-f="subgroup" placeholder="e.g. Primary"></td>
     <td><button onclick="this.closest('tr').remove();sync()" style="padding:2px 7px;border:none;background:none;color:var(--danger);cursor:pointer;font-size:1.1rem">&times;</button></td>
   `;
   tr.querySelectorAll('input,select').forEach(el => el.addEventListener('input', sync));
@@ -2910,8 +2910,8 @@ function renderBiasAdjustment() {
     const dLabel = DESIGNS[dKey]?.short ?? dKey;
     html += '<tr>';
     html += '<td style="text-align:left;font-weight:600">' + escapeHtml(dLabel) + '</td>';
-    html += '<td><input type="number" step="0.01" min="0" max="1" value="' + bias.magnitude + '" style="width:70px;padding:3px 6px;font-family:var(--mono);font-size:0.82rem" data-bias-design="' + escapeHtml(dKey) + '" data-bias-field="magnitude"></td>';
-    html += '<td><select style="padding:3px 6px;font-size:0.82rem" data-bias-design="' + escapeHtml(dKey) + '" data-bias-field="direction">';
+    html += '<td><input type="number" aria-label="Bias magnitude for ' + escapeHtml(dLabel) + '" step="0.01" min="0" max="1" value="' + bias.magnitude + '" style="width:70px;padding:3px 6px;font-family:var(--mono);font-size:0.82rem" data-bias-design="' + escapeHtml(dKey) + '" data-bias-field="magnitude"></td>';
+    html += '<td><select aria-label="Bias direction for ' + escapeHtml(dLabel) + '" style="padding:3px 6px;font-size:0.82rem" data-bias-design="' + escapeHtml(dKey) + '" data-bias-field="direction">';
     html += '<option value="0"' + (bias.direction === 0 ? ' selected' : '') + '>None (0)</option>';
     html += '<option value="1"' + (bias.direction === 1 ? ' selected' : '') + '>Away from null (+1)</option>';
     html += '<option value="-1"' + (bias.direction === -1 ? ' selected' : '') + '>Toward null (-1)</option>';
@@ -6673,7 +6673,7 @@ function openRoBModal() {
     html += '<tr><td style="text-align:left;font-size:0.78rem">' + escapeHtml(s.study) + '</td>';
     html += '<td style="color:' + color + '">' + escapeHtml(DESIGNS[s.design]?.short ?? s.design) + '</td>';
     for (let di = 0; di < ROB_DOMAINS.length; di++) {
-      html += '<td><select data-rob-study="' + escapeHtml(s.study) + '" data-rob-domain="' + di + '" style="font-size:0.78rem;padding:2px">';
+      html += '<td><select aria-label="Risk of bias rating — ' + escapeHtml(s.study) + ' domain ' + (di + 1) + '" data-rob-study="' + escapeHtml(s.study) + '" data-rob-domain="' + di + '" style="font-size:0.78rem;padding:2px">';
       html += '<option value="low"' + (ratings[di] === 'low' ? ' selected' : '') + '>Low</option>';
       html += '<option value="some"' + (ratings[di] === 'some' ? ' selected' : '') + '>Some</option>';
       html += '<option value="high"' + (ratings[di] === 'high' ? ' selected' : '') + '>High</option>';
@@ -6802,7 +6802,7 @@ renderFunnelPlot = function() {
   if (!existingToggle) {
     const toggleDiv = document.createElement('div');
     toggleDiv.className = 'funnel-toggle';
-    toggleDiv.innerHTML = '<label><input type="checkbox" id="contourFunnelToggle" onchange="toggleContourFunnel()"> Show significance contours (p=0.01, 0.05, 0.10)</label>';
+    toggleDiv.innerHTML = '<input type="checkbox" id="contourFunnelToggle" onchange="toggleContourFunnel()"> <label for="contourFunnelToggle">Show significance contours (p=0.01, 0.05, 0.10)</label>';
     container.insertBefore(toggleDiv, container.firstChild);
   }
 
@@ -6811,7 +6811,7 @@ renderFunnelPlot = function() {
   if (!existingTfToggle) {
     const tfDiv = document.createElement('div');
     tfDiv.className = 'funnel-toggle tf-toggle';
-    tfDiv.innerHTML = '<label><input type="checkbox" id="trimFillToggle" onchange="toggleTrimFillFunnel()"> Show Trim-and-Fill imputed studies</label>';
+    tfDiv.innerHTML = '<input type="checkbox" id="trimFillToggle" onchange="toggleTrimFillFunnel()"> <label for="trimFillToggle">Show Trim-and-Fill imputed studies</label>';
     container.insertBefore(tfDiv, container.children[1] ?? null);
   }
 };
@@ -6996,18 +6996,18 @@ function renderPowerAnalysis() {
   html += '<div class="power-slider-wrap" style="margin-top:14px">';
   html += '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px">';
   html += '<label style="font-size:0.82rem;font-weight:600">Add hypothetical studies from:</label>';
-  html += '<select id="powerDesignSelect" onchange="updatePowerSimulation()" style="padding:4px 8px">';
+  html += '<select id="powerDesignSelect" aria-label="Hypothetical study design" onchange="updatePowerSimulation()" style="padding:4px 8px">';
   for (const dKey of Object.keys(DESIGNS)) {
     html += '<option value="' + dKey + '"' + (dKey === 'RCT' ? ' selected' : '') + '>' + DESIGNS[dKey].short + '</option>';
   }
   html += '</select>';
   html += '<label style="font-size:0.82rem;font-weight:600">with effect ~</label>';
-  html += '<input type="number" id="powerEffectInput" value="' + r.overallResult.theta.toFixed(2) + '" step="0.01" style="width:80px;padding:4px 6px;font-family:var(--mono)" onchange="updatePowerSimulation()">';
+  html += '<input type="number" id="powerEffectInput" aria-label="Hypothetical effect estimate" value="' + r.overallResult.theta.toFixed(2) + '" step="0.01" style="width:80px;padding:4px 6px;font-family:var(--mono)" onchange="updatePowerSimulation()">';
   html += '<label style="font-size:0.82rem;font-weight:600">SE ~</label>';
-  html += '<input type="number" id="powerSEInput" value="' + (r.overallResult.se * 2).toFixed(2) + '" step="0.01" min="0.01" style="width:70px;padding:4px 6px;font-family:var(--mono)" onchange="updatePowerSimulation()">';
+  html += '<input type="number" id="powerSEInput" aria-label="Hypothetical SE" value="' + (r.overallResult.se * 2).toFixed(2) + '" step="0.01" min="0.01" style="width:70px;padding:4px 6px;font-family:var(--mono)" onchange="updatePowerSimulation()">';
   html += '</div>';
   html += '<label>Additional studies: <span class="power-slider-val" id="powerKVal">3</span></label>';
-  html += '<input type="range" id="powerKSlider" min="1" max="20" value="3" oninput="updatePowerSimulation()">';
+  html += '<input type="range" id="powerKSlider" aria-label="Number of additional hypothetical studies" min="1" max="20" value="3" oninput="updatePowerSimulation()">';
   html += '</div>';
 
   html += '<div id="powerResultContainer" style="margin-top:14px"></div>';
@@ -9171,7 +9171,7 @@ function initMultiOutcome() {
   if (outcomes.length <= 1) { bar.style.display = 'none'; return; }
   bar.style.display = '';
   let html = '<label style="font-size:0.82rem;font-weight:600;color:var(--text-heading);margin-right:8px">Outcome:</label>';
-  html += '<select id="outcomeSelect" onchange="switchOutcome(this.value)" style="font-family:var(--font);font-size:0.82rem;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-input);color:var(--text)">';
+  html += '<select id="outcomeSelect" aria-label="Select outcome" onchange="switchOutcome(this.value)" style="font-family:var(--font);font-size:0.82rem;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-input);color:var(--text)">';
   for (const name of outcomes) {
     html += `<option value="${escapeHtml(name)}" ${name === currentOutcome ? 'selected' : ''}>${escapeHtml(name)}</option>`;
   }
