@@ -1,5 +1,7 @@
 # CausalSynth
 
+[![ci](https://github.com/mahmood726-cyber/CausalSynth/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/mahmood726-cyber/CausalSynth/actions/workflows/ci.yml) [![codeql](https://github.com/mahmood726-cyber/CausalSynth/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/mahmood726-cyber/CausalSynth/actions/workflows/codeql.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![python: 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+
 Browser-based causal evidence triangulation engine: pools studies grouped by design type and computes a convergence score across heterogeneous designs (RCTs, cohorts, case-control, Mendelian randomization).
 
 **Live dashboard:** <https://mahmood726-cyber.github.io/causalsynth/>
