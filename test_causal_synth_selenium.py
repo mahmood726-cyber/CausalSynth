@@ -2,23 +2,22 @@
 Comprehensive Selenium test suite for CausalSynth -- Causal Evidence Triangulation Engine.
 Target: 80+ tests covering all features.
 """
-import sys
-import os
 import io
+import sys
 import time
 
 # Set UTF-8 for console output only when running standalone (not under pytest)
 if "pytest" not in sys.modules:
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
-import pytest
 from pathlib import Path
+
+import pytest
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait, Select
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
 
 HTML_PATH = Path(__file__).parent / "causal-synth.html"
 URL = f"file:///{HTML_PATH.resolve().as_posix()}"

@@ -3,8 +3,8 @@ Comprehensive Selenium test suite for CausalSynth — Causal Evidence Triangulat
 40 tests across 7 categories.
 """
 
-import sys
 import io
+import sys
 import time
 import traceback
 
@@ -13,11 +13,10 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 URL = "http://localhost:8781/causal-synth.html"
 

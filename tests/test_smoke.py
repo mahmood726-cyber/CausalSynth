@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 REQUIRED_FILES = (
     'causal-synth.html',
     'index.html',

@@ -1,5 +1,8 @@
 """CausalSynth Phase 3 Selenium Tests"""
-import sys, io, time
+import io
+import sys
+import time
+
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 
 from selenium import webdriver
