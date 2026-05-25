@@ -3,7 +3,7 @@
   "slug": "causal-synth",
   "author": "Mahmood Ahmad",
   "date": "2026-04-01",
-  "path": "C:\\CausalSynth",
+  "path": "..",
   "type": "methods",
   "primary_estimand": "Causal Evidence Score",
   "summary": "First browser-based causal evidence triangulation engine with CaMeA correction, bias direction modeling, GRADE mapping, and TruthCert provenance across five clinical examples.",
