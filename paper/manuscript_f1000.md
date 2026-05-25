@@ -438,7 +438,7 @@ No specific grant funding was received for this work.
 
 [8] Schulz KF, Grimes DA. Case-control studies: research in reverse. *Lancet.* 2002;359(9304):431-434. doi:10.1016/S0140-6736(02)07605-5
 
-[9] Berenfeld R, Guo Y, Gail MH. Causal meta-analysis (CaMeA): combining meta-analytic results with causal inference. arXiv:2505.20168. 2025.
+[9] Berenfeld C, Boughdiri A, Colnet B, van Amsterdam WAC, Bellet A. Causal meta-analysis: rethinking the foundations of evidence-based medicine. arXiv:2505.20168. 2025. https://arxiv.org/abs/2505.20168
 
 [10] Wang J, Zhu H, Zhou X-H. CausalMetaR: an R package for performing causally interpretable meta-analyses. *Res Synth Methods.* 2025. arXiv:2402.04341.
 

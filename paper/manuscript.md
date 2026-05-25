@@ -57,8 +57,8 @@ CausalSynth is the first tool to quantify cross-design convergence computational
 ## References
 
 1. Lawlor DA, Tilling K, Davey Smith G. Triangulation in aetiological epidemiology. *Int J Epidemiol*. 2016;45(6):1866-1886.
-2. Munafò MR, Davey Smith G. Robust research needs many lines of evidence. *Nature*. 2018;553(7689):399-401.
-3. Belbasis L, et al. The CaMeA framework for causal meta-analysis. *Int J Epidemiol*. 2024;53(1):dyad180.
+2. Munafò MR, Davey Smith G. Robust research needs many lines of evidence. *Nature*. 2018;553(7689):399-401. doi:10.1038/d41586-018-01023-3
+3. Berenfeld C, Boughdiri A, Colnet B, van Amsterdam WAC, Bellet A. Causal Meta-Analysis: Rethinking the Foundations of Evidence-Based Medicine. arXiv:2505.20168. 2025. https://arxiv.org/abs/2505.20168
 
 ## Data Availability
 Code at https://github.com/mahmood726-cyber/CausalSynth (MIT licence).

@@ -2960,7 +2960,7 @@ function renderBiasAdjustment() {
     }
   }
 
-  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">Bias magnitudes based on typical empirical estimates (Belbasis et al., 2015; Lawlor et al., 2016). RCTs serve as gold standard (zero bias). MR has slight dilution toward null.</p>';
+  html += '<p style="font-size:0.78rem;color:var(--text-muted);margin-top:6px">Bias magnitudes based on typical empirical estimates (Welton et al., 2009; Lawlor et al., 2016). RCTs serve as gold standard (zero bias). MR has slight dilution toward null.</p>';
   container.innerHTML = html;
 }
 
@@ -3812,7 +3812,7 @@ function generateExpandedReport() {
     }
   }
 
-  text += 'Bias adjustment was applied using empirical bias magnitudes per design type (Belbasis et al., 2015; Lawlor et al., 2016).\n';
+  text += 'Bias adjustment was applied using empirical bias magnitudes per design type (Welton et al., 2009; Lawlor et al., 2016).\n';
 
   if (studies.length >= 10) {
     text += 'Publication bias was assessed using the Egger regression test (Egger et al., 1997) and funnel plot visualization.\n';
@@ -5161,7 +5161,7 @@ function renderMethodReference() {
   html += '<p>The CaMeA framework (Berenfeld et al., 2025) converts nonlinear effect measures (OR, RR) to the risk difference (RD) scale using study-level baseline risks, enabling linear pooling of absolute effects. This corrects for non-collapsibility of the OR and interaction between baseline risk and the effect measure.</p>';
 
   html += '<h4 style="color:var(--text-heading);margin:10px 0 4px">Bias Adjustment Model</h4>';
-  html += '<p>Applies empirically-derived bias magnitudes to each study design. Based on systematic comparisons between RCTs and observational studies (Belbasis et al., 2015; Lawlor et al., 2016). RCTs serve as the gold standard (zero bias). MR has slight dilution toward null due to weak instrument bias.</p>';
+  html += '<p>Applies empirically-derived bias magnitudes to each study design. Based on systematic comparisons between RCTs and observational studies (Welton et al., 2009; Lawlor et al., 2016). RCTs serve as the gold standard (zero bias). MR has slight dilution toward null due to weak instrument bias.</p>';
 
   html += '<h4 style="color:var(--text-heading);margin:10px 0 4px">Egger Test</h4>';
   html += '<p>Regression test for funnel plot asymmetry (Egger et al., 1997). Regresses standardized effects on precision. A significant intercept (p &lt; 0.1) suggests small-study effects, which may indicate publication bias. Requires k &gt;= 10 studies for adequate power.</p>';
