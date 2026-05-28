@@ -2502,7 +2502,7 @@ function generateRCode() {
   // Data frame
   code += '# Data\n';
   code += 'dat <- data.frame(\n';
-  code += '  study  = c(' + studies.map(function(s) { return '"' + s.study.replace(/"/g, '\\"') + '"'; }).join(', ') + '),\n';
+  code += '  study  = c(' + studies.map(function(s) { return '"' + s.study.replace(/\/g, '\\').replace(/"/g, '\\"') + '"'; }).join(', ') + '),\n';
   code += '  design = c(' + studies.map(function(s) { return '"' + s.design + '"'; }).join(', ') + '),\n';
   code += '  yi     = c(' + studies.map(function(s) { return s.yi.toString(); }).join(', ') + '),\n';
   code += '  sei    = c(' + studies.map(function(s) { return s.se.toString(); }).join(', ') + ')\n';
@@ -3960,7 +3960,7 @@ function generateExpandedRCode() {
   // Data frame
   code += '# ---- Data ----\n';
   code += 'dat <- data.frame(\n';
-  code += '  study  = c(' + studies.map(function(s) { return '"' + s.study.replace(/"/g, '\\"') + '"'; }).join(',\n             ') + '),\n';
+  code += '  study  = c(' + studies.map(function(s) { return '"' + s.study.replace(/\/g, '\\').replace(/"/g, '\\"') + '"'; }).join(',\n             ') + '),\n';
   code += '  design = c(' + studies.map(function(s) { return '"' + s.design + '"'; }).join(', ') + '),\n';
   code += '  yi     = c(' + studies.map(function(s) { return s.yi.toString(); }).join(', ') + '),\n';
   code += '  sei    = c(' + studies.map(function(s) { return s.se.toString(); }).join(', ') + ')';
@@ -7382,7 +7382,7 @@ function generateSubgroupRCode() {
   if (!hasSubgroups) return '';
 
   let code = '\n# ---- Subgroup Analysis ----\n';
-  code += 'dat$subgroup <- c(' + studies.map(function(s) { return '"' + (s.subgroup ?? '').replace(/"/g, '\\"') + '"'; }).join(', ') + ')\n\n';
+  code += 'dat$subgroup <- c(' + studies.map(function(s) { return '"' + (s.subgroup ?? '').replace(/\/g, '\\').replace(/"/g, '\\"') + '"'; }).join(', ') + ')\n\n';
   code += '# Per-subgroup meta-analysis\n';
   code += 'subgroups <- unique(dat$subgroup[dat$subgroup != ""])\n';
   code += 'sg_results <- list()\n';
