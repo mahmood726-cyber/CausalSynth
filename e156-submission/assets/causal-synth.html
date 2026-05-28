@@ -1956,7 +1956,7 @@ function generateRCode() {
   // Data frame
   code += '# Data\n';
   code += 'dat <- data.frame(\n';
-  code += '  study  = c(' + studies.map(function(s) { return '"' + s.study.replace(/\/g, '\\').replace(/"/g, '\\"') + '"'; }).join(', ') + '),\n';
+  code += '  study  = c(' + studies.map(function(s) { return '"' + s.study.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }).join(', ') + '),\n';
   code += '  design = c(' + studies.map(function(s) { return '"' + s.design + '"'; }).join(', ') + '),\n';
   code += '  yi     = c(' + studies.map(function(s) { return s.yi.toString(); }).join(', ') + '),\n';
   code += '  sei    = c(' + studies.map(function(s) { return s.se.toString(); }).join(', ') + ')\n';
