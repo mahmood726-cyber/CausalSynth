@@ -4295,7 +4295,7 @@ function renderInfluenceDiagnostics() {
 // ============================================================
 // Phase 3: Prediction Interval Calculation
 // ============================================================
-function renderPredictionIntervals() {
+function renderOverallPredictionInterval() {
   if (!triResults) return '';
   const r = triResults;
 
@@ -5300,7 +5300,7 @@ renderSensitivity = function() {
   container.insertAdjacentHTML('beforeend', renderInfluenceDiagnostics());
 
   // Add prediction intervals
-  container.insertAdjacentHTML('beforeend', renderPredictionIntervals());
+  container.insertAdjacentHTML('beforeend', renderOverallPredictionInterval());
 };
 
 // ============================================================
